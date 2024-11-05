@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Категории доходов</title>
+    <link rel="stylesheet" href="../styles/bootstrap.min.css">
+</head>
+<body>
+<!-- Основной контейнер -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Левая боковая панель -->
+        <div class="col-2 min-vh-100 border-end bg-white">
+            <!-- Логотип -->
+            <div class="text-center my-4">
+                <img src="../images/Logo.svg" alt="Logo" class="img-fluid">
+            </div>
+
+            <!-- Основная навигация -->
+            <nav class="mb-4">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-dark" href="#">
+                                    <span class="input-group-text border-0 bg-light me-2">
+                                        <img src="../images/email.svg" alt="Email icon">
+                                    </span>
+                                Главная
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-dark" href="#">
+                                    <span class="input-group-text border-0 bg-light me-2">
+                                        <img src="../images/email.svg" alt="Email icon">
+                                    </span>
+                                Доходы & Расходы
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Выпадающий список категорий -->
+            <div class="dropdown mb-3">
+                <button class="btn btn-light dropdown-toggle w-100 text-start" type="button" data-bs-toggle="dropdown">
+                    Категории
+                </button>
+                <ul class="dropdown-menu w-100">
+                    <li><a class="dropdown-item active" href="#">Доходы</a></li>
+                    <li><a class="dropdown-item" href="#">Расходы</a></li>
+                </ul>
+            </div>
+
+            <!-- Баланс -->
+            <div class="mt-auto p-3">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Баланс:</span>
+                    <span class="text-primary">500$</span>
+                </div>
+            </div>
+
+            <!-- Информация о пользователе -->
+            <div class="d-flex align-items-center p-3">
+                <div class="rounded-circle bg-secondary text-white p-2 me-2">
+                    <small>RC</small>
+                </div>
+                <span>RomanChernov</span>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="col-10 bg-light p-4">
+            <h2 class="mb-4">Доходы</h2>
+
+            <!-- Сетка категорий -->
+            <div class="row g-4">
+                <!-- Депозиты -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Депозиты</h5>
+                            <div class="mt-3">
+                                <button class="btn btn-primary me-2">Редактировать</button>
+                                <button class="btn btn-danger">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Зарплата -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Зарплата</h5>
+                            <div class="mt-3">
+                                <button class="btn btn-primary me-2">Редактировать</button>
+                                <button class="btn btn-danger">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Сбережения -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Сбережения</h5>
+                            <div class="mt-3">
+                                <button class="btn btn-primary me-2">Редактировать</button>
+                                <button class="btn btn-danger">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Инвестиции -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Инвестиции</h5>
+                            <div class="mt-3">
+                                <button class="btn btn-primary me-2">Редактировать</button>
+                                <button class="btn btn-danger">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопка добавления новой категории -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-dashed">
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-plus-lg"></i>
+                                Добавить категорию
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../scripts/bootstrap.min.js"></script>
+</body>
+</html>
