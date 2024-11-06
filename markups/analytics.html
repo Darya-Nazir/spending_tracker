@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная</title>
+    <link rel="stylesheet" href="../styles/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Левая боковая панель -->
+        <div class="col-2 min-vh-100 border-end bg-white">
+            <!-- Логотип -->
+            <div class="text-center my-4">
+                <img src="../images/Logo.svg" alt="Logo" class="img-fluid">
+            </div>
+<!--TODO: размер заглавия диаграмм и размер диаграмм-->
+            <!-- Основная навигация -->
+            <nav class="mb-4">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-white bg-primary" href="#">
+                                <span class="input-group-text border-0 bg-light me-2">
+                                    <img src="../images/email.svg" alt="Home icon">
+                                </span>
+                                Главная
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-dark" href="#">
+                                <span class="input-group-text border-0 bg-light me-2">
+                                    <img src="../images/email.svg" alt="Finance icon">
+                                </span>
+                                Доходы & Расходы
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-light w-100 text-start d-flex align-items-center">
+                                Категории
+                                <i class="ms-auto">›</i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Баланс -->
+            <div class="mt-auto p-3">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Баланс:</span>
+                    <span class="text-primary">500$</span>
+                </div>
+            </div>
+
+            <!-- Информация о пользователе -->
+            <div class="d-flex align-items-center p-3">
+                <div class="rounded-circle bg-secondary text-white p-2 me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                    <small>RC</small>
+                </div>
+                <span>RomanChernov</span>
+            </div>
+        </div>
+
+        <!-- Основная рабочая область -->
+        <div class="col">
+            <div class="container mt-4">
+                <h2 class="mb-4">Главная</h2>
+
+                <!-- Фильтры -->
+                <div class="mb-4 d-flex align-items-center gap-2">
+                    <button class="btn btn-secondary">Сегодня</button>
+                    <button class="btn btn-light">Неделя</button>
+                    <button class="btn btn-light">Месяц</button>
+                    <button class="btn btn-light">Год</button>
+                    <button class="btn btn-light">Все</button>
+                    <button class="btn btn-light">Интервал</button>
+                    <span class="ms-2">с</span>
+                    <input type="text" class="form-control" placeholder="Дата" style="width: 100px;">
+                    <span>по</span>
+                    <input type="text" class="form-control" placeholder="Дата" style="width: 100px;">
+                </div>
+
+                <!-- Графики -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">Доходы</h5>
+                                <canvas id="incomeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">Расходы</h5>
+                                <canvas id="expensesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Данные для графиков
+    const incomeData = {
+        labels: ['Red', 'Orange', 'Yellow', 'Green', 'Blue'],
+        datasets: [{
+            data: [30, 40, 15, 10, 5],
+            backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#198754', '#0d6efd']
+        }]
+    };
+
+    const expensesData = {
+        labels: ['Red', 'Orange', 'Yellow', 'Green', 'Blue'],
+        datasets: [{
+            data: [10, 20, 30, 35, 5],
+            backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#198754', '#0d6efd']
+        }]
+    };
+
+    // Опции для графиков
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        }
+    };
+
+    // Создание графиков
+    window.onload = function() {
+        new Chart(document.getElementById('incomeChart'), {
+            type: 'pie',
+            data: incomeData,
+            options: options
+        });
+
+        new Chart(document.getElementById('expensesChart'), {
+            type: 'pie',
+            data: expensesData,
+            options: options
+        });
+    };
+</script>
+
+<script src="../scripts/bootstrap.min.js"></script>
+</body>
+</html>
