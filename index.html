@@ -15,22 +15,30 @@
 
         <h1 class="display-5 fw-medium text-primary-emphasis text-center fs-2 mb-4">Вход</h1>
 
-        <form>
+        <form id="registrationForm" novalidate>
             <div class="mb-3">
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text border-end-0 bg-light">
                         <img src="images/email.svg" alt="Email icon">
                     </span>
-                    <input type="email" class="form-input-text form-control form-control-lg fs-6 fw-normal text-secondary" placeholder="Электронная почта">
+                    <input type="email" class="form-input-text form-control form-control-lg fs-6 fw-normal text-secondary"
+                           id="email" placeholder="Электронная почта" required>
+                    <div class="invalid-feedback">
+                        Пожалуйста, введите корректный email.
+                    </div>
                 </div>
             </div>
 
             <div class="mb-3">
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light">
                         <img src="images/lock.svg" alt="Password icon">
                     </span>
-                    <input type="password" class="form-input-text form-control form-control-lg fs-6 fw-normal text-secondary" placeholder="Пароль">
+                    <input type="password" class="form-input-text form-control form-control-lg fs-6 fw-normal text-secondary"
+                           id="password" placeholder="Пароль" required minlength="6">
+                    <div class="invalid-feedback">
+                        Введен неправильный пароль.
+                    </div>
                 </div>
             </div>
 
@@ -54,5 +62,6 @@
 </div>
 
 <script src="scripts/bootstrap.min.js"></script>
+<script src="scripts/index.js"></script>
 </body>
 </html>
