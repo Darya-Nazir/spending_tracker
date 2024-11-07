@@ -37,5 +37,29 @@ document.getElementById('registrationForm').addEventListener('submit', function(
     if (isValid) {
         console.log('Форма валидна, можно отправлять');
         // Здесь можно добавить код для отправки формы
+        const formData = new FormData(this);
+
+        fetch('https://webhook.site/7a62e4f2-8643-49d1-92f7-2d8d90b1e667', {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors',
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+            .then(response => {
+                if (response.status === 200) {
+                    console.log('Данные успешно отправлены');
+                } else {
+                    console.error('Ошибка отправки данных', response);
+                }
+                console.log(formData)
+            })
+            .catch(error => console.error('Ошибка:', error));
+
     }
 });
+
+// Переписать fetch на асинк-эвейт.
+//     Из formData надо достать данные и положить их в объект для отправки.
+//     Посмотреть, как Роман отправляет.
