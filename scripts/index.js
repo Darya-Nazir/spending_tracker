@@ -1,4 +1,5 @@
-document.getElementById('registrationForm').addEventListener('submit', function(event) {
+const form = document.getElementById('registrationForm');
+form.addEventListener('submit', async function (event) {
     event.preventDefault();
 
     // Получаем все поля формы
@@ -36,27 +37,25 @@ document.getElementById('registrationForm').addEventListener('submit', function(
     // Если форма валидна, можно отправлять данные
     if (isValid) {
         console.log('Форма валидна, можно отправлять');
-        // Здесь можно добавить код для отправки формы
-        const formData = new FormData(this);
 
-        fetch('https://webhook.site/7a62e4f2-8643-49d1-92f7-2d8d90b1e667', {
+        // Создаем объект formData с данными из формы
+        const formData = new FormData(form);
+
+        // Создаем объект с данными из formData
+        const dataObject = Object.fromEntries(formData.entries());
+        console.log(dataObject);
+
+        // Отправляем данные на сервер
+        const response = await fetch('https://webhook.site/7a62e4f2-8643-49d1-92f7-2d8d90b1e667', {
             method: 'POST',
-            body: formData,
-            mode: 'no-cors',
+            body: JSON.stringify(dataObject),
+            mode: "no-cors",
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
         })
-            .then(response => {
-                if (response.status === 200) {
-                    console.log('Данные успешно отправлены');
-                } else {
-                    console.error('Ошибка отправки данных', response);
-                }
-                console.log(formData)
-            })
-            .catch(error => console.error('Ошибка:', error));
-
+        console.log(response)
     }
 });
 
