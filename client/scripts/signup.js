@@ -1,4 +1,5 @@
-document.getElementById('registrationForm').addEventListener('submit', function(event) {
+const form = document.getElementById('registrationForm');
+form.addEventListener('submit', async function (event) {
     event.preventDefault();
 
     // Получаем все поля формы
@@ -55,8 +56,33 @@ document.getElementById('registrationForm').addEventListener('submit', function(
 
     // Если форма валидна, можно отправлять данные
     if (isValid) {
-        console.log('Форма валидна, можно отправлять');
-        // Здесь можно добавить код для отправки формы
+        const dataObject = {
+            name: fullName.value.trim(),
+            email: email.value.trim(),
+            password: password.value,
+            passwordRepeat: confirmPassword.value
+        };
+
+        try {
+            const response = await fetch('http://localhost:3000/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(dataObject)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Ошибка:', errorData);
+            } else {
+                const result = await response.json();
+                console.log('Успешно:', result);
+            }
+        } catch (error) {
+            console.error('Ошибка при отправке:', error);
+        }
     }
 });
 
