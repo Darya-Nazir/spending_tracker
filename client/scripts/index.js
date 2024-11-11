@@ -1,3 +1,5 @@
+import {Auth} from "./services/auth.js";
+
 const form = document.getElementById('registrationForm');
 form.addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -35,11 +37,16 @@ form.addEventListener('submit', async function (event) {
     this.classList.add('was-validated');
 
     // Если форма валидна, можно отправлять данные
+
+    const emailValue = email.value.trim();
+        const passwordValue = password.value;
+
     if (isValid) {
+
         try {
             const dataObject = {
-                email: email.value.trim(),
-                password: password.value,
+                email: emailValue,
+                password: passwordValue,
                 rememberMe: true
             };
 
@@ -55,10 +62,17 @@ form.addEventListener('submit', async function (event) {
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Ошибка:', errorData);
-            } else {
-                const result = await response.json();
-                console.log('Успешно:', result);
+                return;
             }
+            const result = await response.json();
+            console.log('Успешно:', result);
+
+            console.log(result);
+            Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
+            Auth.setUserInfo({
+                email: emailValue,
+                password: passwordValue
+            });
 
         } catch (error) {
             console.error('Ошибка при отправке:', error);
