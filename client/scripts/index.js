@@ -36,26 +36,33 @@ form.addEventListener('submit', async function (event) {
 
     // Если форма валидна, можно отправлять данные
     if (isValid) {
-        console.log('Форма валидна, можно отправлять');
+        try {
+            const dataObject = {
+                email: email.value.trim(),
+                password: password.value,
+                rememberMe: true
+            };
 
-        // Создаем объект formData с данными из формы
-        const formData = new FormData(form);
+            const response = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                body: JSON.stringify(dataObject),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
 
-        // Создаем объект с данными из formData
-        const dataObject = Object.fromEntries(formData.entries());
-        console.log(dataObject);
-
-        // Отправляем данные на сервер
-        const response = await fetch('https://webhook.site/7a62e4f2-8643-49d1-92f7-2d8d90b1e667', {
-            method: 'POST',
-            body: JSON.stringify(dataObject),
-            mode: "no-cors",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Ошибка:', errorData);
+            } else {
+                const result = await response.json();
+                console.log('Успешно:', result);
             }
-        })
-        console.log(response)
+
+        } catch (error) {
+            console.error('Ошибка при отправке:', error);
+        }
     }
 });
 
