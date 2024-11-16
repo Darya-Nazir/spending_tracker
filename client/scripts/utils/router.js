@@ -1,27 +1,40 @@
-class Router {
+export class Router {
     constructor(routes) {
         this.routes = routes;
-        window.addEventListener('hashchange', () => this.handleNavigation());
-        window.addEventListener('load', () => this.handleNavigation());
+
+        // Слушаем события загрузки страницы и изменения состояния истории
+        window.addEventListener('DOMContentLoaded', this.handleNavigation.bind(this));
+        window.addEventListener('popstate', this.handleNavigation.bind(this));
     }
 
     navigateTo(route) {
-        window.location.hash = route; // Изменение hash для отслеживания изменений URL
+        // Изменение состояния истории без добавления в стек истории
+        history.pushState(null, '', route); // Используем pushState для полноценного изменения истории
+        this.handleNavigation();
     }
 
     handleNavigation() {
-        const path = window.location.hash.replace('#', '') || '/';
+        const path = window.location.pathname || '/'; // Получаем путь из URL (без хэша)
         const page = this.routes[path];
 
         if (page) {
             fetch(page)
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Страница не найдена');
+                    }
+                    return response.text();
+                })
                 .then(html => {
                     document.getElementById('app').innerHTML = html;
                 })
-                .catch(error => console.error('Ошибка при загрузке страницы:', error));
+                .catch(error => {
+                    console.error('Ошибка при загрузке страницы:', error);
+                    document.getElementById('app').innerHTML = '<h1>Страница не найдена</h1>';
+                });
         } else {
             console.error('Маршрут не найден:', path);
+            document.getElementById('app').innerHTML = '<h1>Маршрут не найден</h1>';
         }
     }
 }
@@ -41,7 +54,7 @@ const router = new Router({
     '/edit-transaction': 'markups/edit_transaction.html',
 });
 
-export default router;
+// export default router;
 
 
 <!--в роутере подключение массивом-->

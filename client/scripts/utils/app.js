@@ -5,3 +5,14 @@
 // выделить главную страницу
 
 // пути в логине не настроены
+
+import {Router} from "./router.js";
+
+class App {
+    constructor() {
+        new Router();
+    }
+}
+
+(new App());
+
