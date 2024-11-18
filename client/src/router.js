@@ -1,6 +1,7 @@
 export class Router {
     constructor(routes) {
         this.routes = routes;
+        this.handleNavigation = this.handleNavigation.bind(this);
         this.initEvents();
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
@@ -21,15 +22,18 @@ export class Router {
     }
 
     navigateTo(route) {
+
         // Изменение состояния истории без добавления в стек истории
         history.pushState(null, '', route); // Используем pushState для полноценного изменения истории
-        this.handleNavigation();
+        // this.handleNavigation();
     }
 
     async handleNavigation() {
-        const path = window.location.pathname || '/'; // Получаем путь из URL (без хэша)
+        const path = window.location.pathname || '/';
         const page = this.routes[path];
-
+        console.log('Path:', path);
+        console.log('Routes:', this.routes);
+        console.log('Matched Page:', this.routes[path]);
         if (page) {
            await fetch(page)
                 .then(response => {
@@ -54,6 +58,7 @@ export class Router {
 
 // Инициализация роутера с маршрутами
 const router = new Router({
+    // '/': 'index.html',
     '/login': 'markups/login.html',
     '/signup': 'markups/signup.html',
     '/costs': 'markups/costs.html',
