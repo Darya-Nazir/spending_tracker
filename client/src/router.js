@@ -4,6 +4,8 @@ export class Router {
         this.initEvents();
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
+        this.loadedStyles = new Set(); // Отслеживаем загруженные стили
+        this.loadedScripts = new Set(); // Отслеживаем загруженные скрипты
     }
 
     initEvents() {
@@ -21,29 +23,79 @@ export class Router {
     }
 
     navigateTo(route) {
-
         // Изменение состояния истории без добавления в стек истории
         history.pushState(null, '', route); // Используем pushState для полноценного изменения истории
         this.handleNavigation();
     }
 
+    async loadStyle(href) {
+        // Проверяем, не загружен ли уже этот стиль
+        if (this.loadedStyles.has(href)) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.onload = () => {
+                this.loadedStyles.add(href);
+                resolve();
+            };
+            link.onerror = reject;
+            document.head.appendChild(link);
+        });
+    }
+
+    async loadScript(src) {
+        // Проверяем, не загружен ли уже этот скрипт
+        if (this.loadedScripts.has(src)) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.type = 'module';
+            script.onload = () => {
+                this.loadedScripts.add(src);
+                resolve();
+            };
+            script.onerror = reject;
+            document.body.appendChild(script);
+        });
+    }
+
+    async loadResources(path) {
+        const pageResources = resources[path] || { css: [], js: [] };
+
+        try {
+            // Загружаем все CSS файлы
+            await Promise.all(pageResources.css.map(href => this.loadStyle(href)));
+
+            // Загружаем все JS файлы
+            await Promise.all(pageResources.js.map(src => this.loadScript(src)));
+        } catch (error) {
+            console.error('Ошибка при загрузке ресурсов:', error);
+        }
+    }
+
     async handleNavigation() {
         const path = window.location.pathname || '/';
         const page = this.routes[path] ?? null;
-        console.log('Path:', path);
-        console.log('Routes:', this.routes);
-        console.log('Matched Page:', this.routes[path]);
+
         if (page) {
-            this.appElement.innerHTML = await fetch(page)
-                .then(response => response.text())
-                // })
-                // .then(html => {
-                //     this.appElement.innerHTML = html;
-                // })
-                .catch(error => {
-                    console.error('Ошибка при загрузке страницы:', error);
-                    this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
-                });
+            try {
+                // Сначала загружаем HTML
+                const html = await fetch(page).then(response => response.text());
+                this.appElement.innerHTML = html;
+
+                // Затем загружаем связанные ресурсы
+                await this.loadResources(path);
+            } catch (error) {
+                console.error('Ошибка при загрузке страницы:', error);
+                this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
+            }
         } else {
             console.error('Маршрут не найден:', path);
             this.appElement.innerHTML = '<h1>Маршрут не найден</h1>';
@@ -67,3 +119,37 @@ const routes = {
     // '/edit-transaction': 'markups/edit_transaction.html',
 };
 
+const resources = {
+    '/': {
+        css: [
+            '/bootstrap.min.css',
+            '/common.css',
+        ],
+        js: [
+            '/src/components/signup.js'
+        ]
+    },
+    '/login': {
+        css: [
+            '/bootstrap.min.css',
+            '/common.css',
+        ],
+        js: [
+            '/src/components/login.js'
+        ]
+    },
+    // '/costs': {
+    //     css: [
+    //         '/styles/bootstrap.min.css',
+    //         '/styles/common.css',
+    //         '/styles/costs.css'
+    //     ],
+    //     js: [
+    //         '/js/costs.js'
+    //     ]
+    // }
+};
+
+// Не получаееся подключить стили и скрипты
+// Этот ли вариант массивов с путями, или из квиза?
+// Надо ли собирать в дисте стили?

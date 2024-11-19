@@ -11,7 +11,7 @@ module.exports = {
     },
     devServer: {
         static: {
-            directory: path.join(__dirname, 'public'),
+            directory: path.join(__dirname, 'styles'),
         },
         compress: true,
         port: 9000,
