@@ -1,7 +1,6 @@
 export class Router {
-    constructor(routes) {
+    constructor() {
         this.routes = routes;
-        this.handleNavigation = this.handleNavigation.bind(this);
         this.initEvents();
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
@@ -25,26 +24,22 @@ export class Router {
 
         // Изменение состояния истории без добавления в стек истории
         history.pushState(null, '', route); // Используем pushState для полноценного изменения истории
-        // this.handleNavigation();
+        this.handleNavigation();
     }
 
     async handleNavigation() {
         const path = window.location.pathname || '/';
-        const page = this.routes[path];
+        const page = this.routes[path] ?? null;
         console.log('Path:', path);
         console.log('Routes:', this.routes);
         console.log('Matched Page:', this.routes[path]);
         if (page) {
-           await fetch(page)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Страница не найдена');
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    this.appElement.innerHTML = html;
-                })
+            this.appElement.innerHTML = await fetch(page)
+                .then(response => response.text())
+                // })
+                // .then(html => {
+                //     this.appElement.innerHTML = html;
+                // })
                 .catch(error => {
                     console.error('Ошибка при загрузке страницы:', error);
                     this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
@@ -57,11 +52,11 @@ export class Router {
 }
 
 // Инициализация роутера с маршрутами
-const router = new Router({
+const routes = {
     // '/': 'index.html',
-    '/login': 'markups/login.html',
-    '/signup': 'markups/signup.html',
-    '/costs': 'markups/costs.html',
+    '/': 'templates/signup.html',
+    '/login': 'templates/login.html',
+    '/costs': 'templates/costs.html',
     // '/revenues': 'markups/revenues.html',
     // '/transactions': 'markups/transactions.html',
     // '/analytics': 'markups/analytics.html',
@@ -70,5 +65,5 @@ const router = new Router({
     // '/edit-cost': 'markups/edit_cost.html',
     // '/edit-revenue': 'markups/edit_revenue.html',
     // '/edit-transaction': 'markups/edit_transaction.html',
-});
+};
 
