@@ -18,12 +18,13 @@ module.exports = {
         historyApiFallback: true,
     },
     plugins: [new HtmlWebpackPlugin({
-        template: "./index.html"
+            template: "./index.html"
         }
     ),
         new CopyPlugin({
             patterns: [
-                { from: "./src/markups", to: "templates" },
+                {from: "./src/markups", to: "templates"},
+                {from: "styles", to: "styles"},
             ],
         }),
     ],

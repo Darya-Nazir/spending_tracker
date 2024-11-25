@@ -87,7 +87,7 @@ export class Router {
         if (page) {
             try {
                 // Сначала загружаем HTML
-                const html = await fetch(page).then(response => response.text());
+                const html = await fetch(page.html).then(response => response.text());
                 this.appElement.innerHTML = html;
 
                 // Затем загружаем связанные ресурсы
@@ -106,8 +106,20 @@ export class Router {
 // Инициализация роутера с маршрутами
 const routes = {
     // '/': 'index.html',
-    '/': 'templates/signup.html',
-    '/login': 'templates/login.html',
+    '/': {
+        html: 'templates/signup.html',
+        css: [
+            '/bootstrap.min.css',
+            '/common.css',
+        ],
+    },
+    '/login': {
+        html: 'templates/login.html',
+        css: [
+            '/bootstrap.min.css',
+            '/common.css',
+        ],
+    },
     '/costs': 'templates/costs.html',
     // '/revenues': 'markups/revenues.html',
     // '/transactions': 'markups/transactions.html',
@@ -150,6 +162,20 @@ const resources = {
     // }
 };
 
-// Не получаееся подключить стили и скрипты
-// Этот ли вариант массивов с путями, или из квиза?
-// Надо ли собирать в дисте стили?
+
+// ***
+// функция лоад подгружает импортированные классы, созд. инстанс
+// всё отправить в дист
+// переименовать индекс джс
+// new CopyPlugin({
+//     patterns: [
+//         {from: "./src/markups", to: "templates"},
+//         {from: "styles", to: "styles"},
+//     ],
+// }),
+// хешмапы - ключи, в значении объект с информацией
+
+
+
+// показывай мне, где я ответила правильно, а где неправильно.
+// обращай внимание и смысл, и на мою формулировку.
