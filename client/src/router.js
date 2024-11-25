@@ -1,3 +1,6 @@
+import {Signup} from "./components/signup.js";
+import {Login} from "./components/login.js";
+
 export class Router {
     constructor() {
         this.routes = routes;
@@ -47,6 +50,15 @@ export class Router {
         });
     }
 
+    startLoad() {
+        const path = window.location.pathname || '/';
+        const page = this.routes[path];
+
+        if (page && typeof page.load === 'function') {
+            page.load();
+        }
+    }
+
     // async loadScript(src) {
     //     // Проверяем, не загружен ли уже этот скрипт
     //     if (this.loadedScripts.has(src)) {
@@ -74,6 +86,20 @@ export class Router {
             try {
                 // Сначала загружаем HTML
                 const html = await fetch(page.html).then(response => response.text());
+                // this.appElement.innerHTML = html;
+
+                // Создаем observer перед обновлением DOM
+                const observer = new MutationObserver((mutations, obs) => {
+                    this.startLoad();
+                    obs.disconnect(); // Отключаем observer после первого срабатывания
+                });
+
+                // Начинаем наблюдение за изменениями
+                observer.observe(this.appElement, {
+                    childList: true
+                });
+
+                // Обновляем DOM
                 this.appElement.innerHTML = html;
 
             } catch (error) {
@@ -96,6 +122,9 @@ const routes = {
         //     '/bootstrap.min.css',
         //     '/common.css',
         // ],
+        load: () => {
+            new Signup;
+        }
     },
     '/login': {
         html: 'templates/login.html',
@@ -103,6 +132,9 @@ const routes = {
         //     '/bootstrap.min.css',
         //     '/common.css',
         // ],
+        load: () => {
+            new Login;
+        }
     },
     '/costs': 'templates/costs.html',
     // '/revenues': 'markups/revenues.html',
@@ -127,7 +159,6 @@ const routes = {
 //     ],
 // }),
 // хешмапы - ключи, в значении объект с информацией
-
 
 
 // показывай мне, где я ответила правильно, а где неправильно.
