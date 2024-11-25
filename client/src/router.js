@@ -8,7 +8,6 @@ export class Router {
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
         this.loadedStyles = new Set(); // Отслеживаем загруженные стили
-        this.loadedScripts = new Set(); // Отслеживаем загруженные скрипты
     }
 
     initEvents() {
@@ -30,25 +29,26 @@ export class Router {
         history.pushState(null, '', route); // Используем pushState для полноценного изменения истории
         this.handleNavigation();
     }
+// На случай дополнительных стилей
 
-    async loadStyle(href) {
-        // Проверяем, не загружен ли уже этот стиль
-        if (this.loadedStyles.has(href)) {
-            return Promise.resolve();
-        }
-
-        return new Promise((resolve, reject) => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            link.onload = () => {
-                this.loadedStyles.add(href);
-                resolve();
-            };
-            link.onerror = reject;
-            document.head.appendChild(link);
-        });
-    }
+    // async loadStyle(href) {
+    //     // Проверяем, не загружен ли уже этот стиль
+    //     if (this.loadedStyles.has(href)) {
+    //         return Promise.resolve();
+    //     }
+    //
+    //     return new Promise((resolve, reject) => {
+    //         const link = document.createElement('link');
+    //         link.rel = 'stylesheet';
+    //         link.href = href;
+    //         link.onload = () => {
+    //             this.loadedStyles.add(href);
+    //             resolve();
+    //         };
+    //         link.onerror = reject;
+    //         document.head.appendChild(link);
+    //     });
+    // }
 
     startLoad() {
         const path = window.location.pathname || '/';
@@ -59,24 +59,16 @@ export class Router {
         }
     }
 
-    // async loadScript(src) {
-    //     // Проверяем, не загружен ли уже этот скрипт
-    //     if (this.loadedScripts.has(src)) {
-    //         return Promise.resolve();
-    //     }
-    //
-    //     return new Promise((resolve, reject) => {
-    //         const script = document.createElement('script');
-    //         script.src = src;
-    //         script.type = 'module';
-    //         script.onload = () => {
-    //             this.loadedScripts.add(src);
-    //             resolve();
-    //         };
-    //         script.onerror = reject;
-    //         document.body.appendChild(script);
-    //     });
-    // }
+    addTitle() {
+        const path = window.location.pathname || '/';
+        const page = this.routes[path];
+
+        if (page && typeof page.title === 'string') {
+            document.title = page.title; // Устанавливаем текст для тега <title>
+        } else {
+            document.title = 'Lumincoin Finance'; // Значение по умолчанию
+        }
+    }
 
     async handleNavigation() {
         const path = window.location.pathname || '/';
@@ -86,11 +78,11 @@ export class Router {
             try {
                 // Сначала загружаем HTML
                 const html = await fetch(page.html).then(response => response.text());
-                // this.appElement.innerHTML = html;
 
                 // Создаем observer перед обновлением DOM
                 const observer = new MutationObserver((mutations, obs) => {
                     this.startLoad();
+                    this.addTitle();
                     obs.disconnect(); // Отключаем observer после первого срабатывания
                 });
 
@@ -118,6 +110,7 @@ const routes = {
     // '/': 'index.html',
     '/': {
         html: 'templates/signup.html',
+        title: 'Lumincoin Finance - Регистрация',
         // css: [
         //     '/bootstrap.min.css',
         //     '/common.css',
@@ -128,6 +121,7 @@ const routes = {
     },
     '/login': {
         html: 'templates/login.html',
+        title: 'Lumincoin Finance - Вход',
         // css: [
         //     '/bootstrap.min.css',
         //     '/common.css',
@@ -148,10 +142,7 @@ const routes = {
 };
 
 
-// ***
-// функция лоад подгружает импортированные классы, созд. инстанс
 // всё отправить в дист
-// переименовать индекс джс
 // new CopyPlugin({
 //     patterns: [
 //         {from: "./src/markups", to: "templates"},
