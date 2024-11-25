@@ -25,6 +25,7 @@ module.exports = {
             patterns: [
                 {from: "./src/markups", to: "templates"},
                 {from: "styles", to: "styles"},
+                {from: "images", to: "images"},
             ],
         }),
     ],

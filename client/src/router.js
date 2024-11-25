@@ -47,38 +47,24 @@ export class Router {
         });
     }
 
-    async loadScript(src) {
-        // Проверяем, не загружен ли уже этот скрипт
-        if (this.loadedScripts.has(src)) {
-            return Promise.resolve();
-        }
-
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.type = 'module';
-            script.onload = () => {
-                this.loadedScripts.add(src);
-                resolve();
-            };
-            script.onerror = reject;
-            document.body.appendChild(script);
-        });
-    }
-
-    async loadResources(path) {
-        const pageResources = resources[path] || { css: [], js: [] };
-
-        try {
-            // Загружаем все CSS файлы
-            await Promise.all(pageResources.css.map(href => this.loadStyle(href)));
-
-            // Загружаем все JS файлы
-            await Promise.all(pageResources.js.map(src => this.loadScript(src)));
-        } catch (error) {
-            console.error('Ошибка при загрузке ресурсов:', error);
-        }
-    }
+    // async loadScript(src) {
+    //     // Проверяем, не загружен ли уже этот скрипт
+    //     if (this.loadedScripts.has(src)) {
+    //         return Promise.resolve();
+    //     }
+    //
+    //     return new Promise((resolve, reject) => {
+    //         const script = document.createElement('script');
+    //         script.src = src;
+    //         script.type = 'module';
+    //         script.onload = () => {
+    //             this.loadedScripts.add(src);
+    //             resolve();
+    //         };
+    //         script.onerror = reject;
+    //         document.body.appendChild(script);
+    //     });
+    // }
 
     async handleNavigation() {
         const path = window.location.pathname || '/';
@@ -90,8 +76,6 @@ export class Router {
                 const html = await fetch(page.html).then(response => response.text());
                 this.appElement.innerHTML = html;
 
-                // Затем загружаем связанные ресурсы
-                await this.loadResources(path);
             } catch (error) {
                 console.error('Ошибка при загрузке страницы:', error);
                 this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
@@ -108,17 +92,17 @@ const routes = {
     // '/': 'index.html',
     '/': {
         html: 'templates/signup.html',
-        css: [
-            '/bootstrap.min.css',
-            '/common.css',
-        ],
+        // css: [
+        //     '/bootstrap.min.css',
+        //     '/common.css',
+        // ],
     },
     '/login': {
         html: 'templates/login.html',
-        css: [
-            '/bootstrap.min.css',
-            '/common.css',
-        ],
+        // css: [
+        //     '/bootstrap.min.css',
+        //     '/common.css',
+        // ],
     },
     '/costs': 'templates/costs.html',
     // '/revenues': 'markups/revenues.html',
@@ -129,37 +113,6 @@ const routes = {
     // '/edit-cost': 'markups/edit_cost.html',
     // '/edit-revenue': 'markups/edit_revenue.html',
     // '/edit-transaction': 'markups/edit_transaction.html',
-};
-
-const resources = {
-    '/': {
-        css: [
-            '/bootstrap.min.css',
-            '/common.css',
-        ],
-        js: [
-            '/src/components/signup.js'
-        ]
-    },
-    '/login': {
-        css: [
-            '/bootstrap.min.css',
-            '/common.css',
-        ],
-        js: [
-            '/src/components/login.js'
-        ]
-    },
-    // '/costs': {
-    //     css: [
-    //         '/styles/bootstrap.min.css',
-    //         '/styles/common.css',
-    //         '/styles/costs.css'
-    //     ],
-    //     js: [
-    //         '/js/costs.js'
-    //     ]
-    // }
 };
 
 
