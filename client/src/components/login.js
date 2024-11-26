@@ -1,5 +1,5 @@
-// import {Auth} from "./services/auth.js";
-//
+import {Auth} from "../../scripts/services/auth.js";
+
 // const form = document.getElementById('registrationForm');
 // form.addEventListener('submit', async function (event) {
 //     event.preventDefault();
@@ -81,7 +81,97 @@
 // });
 
 export class Login {
-   constructor() {
-       console.log('Login!')
-   }
+    constructor() {
+        this.form = document.getElementById('registrationForm');
+        this.emailInput = document.getElementById('email');
+        this.passwordInput = document.getElementById('password');
+        this.emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        this.initEventListeners();
+    }
+
+    initEventListeners() {
+        this.form.addEventListener('submit', this.handleSubmit.bind(this));
+    }
+
+    handleSubmit(event) {
+        event.preventDefault();
+        this.form.classList.remove('was-validated');
+
+        const isValid = this.validateForm();
+        this.form.classList.add('was-validated');
+
+        if (isValid) {
+            this.submitForm();
+        }
+    }
+
+    validateForm() {
+        let isValid = true;
+
+        // Валидация email
+        if (!this.emailRegex.test(this.emailInput.value.trim())) {
+            this.markInputAsInvalid(this.emailInput);
+            isValid = false;
+        } else {
+            this.markInputAsValid(this.emailInput);
+        }
+
+        // Валидация пароля
+        if (this.passwordInput.value.length < 6) {
+            this.markInputAsInvalid(this.passwordInput);
+            isValid = false;
+        } else {
+            this.markInputAsValid(this.passwordInput);
+        }
+
+        return isValid;
+    }
+
+    markInputAsInvalid(inputElement) {
+        inputElement.classList.remove('is-valid');
+        inputElement.classList.add('is-invalid');
+    }
+
+    markInputAsValid(inputElement) {
+        inputElement.classList.remove('is-invalid');
+        inputElement.classList.add('is-valid');
+    }
+
+    async submitForm() {
+        const emailValue = this.emailInput.value.trim();
+        const passwordValue = this.passwordInput.value;
+
+        try {
+            const dataObject = {
+                email: emailValue,
+                password: passwordValue,
+                rememberMe: true
+            };
+
+            const response = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                body: JSON.stringify(dataObject),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Ошибка:', errorData);
+                return;
+            }
+
+            const result = await response.json();
+            console.log('Успешно:', result);
+
+            // Предполагаем наличие класса Auth для работы с токенами
+            Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
+            Auth.setUserInfo({email: emailValue, password: passwordValue});
+        } catch (error) {
+            console.error('Ошибка при отправке:', error);
+        }
+    }
 }
