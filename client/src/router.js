@@ -76,6 +76,16 @@ export class Router {
         const path = window.location.pathname || '/';
         const page = this.routes[path] ?? null;
 
+        // // Получаем элемент навбара
+        // const navbar = document.getElementById('navbar');
+        //
+        // // Скрываем или показываем навбар в зависимости от флага `showNavbar`
+        // if (page && page.showNavbar === false) {
+        //     navbar.style.display = 'none'; // Скрыть навбар
+        // } else {
+        //     navbar.style.display = 'block'; // Показать навбар
+        // }
+
         if (page) {
             try {
                 // Сначала загружаем HTML
@@ -113,6 +123,7 @@ const routes = {
     '/': {
         html: 'templates/signup.html',
         title: 'Lumincoin Finance - Регистрация',
+        // showNavbar: false,
         load: () => {
             new Signup;
         }
@@ -120,6 +131,7 @@ const routes = {
     '/login': {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
+        // showNavbar: false,
         load: () => {
             new Login;
         }
@@ -128,6 +140,7 @@ const routes = {
         html: 'templates/costs.html',
         title: 'Категории доходов',
         css: [],
+        // showNavbar: true,
         load: () => {
             new Costs;
         }
