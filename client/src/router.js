@@ -1,5 +1,6 @@
 import {Signup} from "./components/signup.js";
 import {Login} from "./components/login.js";
+import {Costs} from "./components/costs.js";
 
 export class Router {
     constructor() {
@@ -29,6 +30,7 @@ export class Router {
         history.pushState(null, '', route); // Используем pushState для полноценного изменения истории
         this.handleNavigation();
     }
+
 // На случай дополнительных стилей
 
     // async loadStyle(href) {
@@ -111,10 +113,6 @@ const routes = {
     '/': {
         html: 'templates/signup.html',
         title: 'Lumincoin Finance - Регистрация',
-        // css: [
-        //     '/bootstrap.min.css',
-        //     '/common.css',
-        // ],
         load: () => {
             new Signup;
         }
@@ -122,15 +120,18 @@ const routes = {
     '/login': {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
-        // css: [
-        //     '/bootstrap.min.css',
-        //     '/common.css',
-        // ],
         load: () => {
             new Login;
         }
     },
-    '/costs': 'templates/costs.html',
+    '/costs': {
+        html: 'templates/costs.html',
+        title: 'Категории доходов',
+        css: [],
+        load: () => {
+            new Costs;
+        }
+    }
     // '/revenues': 'markups/revenues.html',
     // '/transactions': 'markups/transactions.html',
     // '/analytics': 'markups/analytics.html',

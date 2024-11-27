@@ -194,10 +194,14 @@ export class Signup {
                 const result = await response.json();
                 console.log('Успешно:', result);
                 // Можно добавить обработку успешной регистрации, например, редирект
+                this.jumpIntoApp();
             }
         } catch (error) {
             console.error('Ошибка при отправке:', error);
         }
+    }
+    jumpIntoApp() {
+        window.location.href = '/costs';
     }
 }
 

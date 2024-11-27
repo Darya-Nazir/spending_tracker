@@ -167,11 +167,15 @@ export class Login {
             const result = await response.json();
             console.log('Успешно:', result);
 
-            // Предполагаем наличие класса Auth для работы с токенами
             Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
             Auth.setUserInfo({email: emailValue, password: passwordValue});
+
+            this.jumpIntoApp();
         } catch (error) {
             console.error('Ошибка при отправке:', error);
         }
+    }
+    jumpIntoApp() {
+        window.location.href = '/costs';
     }
 }
