@@ -9,6 +9,10 @@ export class Router {
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
         this.loadedStyles = new Set(); // Отслеживаем загруженные стили
+        this.navbar = document.getElementById('navbar');
+
+        this.path = window.location.pathname || '/';
+        this.page = this.routes[this.path];
     }
 
     initEvents() {
@@ -53,43 +57,27 @@ export class Router {
     // }
 
     startLoad() {
-        const path = window.location.pathname || '/';
-        const page = this.routes[path];
 
-        if (page && typeof page.load === 'function') {
-            page.load();
+        if (this.page && typeof this.page.load === 'function') {
+            this.page.load();
         }
     }
 
     addTitle() {
-        const path = window.location.pathname || '/';
-        const page = this.routes[path];
-
-        if (page && typeof page.title === 'string') {
-            document.title = page.title; // Устанавливаем текст для тега <title>
+        if (this.page && typeof this.page.title === 'string') {
+            document.title = this.page.title; // Устанавливаем текст для тега <title>
         } else {
             document.title = 'Lumincoin Finance'; // Значение по умолчанию
         }
     }
 
     async handleNavigation() {
-        const path = window.location.pathname || '/';
-        const page = this.routes[path] ?? null;
+        const handlePage = this.page ?? null;
 
-        // // Получаем элемент навбара
-        // const navbar = document.getElementById('navbar');
-        //
-        // // Скрываем или показываем навбар в зависимости от флага `showNavbar`
-        // if (page && page.showNavbar === false) {
-        //     navbar.style.display = 'none'; // Скрыть навбар
-        // } else {
-        //     navbar.style.display = 'block'; // Показать навбар
-        // }
-
-        if (page) {
+        if (handlePage) {
             try {
                 // Сначала загружаем HTML
-                const html = await fetch(page.html).then(response => response.text());
+                const html = await fetch(handlePage.html).then(response => response.text());
 
                 // Создаем observer перед обновлением DOM
                 const observer = new MutationObserver((mutations, obs) => {
@@ -106,13 +94,24 @@ export class Router {
                 // Обновляем DOM
                 this.appElement.innerHTML = html;
 
+                this.canselNav();
+
             } catch (error) {
                 console.error('Ошибка при загрузке страницы:', error);
                 this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
             }
         } else {
-            console.error('Маршрут не найден:', path);
+            console.error('Маршрут не найден:', this.path);
             this.appElement.innerHTML = '<h1>Маршрут не найден</h1>';
+        }
+    }
+
+    canselNav() {
+        // Скрываем или показываем навбар в зависимости от флага `showNavbar`
+        if (this.page && this.page.showNavbar === false) {
+            this.navbar.style.display = 'none'; // Скрыть навбар
+        } else {
+            this.navbar.style.display = 'block'; // Показать навбар
         }
     }
 }
@@ -123,7 +122,7 @@ const routes = {
     '/': {
         html: 'templates/signup.html',
         title: 'Lumincoin Finance - Регистрация',
-        // showNavbar: false,
+        showNavbar: false,
         load: () => {
             new Signup;
         }
@@ -131,7 +130,7 @@ const routes = {
     '/login': {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
-        // showNavbar: false,
+        showNavbar: false,
         load: () => {
             new Login;
         }
@@ -140,7 +139,7 @@ const routes = {
         html: 'templates/costs.html',
         title: 'Категории доходов',
         css: [],
-        // showNavbar: true,
+        showNavbar: true,
         load: () => {
             new Costs;
         }
