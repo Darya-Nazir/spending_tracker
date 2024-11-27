@@ -137,21 +137,85 @@ const routes = {
     },
     '/costs': {
         html: 'templates/costs.html',
+        title: 'Категории расходов',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
+    '/revenues': {
+        html: 'templates/revenues.html',
         title: 'Категории доходов',
         css: [],
         showNavbar: true,
         load: () => {
             new Costs;
         }
-    }
-    // '/revenues': 'markups/revenues.html',
-    // '/transactions': 'markups/transactions.html',
-    // '/analytics': 'markups/analytics.html',
-    // '/create-cost': 'markups/create_cost.html',
-    // '/create-revenue': 'markups/create_revenue.html',
-    // '/edit-cost': 'markups/edit_cost.html',
-    // '/edit-revenue': 'markups/edit_revenue.html',
-    // '/edit-transaction': 'markups/edit_transaction.html',
+    },
+    '/transactions': {
+        html: 'templates/transactions.html',
+        title: 'Доходы и расходы',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
+    '/analytics': {
+        html: 'templates/analytics.html',
+        title: 'Аналитика',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
+    '/create-cost': {
+        html: 'templates/create_cost.html',
+        title: 'Создание категории расходов',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
+    '/create-revenue': {
+        html: 'templates/create_revenue.html',
+        title: 'Создание категории доходов',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
+    '/edit-cost': {
+        html: 'templates/edit_cost.html',
+        title: 'Редактирование категории расходов',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
+    '/edit-revenue': {
+        html: 'templates/edit_revenue.html',
+        title: 'Редактирование категории доходов',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
+    '/edit-transaction': {
+        html: 'templates/edit_transaction.html',
+        title: 'Редактирование дохода/расхода',
+        css: [],
+        showNavbar: true,
+        load: () => {
+            new Costs;
+        }
+    },
 };
 
 
