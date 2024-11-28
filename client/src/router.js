@@ -164,7 +164,7 @@ const routes = {
     },
     '/analytics': {
         html: 'templates/analytics.html',
-        title: 'Аналитика',
+        title: 'Главная',
         css: [],
         showNavbar: true,
         load: () => {

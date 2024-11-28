@@ -3,4 +3,7 @@ export class Costs {
         console.log('Costs!')
         this.costsSelected = document.getElementById('')
     }
+    selectedCosts() {
+
+    }
 }
