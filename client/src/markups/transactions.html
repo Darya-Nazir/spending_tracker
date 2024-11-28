@@ -1,154 +1,85 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Доходы и расходы</title>
-    <link rel="stylesheet" href="../styles/bootstrap.min.css">
-</head>
-<body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Левая боковая панель -->
-        <div class="col-2 min-vh-100 border-end bg-white">
-            <!-- Логотип -->
-            <div class="text-center my-4">
-                <img src="../images/Logo.svg" alt="Logo" class="img-fluid">
-            </div>
+<div class="col">
+    <div class="container mt-4">
+        <!--                                TODO: цвет заглавия. И проверить отступы-->
 
-            <!-- Основная навигация -->
-            <nav class="mb-4">
-                <div class="position-sticky">
-                    <ul class="nav flex-column">
-                        <li class="nav-item mb-2">
-                            <a class="nav-link d-flex align-items-center text-dark" href="#">
-                                <span class="input-group-text border-0 bg-light me-2">
-                                    <img src="../images/email.svg" alt="Email icon">
-                                </span>
-                                Главная
-                            </a>
-                        </li>
-                        <li class="nav-item mb-2">
-                            <a class="nav-link d-flex align-items-center text-dark active bg-primary text-white" href="#">
-                                <span class="input-group-text border-0 bg-light me-2">
-                                    <img src="../images/email.svg" alt="Email icon">
-                                </span>
-                                Доходы & Расходы
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+        <h2 class="mb-4 text-navy">Доходы и расходы</h2>
 
-            <!-- Выпадающий список категорий -->
-<!--            TODO: здесь не селект. Надо сравнить, какой вариант выпад. списка лучше-->
-            <div class="dropdown">
-                <button class="btn btn-light w-100 text-start" type="button">
-                    Категории
-                    <i class="bi bi-chevron-right float-end"></i>
-                </button>
-            </div>
-
-            <!-- Баланс -->
-            <div class="mt-auto p-3">
-                <div class="d-flex justify-content-between">
-                    <span class="text-muted">Баланс:</span>
-                    <span class="text-primary">500$</span>
-                </div>
-            </div>
-
-            <!-- Информация о пользователе -->
-            <div class="d-flex align-items-center p-3">
-                <div class="rounded-circle bg-secondary text-white p-2 me-2">
-                    <small>RC</small>
-                </div>
-                <span>RomanChernov</span>
-            </div>
+        <!-- Кнопки создания -->
+        <div class="mb-4">
+            <button class="btn btn-success me-2">Создать доход</button>
+            <button class="btn btn-danger">Создать расход</button>
         </div>
 
-        <!-- Основная рабочая область -->
-        <div class="col">
-            <div class="container mt-4">
-                <!--                                TODO: цвет заглавия. И проверить отступы-->
+        <!-- Фильтры -->
+        <div class="mb-4 d-flex align-items-center gap-2">
+            <button class="btn btn-secondary">Сегодня</button>
+            <button class="btn btn-light">Неделя</button>
+            <button class="btn btn-light">Месяц</button>
+            <button class="btn btn-light">Год</button>
+            <button class="btn btn-light">Все</button>
+            <button class="btn btn-light">Интервал</button>
+            <span class="ms-2">с</span>
+            <input type="text" class="form-control" placeholder="Дата" style="width: 100px;">
+            <span>по</span>
+            <input type="text" class="form-control" placeholder="Дата" style="width: 100px;">
+        </div>
 
-                <h2 class="mb-4 text-navy">Доходы и расходы</h2>
+        <!-- Таблица -->
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>№ операции</th>
+                    <th>Тип</th>
+                    <th>Категория</th>
+                    <th>Сумма</th>
+                    <th>Дата</th>
+                    <th>Комментарий</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1</td>
+                    <td class="text-success">доход</td>
+                    <td>зарплата</td>
+                    <td>500$</td>
+                    <td>11.09.2022</td>
+                    <td></td>
+                    <td>
+                        <button class="btn btn-sm btn-light me-1">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td class="text-danger">расход</td>
+                    <td>жильё</td>
+                    <td>2 500$</td>
+                    <td>12.09.2022</td>
+                    <td></td>
+                    <td>
 
-                <!-- Кнопки создания -->
-                <div class="mb-4">
-                    <button class="btn btn-success me-2">Создать доход</button>
-                    <button class="btn btn-danger">Создать расход</button>
-                </div>
+                        <!--                                TODO: надо вставить иконки-->
 
-                <!-- Фильтры -->
-                <div class="mb-4 d-flex align-items-center gap-2">
-                    <button class="btn btn-secondary">Сегодня</button>
-                    <button class="btn btn-light">Неделя</button>
-                    <button class="btn btn-light">Месяц</button>
-                    <button class="btn btn-light">Год</button>
-                    <button class="btn btn-light">Все</button>
-                    <button class="btn btn-light">Интервал</button>
-                    <span class="ms-2">с</span>
-                    <input type="text" class="form-control" placeholder="Дата" style="width: 100px;">
-                    <span>по</span>
-                    <input type="text" class="form-control" placeholder="Дата" style="width: 100px;">
-                </div>
-
-                <!-- Таблица -->
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>№ операции</th>
-                            <th>Тип</th>
-                            <th>Категория</th>
-                            <th>Сумма</th>
-                            <th>Дата</th>
-                            <th>Комментарий</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td class="text-success">доход</td>
-                            <td>зарплата</td>
-                            <td>500$</td>
-                            <td>11.09.2022</td>
-                            <td></td>
-                            <td>
-                                <button class="btn btn-sm btn-light me-1">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-light">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td class="text-danger">расход</td>
-                            <td>жильё</td>
-                            <td>2 500$</td>
-                            <td>12.09.2022</td>
-                            <td></td>
-                            <td>
-
-<!--                                TODO: надо вставить иконки-->
-
-                                <button class="btn btn-sm btn-light me-1">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-light">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        <button class="btn btn-sm btn-light me-1">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
 <!--TODO: стили модалки.-->
 <!--TODO: модалка не настроена.-->
 
@@ -159,7 +90,8 @@
 </button>
 
 <!-- Модальное окно -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -176,6 +108,4 @@
         </div>
     </div>
 </div>
-<script src="../scripts/bootstrap.min.js"></script>
-</body>
-</html>
+
