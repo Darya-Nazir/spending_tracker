@@ -52,11 +52,65 @@
             </nav>
 
             <!-- Выпадающий список категорий -->
-            <select class="form-select" aria-label="Пример выбора по умолчанию">
-                <option selected>Категории</option>
-                <option value="1">Доходы</option>
-                <option value="2">Расходы</option>
-            </select>
+
+            <div class="dropdown show">
+                <button class="btn btn-primary dropdown-toggle dropdown-menu-end" style="width: 100%"
+                        type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="true">
+                    Категории
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item bg-primary" href="#">Доходы</a></li>
+                    <li><a class="dropdown-item" href="#">Расходы</a></li>
+                </ul>
+            </div>
+
+            <script>
+                // Get the dropdown button and menu
+                const dropdownBtn = document.querySelector('.dropdown-toggle');
+                const dropdownMenu = document.querySelector('.dropdown-menu');
+
+                // Toggle the visibility of the dropdown menu on button click
+                dropdownBtn.addEventListener('click', () => {
+                    dropdownMenu.classList.toggle('show');
+                });
+
+                // Close the dropdown menu when clicking outside of it
+                window.addEventListener('click', (event) => {
+                    if (!event.target.matches('.dropdown-toggle')) {
+                        if (dropdownMenu.classList.contains('show')) {
+                            dropdownMenu.classList.remove('show');
+                        }
+                    }
+                });
+            </script>
+
+            <style>
+                .dropdown-menu {
+                    background-color: #4285F4;
+                    border: none;
+                    padding: 0.5rem 0;
+                    display: none;
+                }
+
+                .dropdown-menu.show {
+                    display: block;
+                    width: 100%;
+                }
+
+                .dropdown-item {
+                    color: #fff;
+                    padding: 0.5rem 1rem;
+                }
+
+                .dropdown-item:hover,
+                .dropdown-item.active {
+                    background-color: #1266F1;
+                    color: #fff;
+                }
+            </style>
+
+
+
 
             <!-- Баланс -->
             <div class="mt-auto p-3">
