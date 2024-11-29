@@ -1,6 +1,7 @@
 import {Signup} from "./components/signup.js";
 import {Login} from "./components/login.js";
 import {Costs} from "./components/costs.js";
+import {Auth} from "../scripts/services/auth.js";
 
 export class Router {
     constructor() {
@@ -14,6 +15,12 @@ export class Router {
         this.path = window.location.pathname || '/';
         this.page = this.routes[this.path];
     }
+
+    // для охраны от неавторизованных пользователей
+
+    // isAuthenticated() {
+    //     return localStorage.getItem(Auth.accessTokenKey) !== null;
+    // }
 
     initEvents() {
         window.addEventListener('DOMContentLoaded', this.handleNavigation.bind(this));
@@ -57,7 +64,6 @@ export class Router {
     // }
 
     startLoad() {
-
         if (this.page && typeof this.page.load === 'function') {
             this.page.load();
         }
@@ -72,6 +78,13 @@ export class Router {
     }
 
     async handleNavigation() {
+        // для охраны от неавторизованных пользователей
+        // if (this.page && this.page.requiresAuth && !this.isAuthenticated()) {
+        //     this.navigateTo('/login');
+        //     window.location.reload();
+        //     return;
+        // }
+
         const handlePage = this.page ?? null;
 
         if (handlePage) {
@@ -116,7 +129,6 @@ export class Router {
     }
 }
 
-// Инициализация роутера с маршрутами
 const routes = {
     // '/': 'index.html',
     '/': {
@@ -140,6 +152,7 @@ const routes = {
         title: 'Категории расходов',
         css: [],
         showNavbar: true,
+        requiresAuth: true,
         load: () => {
             new Costs;
         }
@@ -148,6 +161,7 @@ const routes = {
         html: 'templates/revenues.html',
         title: 'Категории доходов',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -157,6 +171,7 @@ const routes = {
         html: 'templates/transactions.html',
         title: 'Доходы и расходы',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -166,6 +181,7 @@ const routes = {
         html: 'templates/analytics.html',
         title: 'Главная',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -175,6 +191,7 @@ const routes = {
         html: 'templates/create_cost.html',
         title: 'Создание категории расходов',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -184,6 +201,7 @@ const routes = {
         html: 'templates/create_revenue.html',
         title: 'Создание категории доходов',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -193,6 +211,7 @@ const routes = {
         html: 'templates/edit_cost.html',
         title: 'Редактирование категории расходов',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -202,6 +221,7 @@ const routes = {
         html: 'templates/edit_revenue.html',
         title: 'Редактирование категории доходов',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -211,6 +231,7 @@ const routes = {
         html: 'templates/edit_transaction.html',
         title: 'Редактирование дохода/расхода',
         css: [],
+        requiresAuth: true,
         showNavbar: true,
         load: () => {
             new Costs;
@@ -219,7 +240,6 @@ const routes = {
 };
 
 
-// всё отправить в дист
 // new CopyPlugin({
 //     patterns: [
 //         {from: "./src/markups", to: "templates"},

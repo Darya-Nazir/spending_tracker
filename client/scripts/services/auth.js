@@ -57,11 +57,12 @@ export class Auth {
         localStorage.setItem(this.refreshTokenKey, refreshToken);
     }
 
-    // static removeTokens() {
-    //     localStorage.removeItem(this.accessTokenKey);
-    //     localStorage.removeItem(this.refreshTokenKey);
-    // }
-    //
+    static removeTokens() {
+        localStorage.removeItem(this.accessTokenKey);
+        localStorage.removeItem(this.refreshTokenKey);
+        localStorage.removeItem(this.userInfoKey);
+    }
+
     static setUserInfo(info) {
         localStorage.setItem(this.userInfoKey, JSON.stringify(info))
     }
