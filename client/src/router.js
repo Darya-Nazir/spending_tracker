@@ -2,6 +2,7 @@ import {Signup} from "./components/signup.js";
 import {Login} from "./components/login.js";
 import {Costs} from "./components/costs.js";
 import {Auth} from "../scripts/services/auth.js";
+import {Analytics} from "./components/analytics.js";
 
 export class Router {
     constructor() {
@@ -184,7 +185,7 @@ const routes = {
         requiresAuth: true,
         showNavbar: true,
         load: () => {
-            new Costs;
+            new Analytics();
         }
     },
     '/create-cost': {
@@ -238,13 +239,4 @@ const routes = {
         }
     },
 };
-
-
-// new CopyPlugin({
-//     patterns: [
-//         {from: "./src/markups", to: "templates"},
-//         {from: "styles", to: "styles"},
-//     ],
-// }),
-// хешмапы - ключи, в значении объект с информацией
 
