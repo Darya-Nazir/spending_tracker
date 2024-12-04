@@ -9,7 +9,9 @@ import {Transaction} from "./components/transaction.js";
 export class Router {
     constructor() {
         this.routes = routes;
+
         this.initEvents();
+
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
         this.loadedStyles = new Set(); // Отслеживаем загруженные стили
@@ -40,9 +42,10 @@ export class Router {
     }
 
     navigateTo(route) {
-        // Изменение состояния истории без добавления в стек истории
-        history.pushState(null, '', route); // Используем pushState для полноценного изменения истории
-        this.handleNavigation();
+        history.pushState(null, '', route); // Изменяем историю
+        this.path = window.location.pathname; // Обновляем текущий путь
+        this.page = this.routes[this.path]; // Обновляем текущую страницу
+        this.handleNavigation(); // Загружаем новую страницу
     }
 
 // На случай дополнительных стилей
@@ -83,7 +86,7 @@ export class Router {
     async handleNavigation() {
         // для охраны от неавторизованных пользователей
         // if (this.page && this.page.requiresAuth && !this.isAuthenticated()) {
-        //     this.navigateTo('/login');
+        //     this.navigateTo('/');
         //     window.location.reload();
         //     return;
         // }
@@ -111,6 +114,7 @@ export class Router {
                 this.appElement.innerHTML = html;
 
                 this.canselNav();
+                // location.reload();
 
             } catch (error) {
                 console.error('Ошибка при загрузке страницы:', error);
