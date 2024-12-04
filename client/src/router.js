@@ -133,21 +133,20 @@ export class Router {
 }
 
 const routes = {
-    // '/': 'index.html',
     '/': {
-        html: 'templates/signup.html',
-        title: 'Lumincoin Finance - Регистрация',
-        showNavbar: false,
-        load: () => {
-            new Signup;
-        }
-    },
-    '/login': {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
         showNavbar: false,
         load: () => {
             new Login;
+        }
+    },
+    '/signup': {
+        html: 'templates/signup.html',
+        title: 'Lumincoin Finance - Регистрация',
+        showNavbar: false,
+        load: () => {
+            new Signup;
         }
     },
     '/costs': {
