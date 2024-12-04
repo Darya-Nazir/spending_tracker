@@ -3,6 +3,8 @@ import {Login} from "./components/login.js";
 import {Costs} from "./components/costs.js";
 import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
+import {Revenue} from "./components/revenue.js";
+import {Transaction} from "./components/transaction.js";
 
 export class Router {
     constructor() {
@@ -165,7 +167,7 @@ const routes = {
         requiresAuth: true,
         showNavbar: true,
         load: () => {
-            new Costs;
+            new Revenue();
         }
     },
     '/transactions': {
@@ -175,7 +177,7 @@ const routes = {
         requiresAuth: true,
         showNavbar: true,
         load: () => {
-            new Costs;
+            new Transaction();
         }
     },
     '/analytics': {
