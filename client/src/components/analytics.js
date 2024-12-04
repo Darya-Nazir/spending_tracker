@@ -2,11 +2,12 @@ export class Analytics {
     constructor() {
         this.init();
     }
-    async init() {
+
+    init() {
         console.log('Analytics');
-         this.startChart();
-        await this.startDiagrams();
+        this.startChart();
     }
+
     startChart() {
 // Создаём новый элемент <script>
         const script = document.createElement('script');
@@ -27,11 +28,12 @@ export class Analytics {
         // Опционально: обработка события загрузки
         script.onload = () => {
             console.log('Chart.js загружен');
-            // Здесь можно вызвать функцию инициализации графиков, если нужно
+            this.startDiagrams();  // Вызов диаграмм после загрузки Chart.js
         };
         // <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 
     }
+
     startDiagrams() {
         // Данные для графиков
         const incomeData = {
@@ -61,18 +63,16 @@ export class Analytics {
         };
 
         // Создание графиков
-        window.onload = function () {
-            new Chart(document.getElementById('incomeChart'), {
-                type: 'pie',
-                data: incomeData,
-                options: options
-            });
+        new Chart(document.getElementById('incomeChart'), {
+            type: 'pie',
+            data: incomeData,
+            options: options
+        });
 
-            new Chart(document.getElementById('expensesChart'), {
-                type: 'pie',
-                data: expensesData,
-                options: options
-            });
-        };
+        new Chart(document.getElementById('expensesChart'), {
+            type: 'pie',
+            data: expensesData,
+            options: options
+        });
     }
 }
