@@ -1,3 +1,30 @@
 .form-input-text {
     color: black!important;
 }
+
+.dropdown-menu {
+    padding: 0.5rem 0;
+    display: none;
+}
+
+.dropdown-menu.show {
+    display: block;
+    width: 100%;
+}
+
+.dropdown-item {
+    color: #4285F4;
+    padding: 0.5rem 1rem;
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+    background-color: #1266F1;
+    color: #fff;
+}
+
+.invalid-feedback {
+    display: none;
+    font-size: 0.875rem;
+    color: #dc3545;
+}

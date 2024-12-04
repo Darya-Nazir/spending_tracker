@@ -5,12 +5,14 @@ import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
 import {Revenue} from "./components/revenue.js";
 import {Transaction} from "./components/transaction.js";
+import {Navbar} from "./components/navbar.js";
 
 export class Router {
     constructor() {
         this.routes = routes;
 
         this.initEvents();
+        this.turnOnNavbar();
 
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
@@ -39,6 +41,13 @@ export class Router {
                 this.navigateTo(path); // Вызов вашего метода для изменения маршрута
             }
         });
+    }
+
+    turnOnNavbar() {
+        const go = () => {
+            new Navbar();
+        }
+        go();
     }
 
     navigateTo(route) {
@@ -87,7 +96,6 @@ export class Router {
         // для охраны от неавторизованных пользователей
         // if (this.page && this.page.requiresAuth && !this.isAuthenticated()) {
         //     this.navigateTo('/');
-        //     window.location.reload();
         //     return;
         // }
 
@@ -113,8 +121,7 @@ export class Router {
                 // Обновляем DOM
                 this.appElement.innerHTML = html;
 
-                this.canselNav();
-                // location.reload();
+                this.toggleNav();
 
             } catch (error) {
                 console.error('Ошибка при загрузке страницы:', error);
@@ -126,7 +133,7 @@ export class Router {
         }
     }
 
-    canselNav() {
+    toggleNav() {
         // Скрываем или показываем навбар в зависимости от флага `showNavbar`
         if (this.page && this.page.showNavbar === false) {
             this.navbar.style.display = 'none'; // Скрыть навбар
