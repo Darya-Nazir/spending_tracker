@@ -9,29 +9,21 @@ export class Analytics {
     }
 
     startChart() {
-// Создаём новый элемент <script>
+        // const scriptoTag = () => {
+        //     document.head.innerHTML += `<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" async></script>`;
+        // }
+
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js';
         script.async = true; // Загружается асинхронно
 
-        // Найдём скрипт Bootstrap на странице
-        const bootstrapScript = document.querySelector('script[src*="bootstrap"]');
-
-        if (bootstrapScript) {
-            // Вставляем после Bootstrap
-            bootstrapScript.parentNode.insertBefore(script, bootstrapScript.nextSibling);
-        } else {
-            // Если Bootstrap не найден, вставляем в конец <body>
-            document.body.appendChild(script);
-        }
+        document.body.appendChild(script);
 
         // Опционально: обработка события загрузки
         script.onload = () => {
             console.log('Chart.js загружен');
             this.startDiagrams();  // Вызов диаграмм после загрузки Chart.js
         };
-        // <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-
     }
 
     startDiagrams() {
