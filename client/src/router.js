@@ -44,10 +44,7 @@ export class Router {
     }
 
     turnOnNavbar() {
-        const go = () => {
-            new Navbar();
-        }
-        go();
+        new Navbar().init();
     }
 
     navigateTo(route) {
@@ -80,7 +77,9 @@ export class Router {
 
     startLoad() {
         if (this.page && typeof this.page.load === 'function') {
-            this.page.load();
+            // this.page.load();
+            const componentInstance = new this.page.component();
+            componentInstance.init();
         }
     }
 
@@ -148,17 +147,13 @@ const routes = {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
         showNavbar: false,
-        load: () => {
-            new Login;
-        }
+        component: Login,
     },
     '/signup': {
         html: 'templates/signup.html',
         title: 'Lumincoin Finance - Регистрация',
         showNavbar: false,
-        load: () => {
-            new Signup;
-        }
+        component: Signup,
     },
     '/costs': {
         html: 'templates/costs.html',
@@ -166,9 +161,7 @@ const routes = {
         css: [],
         showNavbar: true,
         requiresAuth: true,
-        load: () => {
-            new Costs;
-        }
+        component: Costs
     },
     '/revenues': {
         html: 'templates/revenues.html',
@@ -176,9 +169,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Revenue();
-        }
+        component: Revenue
     },
     '/transactions': {
         html: 'templates/transactions.html',
@@ -186,9 +177,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Transaction();
-        }
+        component: Transaction
     },
     '/analytics': {
         html: 'templates/analytics.html',
@@ -196,9 +185,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Analytics();
-        }
+        component: Analytics
     },
     '/create-cost': {
         html: 'templates/create_cost.html',
@@ -206,9 +193,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Costs;
-        }
+        component: Costs
     },
     '/create-revenue': {
         html: 'templates/create_revenue.html',
@@ -216,9 +201,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Costs;
-        }
+        component: Costs
     },
     '/edit-cost': {
         html: 'templates/edit_cost.html',
@@ -226,9 +209,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Costs;
-        }
+        component: Costs
     },
     '/edit-revenue': {
         html: 'templates/edit_revenue.html',
@@ -236,9 +217,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Costs;
-        }
+        component: Costs
     },
     '/edit-transaction': {
         html: 'templates/edit_transaction.html',
@@ -246,9 +225,7 @@ const routes = {
         css: [],
         requiresAuth: true,
         showNavbar: true,
-        load: () => {
-            new Costs;
-        }
+        component: Costs
     },
 };
 

@@ -94,18 +94,22 @@ import {Auth} from "../../scripts/services/auth";
 // });
 
 export class Signup {
+    form = null;
+
     constructor() {
         this.form = document.getElementById('registrationForm');
+    }
 
+    init() {
+        this.initializeEventListeners();
+    }
+
+    initializeEventListeners() {
         if (!this.form) {
             console.error(`Форма не найдена`);
             return;
         }
 
-        this.initializeEventListeners();
-    }
-
-    initializeEventListeners() {
         this.form.addEventListener('submit', async (event) => {
             event.preventDefault();
             this.validateAndSubmit();

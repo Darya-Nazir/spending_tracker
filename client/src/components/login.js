@@ -86,7 +86,9 @@ export class Login {
         this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
         this.emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    }
 
+    init() {
         this.initEventListeners();
     }
 

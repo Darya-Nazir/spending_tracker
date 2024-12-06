@@ -1,6 +1,11 @@
 export class Navbar {
     constructor() {
         console.log('Navbar!')
+    }
+    init() {
+        this.toggleDropdownList();
+    }
+    toggleDropdownList() {
         // Get the dropdown button and menu
         const dropdownBtn = document.querySelector('.dropdown-toggle');
         const dropdownMenu = document.querySelector('.dropdown-menu');
@@ -20,3 +25,4 @@ export class Navbar {
         });
     }
 }
+

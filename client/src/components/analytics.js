@@ -1,6 +1,5 @@
 export class Analytics {
     constructor() {
-        this.init();
     }
 
     init() {
