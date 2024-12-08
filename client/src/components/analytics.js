@@ -8,22 +8,23 @@ export class Analytics {
     }
 
     startChart() {
-        // const scriptoTag = () => {
-        //     document.head.innerHTML += `<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" async></script>`;
-        // }
-
-        console.log('start chart is working...')
-
+        // При использовании innerHTML браузеры не всегда выполняют добавленные теги <script>.
+        // Предпочтительнее использовать document.createElement,
+        //     так как это более надежно и безопасно.
         const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js';
+        script.src = './scripts/services/chart.js';
         script.async = true; // Загружается асинхронно
 
         document.body.appendChild(script);
 
         // Опционально: обработка события загрузки
         script.onload = () => {
-            console.log('Chart.js загружен');
-            this.startDiagrams();  // Вызов диаграмм после загрузки Chart.js
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js не загрузился корректно');
+            } else {
+                console.log('Chart.js загружен');
+                this.startDiagrams();
+            }
         };
     }
 
@@ -69,3 +70,4 @@ export class Analytics {
         });
     }
 }
+

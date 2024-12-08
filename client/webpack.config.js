@@ -26,7 +26,9 @@ module.exports = {
                 {from: "./src/markups", to: "templates"},
                 {from: "styles", to: "styles"},
                 {from: "images", to: "images"},
+                { from: "./scripts/services/chart.js", to: "scripts/services/chart.js" },
             ],
         }),
     ],
 };
+
