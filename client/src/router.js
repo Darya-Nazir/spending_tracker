@@ -76,8 +76,7 @@ export class Router {
     // }
 
     startLoad() {
-        if (this.page && typeof this.page.load === 'function') {
-            // this.page.load();
+        if (this.page && typeof this.page.component) {
             const componentInstance = new this.page.component();
             componentInstance.init();
         }

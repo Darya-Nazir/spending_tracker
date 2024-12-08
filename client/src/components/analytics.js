@@ -12,6 +12,8 @@ export class Analytics {
         //     document.head.innerHTML += `<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" async></script>`;
         // }
 
+        console.log('start chart is working...')
+
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js';
         script.async = true; // Загружается асинхронно
