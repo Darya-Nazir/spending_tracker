@@ -12,7 +12,7 @@ export class Analytics {
         // Предпочтительнее использовать document.createElement,
         //     так как это более надежно и безопасно.
         const script = document.createElement('script');
-        script.src = './scripts/services/chart.js';
+        script.src = './scripts/lib/chart.js';
         script.async = true; // Загружается асинхронно
 
         document.body.appendChild(script);

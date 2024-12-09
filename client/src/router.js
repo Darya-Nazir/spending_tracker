@@ -44,7 +44,11 @@ export class Router {
     }
 
     turnOnNavbar() {
-        new Navbar().init();
+        // Когда модуль навбар и бутстрап js подключены одновременно,
+        // выпадающий список не работает.
+        //     Для корректной работы нужно что-то одно
+
+        // new Navbar().init();
     }
 
     navigateTo(route) {
