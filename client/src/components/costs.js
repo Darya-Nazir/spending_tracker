@@ -1,12 +1,19 @@
+import {Unselect} from "../../scripts/services/unselect.js";
+
 export class Costs {
     constructor() {
-        console.log('Costs!')
-        this.costsSelected = document.getElementById('')
     }
     init() {
-
+        new Unselect().init();
+        this.selectCosts();
     }
-    selectedCosts() {
 
+    selectCosts() {
+        const categoriesElement = document.getElementById('dropdownMenuButton1');
+        const costsElement = document.getElementById('costsPage');
+
+        categoriesElement.classList.add('btn-primary', 'text-white');
+        costsElement.classList.add('bg-primary', 'text-white');
     }
 }
+
