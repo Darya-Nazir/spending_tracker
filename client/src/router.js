@@ -5,14 +5,12 @@ import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
 import {Revenue} from "./components/revenue.js";
 import {Transaction} from "./components/transaction.js";
-import {Navbar} from "./components/navbar.js";
 
 export class Router {
     constructor() {
         this.routes = routes;
 
         this.initEvents();
-        this.turnOnNavbar();
 
         this.appElement = document.getElementById('app');
         this.titlePageElement = document.getElementById('title');
@@ -43,15 +41,14 @@ export class Router {
         });
     }
 
-    turnOnNavbar() {
-        // Когда модуль навбар и бутстрап js подключены одновременно,
-        // выпадающий список не работает.
-        //     Для корректной работы нужно что-то одно
-
-        // new Navbar().init();
-    }
-
     navigateTo(route) {
+        const normalizedCurrentPath = this.path.startsWith('/') ? this.path : `/${this.path}`;
+        const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
+
+        if (normalizedCurrentPath === normalizedRoute) {
+            return;
+        }
+
         history.pushState(null, '', route); // Изменяем историю
         this.path = window.location.pathname; // Обновляем текущий путь
         this.page = this.routes[this.path]; // Обновляем текущую страницу
