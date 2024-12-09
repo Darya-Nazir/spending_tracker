@@ -76,7 +76,6 @@ export class Analytics {
     }
     selectMain() {
         document.getElementById('mainPage').classList.add('bg-primary', 'text-white');
-        // bg-primary text-white
         console.log('selectMain!')
     }
 }
