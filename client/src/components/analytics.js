@@ -1,3 +1,5 @@
+import {Unselect} from "../../scripts/services/unselect.js";
+
 export class Analytics {
     constructor() {
     }
@@ -11,6 +13,7 @@ export class Analytics {
         // При использовании innerHTML браузеры не всегда выполняют добавленные теги <script>.
         // Предпочтительнее использовать document.createElement,
         //     так как это более надежно и безопасно.
+
         const script = document.createElement('script');
         script.src = './scripts/lib/chart.js';
         script.async = true; // Загружается асинхронно
@@ -24,6 +27,8 @@ export class Analytics {
             } else {
                 console.log('Chart.js загружен');
                 this.startDiagrams();
+                new Unselect().init();
+                this.selectMain();
             }
         };
     }
@@ -68,6 +73,11 @@ export class Analytics {
             data: expensesData,
             options: options
         });
+    }
+    selectMain() {
+        document.getElementById('mainPage').classList.add('bg-primary', 'text-white');
+        // bg-primary text-white
+        console.log('selectMain!')
     }
 }
 

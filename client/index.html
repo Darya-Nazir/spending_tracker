@@ -27,7 +27,7 @@
                         <!--                    TODO: иконки подправить-->
 
                         <li class="nav-item mb-2">
-                            <a class="nav-link d-flex align-items-center text-dark" href="/analytics">
+                            <a class="nav-link d-flex align-items-center text-dark rounded" id="mainPage" href="/analytics">
                                     <span class="input-group-text border-0 bg-light me-2">
                                         <img src="../images/email.svg" alt="Email icon">
                                     </span>
@@ -47,12 +47,12 @@
             </nav>
             <!-- Выпадающий список категорий -->
             <div class="dropdown show">
-                <button class="btn btn-primary dropdown-toggle dropdown-menu-end" style="width: 100%"
+                <button class="btn btn-outline-primary dropdown-toggle dropdown-menu-end" style="width: 100%"
                         type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="true">
                     Категории
                 </button>
                 <ul class="dropdown-menu border-primary" aria-labelledby="dropdownMenuButton1">
-                    <li><a class="dropdown-item bg-primary text-white" href="/revenues">Доходы</a></li>
+                    <li><a class="dropdown-item" href="/revenues">Доходы</a></li>
                     <li><a class="dropdown-item" href="/costs">Расходы</a></li>
                 </ul>
             </div>
