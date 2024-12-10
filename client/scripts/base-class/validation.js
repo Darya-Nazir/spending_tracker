@@ -5,50 +5,46 @@ export class Validation {
         this.passwordInput = document.getElementById('password');
         this.emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     }
-    static init() {
-        this.initializeEventListeners();
-        this.validateForm();
-    }
 
-    static initializeEventListeners() {
-        if (!this.form) {
-            console.error(`Форма не найдена`);
-            return;
+    init() {
+        if (this.form) {
+            this.initializeEventListeners();
         }
     }
 
-    static validateForm() {
-        let isValid = true;
+    initializeEventListeners() {
+        // Метод для наследования, можно переопределить в дочерних классах
+    }
 
-        // Валидация email
+    validateEmail() {
         if (!this.emailRegex.test(this.emailInput.value.trim())) {
             this.markInputAsInvalid(this.emailInput);
-            isValid = false;
-        } else {
-            this.markInputAsValid(this.emailInput);
+            return false;
         }
-
-        // Валидация пароля
-        if (this.passwordInput.value.length < 6) {
-            this.markInputAsInvalid(this.passwordInput);
-            isValid = false;
-        } else {
-            this.markInputAsValid(this.passwordInput);
-        }
-
-        return isValid;
+        this.markInputAsValid(this.emailInput);
+        return true;
     }
-    static markInputAsInvalid(inputElement) {
+
+    validatePassword(minLength = 6) {
+        if (this.passwordInput.value.length < minLength) {
+            this.markInputAsInvalid(this.passwordInput);
+            return false;
+        }
+        this.markInputAsValid(this.passwordInput);
+        return true;
+    }
+
+    markInputAsInvalid(inputElement) {
         inputElement.classList.remove('is-valid');
         inputElement.classList.add('is-invalid');
     }
 
-    static markInputAsValid(inputElement) {
+    markInputAsValid(inputElement) {
         inputElement.classList.remove('is-invalid');
         inputElement.classList.add('is-valid');
     }
 
-    static jumpIntoApp() {
+    jumpIntoApp() {
         window.location.href = '/analytics';
     }
 }
