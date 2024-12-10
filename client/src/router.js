@@ -136,8 +136,10 @@ export class Router {
         // Скрываем или показываем навбар в зависимости от флага `showNavbar`
         if (this.page && this.page.showNavbar === false) {
             this.navbar.style.display = 'none'; // Скрыть навбар
+            this.navbar.classList.remove('d-flex');
         } else {
             this.navbar.style.display = 'block'; // Показать навбар
+            this.navbar.classList.add('d-flex');
         }
     }
 }
