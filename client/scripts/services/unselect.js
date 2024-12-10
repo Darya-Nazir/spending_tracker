@@ -15,10 +15,12 @@ export class Unselect {
         // Удаляем класс у всех дочерних элементов
         navbar.querySelectorAll('.bg-primary').forEach(element => {
             element.classList.remove('bg-primary');
+            element.classList.remove('text-white');
         });
 
-        document.getElementById('dropdownMenuButton1').classList.remove('btn-primary');
+        const dropdownButton = document.getElementById('dropdownMenuButton1');
 
-        console.log('remove!')
+        dropdownButton.classList.remove('btn-primary');
+        dropdownButton.classList.remove('text-white');
     }
 }
