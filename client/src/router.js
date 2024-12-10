@@ -30,15 +30,16 @@ export class Router {
     initEvents() {
         window.addEventListener('DOMContentLoaded', this.handleNavigation.bind(this));
         window.addEventListener('popstate', this.handleNavigation.bind(this));
+        document.body.addEventListener('click', this.openNewRoute.bind(this));
+    }
 
-        document.body.addEventListener('click', (event) => {
-            const link = event.target.closest('a.route-link');
-            if (link) {
-                event.preventDefault(); // Предотвращает стандартный переход
-                const path = link.getAttribute('href');
-                this.navigateTo(path); // Вызов вашего метода для изменения маршрута
-            }
-        });
+    openNewRoute(event) {
+        const link = event.target.closest('a');
+        if (link) {
+            event.preventDefault(); // Предотвращает стандартный переход
+            const path = link.getAttribute('href');
+            this.navigateTo(path); // Вызов вашего метода для изменения маршрута
+        }
     }
 
     navigateTo(route) {

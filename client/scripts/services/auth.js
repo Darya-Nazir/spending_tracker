@@ -25,7 +25,7 @@ export class Auth {
     //     }
     //
     //     this.removeTokens();
-    //     location.href = '#/';
+    //     location.href = '#/'; надо по-другому, чтобы без перезагрузки
     //     return false;
     // }
 
