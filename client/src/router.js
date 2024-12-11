@@ -6,6 +6,13 @@ import {Analytics} from "./components/analytics.js";
 import {Revenue} from "./components/revenue.js";
 import {Transaction} from "./components/transaction.js";
 
+const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
+
+const states = {
+    STATE_UNAUTHORIZED: 'unauthorized',
+    STATE_AUTHORIZED: 'authorized',
+}
+
 export class Router {
     constructor() {
         this.routes = routes;
@@ -13,9 +20,8 @@ export class Router {
         this.initEvents();
 
         this.appElement = document.getElementById('app');
-        this.titlePageElement = document.getElementById('title');
         this.loadedStyles = new Set(); // Отслеживаем загруженные стили
-        this.navbar = document.getElementById('navbar');
+        this.navbarElement = document.getElementById('navbar');
 
         this.path = window.location.pathname || '/';
         this.page = this.routes[this.path];
@@ -80,17 +86,13 @@ export class Router {
 
     startLoad() {
         if (this.page && typeof this.page.component) {
-            const componentInstance = new this.page.component();
+            const componentInstance = new this.page.component(this.navigateTo.bind(this));
             componentInstance.init();
         }
     }
 
     addTitle() {
-        if (this.page && typeof this.page.title === 'string') {
-            document.title = this.page.title; // Устанавливаем текст для тега <title>
-        } else {
-            document.title = 'Lumincoin Finance'; // Значение по умолчанию
-        }
+        document.title = this.page.title ? this.page.title : DEFAULT_PAGE_TITLE;
     }
 
     async handleNavigation() {
@@ -137,11 +139,11 @@ export class Router {
     toggleNav() {
         // Скрываем или показываем навбар в зависимости от флага `showNavbar`
         if (this.page && this.page.showNavbar === false) {
-            this.navbar.style.display = 'none'; // Скрыть навбар
-            this.navbar.classList.remove('d-flex');
+            this.navbarElement.style.display = 'none'; // Скрыть навбар
+            this.navbarElement.classList.remove('d-flex');
         } else {
-            this.navbar.style.display = 'block'; // Показать навбар
-            this.navbar.classList.add('d-flex');
+            this.navbarElement.style.display = 'block'; // Показать навбар
+            this.navbarElement.classList.add('d-flex');
         }
     }
 }
@@ -151,12 +153,14 @@ const routes = {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
         showNavbar: false,
+        requiresAuth: false,
         component: Login,
     },
     '/signup': {
         html: 'templates/signup.html',
         title: 'Lumincoin Finance - Регистрация',
         showNavbar: false,
+        requiresAuth: false,
         component: Signup,
     },
     '/costs': {

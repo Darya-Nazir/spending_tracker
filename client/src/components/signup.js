@@ -1,8 +1,9 @@
 import {Http} from "../../scripts/services/http.js";
 import {Validation} from "../../scripts/base-class/validation";
+
 export class Signup extends Validation {
-    constructor() {
-        super();
+    constructor(navigateTo) {
+        super(navigateTo);
         this.fullNameInput = document.getElementById('fullName');
         this.confirmPasswordInput = document.getElementById('confirmPassword');
     }

@@ -1,9 +1,10 @@
 export class Validation {
-    constructor() {
+    constructor(navigateTo) {
         this.form = document.getElementById('registrationForm');
         this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
         this.emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        this.navigateToPath = navigateTo;
     }
 
     init() {
@@ -45,6 +46,7 @@ export class Validation {
     }
 
     jumpIntoApp() {
-        window.location.href = '/analytics';
+        // window.location.href = '/analytics';
+        this.navigateToPath('/analytics');
     }
 }

@@ -3,8 +3,9 @@ import {Http} from "../../scripts/services/http.js";
 import {Validation} from "../../scripts/base-class/validation.js";
 
 export class Login extends Validation {
-    constructor() {
-        super();
+    constructor(navigateTo) {
+        super(navigateTo);
+        this.rememberMeElement = document.getElementById('rememberMe');
     }
 
     initializeEventListeners() {
@@ -31,7 +32,7 @@ export class Login extends Validation {
             const dataObject = {
                 email: emailValue,
                 password: passwordValue,
-                rememberMe: true
+                rememberMe: this.rememberMeElement.checked,
             };
 
             const path = 'http://localhost:3000/api/login';
