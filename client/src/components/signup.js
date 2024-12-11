@@ -7,10 +7,6 @@ export class Signup extends Validation {
         this.confirmPasswordInput = document.getElementById('confirmPassword');
     }
 
-    init() {
-
-    }
-
     initializeEventListeners() {
         this.form.addEventListener('submit', this.handleSubmit.bind(this));
     }

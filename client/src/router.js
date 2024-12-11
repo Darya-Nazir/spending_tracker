@@ -35,6 +35,7 @@ export class Router {
 
     openNewRoute(event) {
         const link = event.target.closest('a');
+
         if (link) {
             event.preventDefault(); // Предотвращает стандартный переход
             const path = link.getAttribute('href');
