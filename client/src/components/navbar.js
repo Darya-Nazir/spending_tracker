@@ -1,3 +1,5 @@
+import {Auth} from "../../scripts/services/auth";
+
 export class Navbar {
     constructor() {
         console.log('Navbar plashka!')
@@ -5,6 +7,7 @@ export class Navbar {
 
     init() {
         this.logoutPlace();
+        this.logOfUser();
     }
 
     // toggleDropdownList() {
@@ -29,9 +32,16 @@ export class Navbar {
     logoutPlace() {
         document.addEventListener('DOMContentLoaded', () => {
             const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-            const popoverList = [...popoverTriggerList].map(popoverTriggerEl =>
-                new bootstrap.Popover(popoverTriggerEl)
-            );
+
+            [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        });
+    }
+    logOfUser() {
+        const logoutButton = document.getElementById('logout');
+
+        logoutButton.addEventListener('click', () => {
+            console.log('logoutButton click!');
+            Auth.removeTokens();
         });
     }
 }
