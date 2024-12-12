@@ -67,12 +67,18 @@
                 </div>
 
                 <!-- Информация о пользователе -->
-                <div class="d-flex align-items-center p-3 user-block" data-bs-toggle="modal"
-                     data-bs-target="#userModal">
-                    <div class="p-2 me-2">
-                        <img src="../images/user.svg" alt="User icon">
+                <div class="border-top"></div>
+                <div class="d-flex flex-column align-items-start p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="p-2 me-2">
+                            <img src="../images/user.svg" alt="User icon">
+                        </div>
+                        <span>RomanChernov</span>
                     </div>
-                    <span>RomanChernov</span>
+                    <button class="btn btn-outline-primary" style="width: 100%"
+                            type="button" data-bs-toggle="modal" data-bs-target="#userModal">
+                        Выйти
+                    </button>
                 </div>
             </div>
         </div>
@@ -83,14 +89,13 @@
 
 
     <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="userModalLabel">Выйти из учетной записи RomanChernov</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Закрыть</button>
                     <button type="button" class="btn btn-primary">Выйти</button>
                 </div>
             </div>
