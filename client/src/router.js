@@ -150,7 +150,7 @@ export class Router {
     }
 
     turnOnLogoutPlace() {
-        new Navbar().init();
+        new Navbar(this.navigateTo.bind(this)).init();
     }
 }
 

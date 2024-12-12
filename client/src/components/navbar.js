@@ -1,8 +1,9 @@
 import {Auth} from "../../scripts/services/auth";
 
 export class Navbar {
-    constructor() {
+    constructor(navigateTo) {
         console.log('Navbar plashka!')
+        this.navigateToPath = navigateTo;
     }
 
     init() {
@@ -42,6 +43,7 @@ export class Navbar {
         logoutButton.addEventListener('click', () => {
             console.log('logoutButton click!');
             Auth.removeTokens();
+            this.navigateToPath('/');
         });
     }
 }
