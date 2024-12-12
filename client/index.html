@@ -20,42 +20,42 @@
                 <img src="../images/Logo.svg" alt="Logo" class="img-fluid">
             </div>
 
-                <!-- Основная навигация -->
-                <nav class="mb-4">
-                    <div class="position-sticky">
-                        <ul class="nav flex-column">
-                            <li class="nav-item mb-2">
-                                <a class="nav-link d-flex align-items-center text-dark rounded" id="mainPage"
-                                   href="/analytics">
+            <!-- Основная навигация -->
+            <nav class="mb-4">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-dark rounded" id="mainPage"
+                               href="/analytics">
                                     <span class="input-group-text border-0 bg-light me-2">
                                         <img src="../images/home.svg" alt="Email icon">
                                     </span>
-                                    Главная
-                                </a>
-                            </li>
-                            <li class="nav-item mb-2">
-                                <a class="nav-link d-flex align-items-center text-dark rounded" id="transactionsPage"
-                                   href="/transactions">
+                                Главная
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-dark rounded" id="transactionsPage"
+                               href="/transactions">
                                     <span class="input-group-text border-0 bg-light me-2">
                                         <img src="../images/money.svg" alt="Email icon">
                                     </span>
-                                    Доходы & Расходы
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-                <!-- Выпадающий список категорий -->
-                <div class="dropdown show">
-                    <button class="btn btn-outline-primary dropdown-toggle dropdown-menu-end" style="width: 100%"
-                            type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="true">
-                        Категории
-                    </button>
-                    <ul class="dropdown-menu border-primary" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item route-link" id="revenuesPage" href="/revenues">Доходы</a></li>
-                        <li><a class="dropdown-item route-link" id="costsPage" href="/costs">Расходы</a></li>
+                                Доходы & Расходы
+                            </a>
+                        </li>
                     </ul>
                 </div>
+            </nav>
+            <!-- Выпадающий список категорий -->
+            <div class="dropdown show">
+                <button class="btn btn-outline-primary dropdown-toggle dropdown-menu-end" style="width: 100%"
+                        type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="true">
+                    Категории
+                </button>
+                <ul class="dropdown-menu border-primary" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item route-link" id="revenuesPage" href="/revenues">Доходы</a></li>
+                    <li><a class="dropdown-item route-link" id="costsPage" href="/costs">Расходы</a></li>
+                </ul>
+            </div>
 
             <div id="down" class="mt-auto">
                 <!-- Баланс -->
@@ -67,7 +67,8 @@
                 </div>
 
                 <!-- Информация о пользователе -->
-                <div class="d-flex align-items-center p-3 ">
+                <div class="d-flex align-items-center p-3 user-block" data-bs-toggle="modal"
+                     data-bs-target="#userModal">
                     <div class="p-2 me-2">
                         <img src="../images/user.svg" alt="User icon">
                     </div>
@@ -79,6 +80,23 @@
         <div class="col" id="app"></div>
 
     </div>
+
+
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Выйти из учетной записи RomanChernov</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 </body>

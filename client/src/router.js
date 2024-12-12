@@ -5,6 +5,7 @@ import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
 import {Revenue} from "./components/revenue.js";
 import {Transaction} from "./components/transaction.js";
+import {Navbar} from "./components/navbar";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
@@ -144,7 +145,12 @@ export class Router {
         } else {
             this.navbarElement.style.display = 'block'; // Показать навбар
             this.navbarElement.classList.add('d-flex');
+           this.turnOnLogoutPlace();
         }
+    }
+
+    turnOnLogoutPlace() {
+        new Navbar().init();
     }
 }
 
