@@ -1,13 +1,13 @@
 import {Auth} from "../../scripts/services/auth";
 
-export class Navbar {
+export class User {
     constructor(navigateTo) {
-        console.log('Navbar plashka!')
+        console.log('User plashka!')
         this.navigateToPath = navigateTo;
     }
 
     init() {
-        this.logoutPlace();
+        this.logoutButton();
         this.logOfUser();
     }
 
@@ -30,7 +30,7 @@ export class Navbar {
     //         }
     //     });
     // }
-    logoutPlace() {
+    logoutButton() {
         document.addEventListener('DOMContentLoaded', () => {
             const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
 

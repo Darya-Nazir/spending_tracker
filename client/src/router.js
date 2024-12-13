@@ -5,7 +5,7 @@ import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
 import {Revenue} from "./components/revenue.js";
 import {Transaction} from "./components/transaction.js";
-import {Navbar} from "./components/navbar";
+import {User} from "./components/user";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
@@ -30,9 +30,9 @@ export class Router {
 
     // для охраны от неавторизованных пользователей
 
-    isAuthenticated() {
-        return localStorage.getItem(Auth.accessTokenKey) !== null;
-    }
+    // isAuthenticated() {
+    //     return localStorage.getItem(Auth.accessTokenKey) !== null;
+    // }
 
     initEvents() {
         window.addEventListener('DOMContentLoaded', this.handleNavigation.bind(this));
@@ -98,10 +98,10 @@ export class Router {
 
     async handleNavigation() {
         // для охраны от неавторизованных пользователей
-        if (this.page && this.page.requiresAuth && !this.isAuthenticated()) {
-            this.navigateTo('/');
-            return;
-        }
+        // if (this.page && this.page.requiresAuth && !this.isAuthenticated()) {
+        //     this.navigateTo('/');
+        //     return;
+        // }
 
         const handlePage = this.page ?? null;
 
@@ -145,12 +145,12 @@ export class Router {
         } else {
             this.navbarElement.style.display = 'block'; // Показать навбар
             this.navbarElement.classList.add('d-flex');
-           this.turnOnLogoutPlace();
+           this.turnOnLogoutButton();
         }
     }
 
-    turnOnLogoutPlace() {
-        new Navbar(this.navigateTo.bind(this)).init();
+    turnOnLogoutButton() {
+        new User(this.navigateTo.bind(this)).init();
     }
 }
 
