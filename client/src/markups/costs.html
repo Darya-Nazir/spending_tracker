@@ -1,14 +1,14 @@
 <div class="container mt-5">
     <!--                    TODO: цвет титлы-->
 
-    <h2 class="mb-4">Расходы</h2>
+    <h2 class="mb-4 text-primary-emphasis">Расходы</h2>
 
     <div class="row g-4">
         <!-- Еда -->
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Еда</h5>
+                    <h5 class="card-title text-primary-emphasis">Еда</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -21,7 +21,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Жильё</h5>
+                    <h5 class="card-title text-primary-emphasis">Жильё</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -34,7 +34,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Здоровье</h5>
+                    <h5 class="card-title text-primary-emphasis">Здоровье</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -47,7 +47,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Кафе</h5>
+                    <h5 class="card-title text-primary-emphasis">Кафе</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -60,7 +60,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Авто</h5>
+                    <h5 class="card-title text-primary-emphasis">Авто</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -73,7 +73,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Одежда</h5>
+                    <h5 class="card-title text-primary-emphasis">Одежда</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -86,7 +86,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Развлечения</h5>
+                    <h5 class="card-title text-primary-emphasis">Развлечения</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -99,7 +99,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Счета</h5>
+                    <h5 class="card-title text-primary-emphasis">Счета</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -112,7 +112,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Спорт</h5>
+                    <h5 class="card-title text-primary-emphasis">Спорт</h5>
                     <div class="mt-3">
                         <button class="btn btn-primary me-2">Редактировать</button>
                         <button class="btn btn-danger">Удалить</button>
@@ -127,7 +127,7 @@
         <div class="col-md-4">
             <div class="card h-100 border-dashed">
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <button class="btn btn-outline-primary">
+                    <button class="btn btn-outline-primary" id="addCategoryBtn">
                         <i class="bi bi-plus-lg"></i>
                         Добавить категорию
                     </button>
@@ -141,26 +141,21 @@
 <!--TODO: модалка не настроена.-->
 
 
-<!-- Кнопка-триггер модального окна -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-    Запустить модальное окно со статическим фоном
-</button>
 
 <!-- Модальное окно -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="deleteCategoryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="deleteCategoryLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content p-4">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Заголовок модального окна</h1>
+                <h1 class="modal-title fs-5 text-primary-emphasis" id="deleteCategoryLabel">
+                    Вы действительно хотите удалить категорию? Связанные расходы будут удалены навсегда.
+                </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body">
-                ...
-            </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <button type="button" class="btn btn-primary">Понял</button>
+                <button type="button" class="btn btn-success" id="confirmDeleteBtn">Да, удалить</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Не удалять</button>
             </div>
         </div>
     </div>
