@@ -37,7 +37,7 @@ export class Login extends Validation {
 
             const path = 'http://localhost:3000/api/login';
             const result = await Http.response(path, dataObject);
-
+debugger;
             Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
             Auth.setUserInfo({email: emailValue, password: passwordValue});
             console.log('Everything all right!');
