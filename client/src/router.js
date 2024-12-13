@@ -98,7 +98,7 @@ export class Router {
 
     async handleNavigation() {
         // для охраны от неавторизованных пользователей
-        // if (this.page && this.page.requiresAuth && !this.isAuthenticated()) {
+        // if (handlePage.state === states.STATE_AUTHORIZED && !this.isAuthenticated()) {
         //     this.navigateTo('/');
         //     return;
         // }
@@ -138,14 +138,15 @@ export class Router {
     }
 
     toggleNav() {
-        // Скрываем или показываем навбар в зависимости от флага `showNavbar`
-        if (this.page && this.page.showNavbar === false) {
-            this.navbarElement.style.display = 'none'; // Скрыть навбар
-            this.navbarElement.classList.remove('d-flex');
-        } else {
-            this.navbarElement.style.display = 'block'; // Показать навбар
+        const showNavbar = this.page?.state === states.STATE_AUTHORIZED;
+
+        if (showNavbar) {
+            this.navbarElement.style.display = 'block';
             this.navbarElement.classList.add('d-flex');
-           this.turnOnLogoutButton();
+            this.turnOnLogoutButton();
+        } else {
+            this.navbarElement.style.display = 'none';
+            this.navbarElement.classList.remove('d-flex');
         }
     }
 
@@ -158,87 +159,76 @@ const routes = {
     '/': {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
-        showNavbar: false,
-        requiresAuth: false,
+        state: states.STATE_UNAUTHORIZED,
         component: Login,
     },
     '/signup': {
         html: 'templates/signup.html',
         title: 'Lumincoin Finance - Регистрация',
-        showNavbar: false,
-        requiresAuth: false,
+        state: states.STATE_UNAUTHORIZED,
         component: Signup,
     },
     '/costs': {
         html: 'templates/costs.html',
         title: 'Категории расходов',
         css: [],
-        showNavbar: true,
-        requiresAuth: true,
+        state: states.STATE_AUTHORIZED,
         component: Costs
     },
     '/revenues': {
         html: 'templates/revenues.html',
         title: 'Категории доходов',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Revenue
     },
     '/transactions': {
         html: 'templates/transactions.html',
         title: 'Доходы и расходы',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Transaction
     },
     '/analytics': {
         html: 'templates/analytics.html',
         title: 'Главная',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Analytics
     },
     '/create-cost': {
         html: 'templates/create_cost.html',
         title: 'Создание категории расходов',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Costs
     },
     '/create-revenue': {
         html: 'templates/create_revenue.html',
         title: 'Создание категории доходов',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Costs
     },
     '/edit-cost': {
         html: 'templates/edit_cost.html',
         title: 'Редактирование категории расходов',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Costs
     },
     '/edit-revenue': {
         html: 'templates/edit_revenue.html',
         title: 'Редактирование категории доходов',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Costs
     },
     '/edit-transaction': {
         html: 'templates/edit_transaction.html',
         title: 'Редактирование дохода/расхода',
         css: [],
-        requiresAuth: true,
-        showNavbar: true,
+        state: states.STATE_AUTHORIZED,
         component: Costs
     },
 };
