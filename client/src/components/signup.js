@@ -1,5 +1,6 @@
 import {Http} from "../../scripts/services/http.js";
 import {Validation} from "../../scripts/base-class/validation";
+import {Auth} from "../../scripts/services/auth";
 
 export class Signup extends Validation {
     constructor(navigateTo) {
@@ -49,10 +50,10 @@ export class Signup extends Validation {
     async submitForm(data) {
         try {
             const path = 'http://localhost:3000/api/signup';
-            const result = await Http.response(path, data);
+            const result = await Http.request(path, data);
 
             if (result) {
-                this.jumpIntoApp();
+                this.navigateToPath('/');
             }
         } catch (error) {
             console.error('Ошибка при отправке:', error);

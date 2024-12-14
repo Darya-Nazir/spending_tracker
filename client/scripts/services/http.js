@@ -2,7 +2,7 @@ export class Http {
     constructor() {
     }
 
-    static async response(path, data) {
+    static async request(path, data) {
         const response = await fetch(path, {
             method: 'POST',
             headers: {

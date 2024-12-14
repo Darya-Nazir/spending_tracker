@@ -44,9 +44,4 @@ export class Validation {
         inputElement.classList.remove('is-invalid');
         inputElement.classList.add('is-valid');
     }
-
-    jumpIntoApp() {
-        // window.location.href = '/analytics';
-        this.navigateToPath('/analytics');
-    }
 }

@@ -24,6 +24,10 @@ export class Login extends Validation {
         }
     }
 
+    jumpIntoApp() {
+        this.navigateToPath('/analytics');
+    }
+
     async submitForm() {
         const emailValue = this.emailInput.value.trim();
         const passwordValue = this.passwordInput.value;
@@ -36,8 +40,8 @@ export class Login extends Validation {
             };
 
             const path = 'http://localhost:3000/api/login';
-            const result = await Http.response(path, dataObject);
-debugger;
+            const result = await Http.request(path, dataObject);
+
             Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
             Auth.setUserInfo({email: emailValue, password: passwordValue});
             console.log('Everything all right!');
