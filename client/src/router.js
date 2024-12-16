@@ -6,6 +6,7 @@ import {Analytics} from "./components/analytics.js";
 import {Revenue} from "./components/revenue.js";
 import {Transaction} from "./components/transaction.js";
 import {User} from "./components/user";
+import {NewCost} from "./components/create_cost.js";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
@@ -201,7 +202,7 @@ const routes = {
         title: 'Создание категории расходов',
         css: [],
         state: states.STATE_AUTHORIZED,
-        component: Costs
+        component: NewCost
     },
     '/create-revenue': {
         html: 'templates/create_revenue.html',
