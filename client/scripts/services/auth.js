@@ -1,33 +1,38 @@
 export class Auth {
+    constructor(navigateTo) {
+        this.navigateToPath = navigateTo;
+    }
+
     static accessTokenKey = 'accessToken';
     static refreshTokenKey = 'refreshToken';
     static userInfoKey = 'userInfo';
 
-    // static async processUnauthorizedResponse() {
-    //     const refreshToken = localStorage.getItem(this.refreshTokenKey);
-    //     if (refreshToken) {
-    //         const response = await fetch(config.host + '/refresh', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Accept': 'application/json'
-    //             },
-    //             body: JSON.stringify({refreshToken: refreshToken})
-    //         });
-    //
-    //         if (response && response.status === 200) {
-    //             const result = await response.json();
-    //             if (result && !result.error) {
-    //                 this.setTokens(result.accessToken, result.refreshToken);
-    //                 return true;
-    //             }
-    //         }
-    //     }
-    //
-    //     this.removeTokens();
-    //     location.href = '#/'; надо по-другому, чтобы без перезагрузки
-    //     return false;
-    // }
+    static async processUnauthorizedResponse(navigateToPath) {
+        const refreshToken = localStorage.getItem(this.refreshTokenKey);
+        if (refreshToken) {
+            const response = await fetch('http://localhost:3000/api/refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({refreshToken: refreshToken})
+            });
+
+            if (response && response.status === 200) {
+                const result = await response.json();
+                if (result && !result.error) {
+                    this.setTokens(result.accessToken, result.refreshToken);
+                    console.log('Set refreshToken!');
+                    return true;
+                }
+            }
+        }
+
+        this.removeTokens();
+        navigateToPath('/');
+        return false;
+    }
 
     // static async logout() {
     //     const refreshToken = localStorage.getItem(this.refreshTokenKey);
@@ -66,14 +71,14 @@ export class Auth {
     static setUserInfo(info) {
         localStorage.setItem(this.userInfoKey, JSON.stringify(info))
     }
-    //
-    // static getUserInfo() {
-    //     const userInfo = localStorage.getItem(this.userInfoKey);
-    //     if (userInfo) {
-    //         return JSON.parse(userInfo);
-    //     }
-    //
-    //     return null;
-    // }
+
+    static getUserInfo() {
+        const userInfo = localStorage.getItem(this.userInfoKey);
+        if (userInfo) {
+            return JSON.parse(userInfo);
+        }
+
+        return null;
+    }
 }
 

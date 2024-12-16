@@ -20,6 +20,7 @@ export class Router {
         this.routes = routes;
 
         this.initEvents();
+        Auth.processUnauthorizedResponse.bind(this);
 
         this.appElement = document.getElementById('app');
         this.loadedStyles = new Set(); // Отслеживаем загруженные стили
@@ -64,27 +65,6 @@ export class Router {
         this.page = this.routes[this.path]; // Обновляем текущую страницу
         this.handleNavigation(); // Загружаем новую страницу
     }
-
-// На случай дополнительных стилей
-
-    // async loadStyle(href) {
-    //     // Проверяем, не загружен ли уже этот стиль
-    //     if (this.loadedStyles.has(href)) {
-    //         return Promise.resolve();
-    //     }
-    //
-    //     return new Promise((resolve, reject) => {
-    //         const link = document.createElement('link');
-    //         link.rel = 'stylesheet';
-    //         link.href = href;
-    //         link.onload = () => {
-    //             this.loadedStyles.add(href);
-    //             resolve();
-    //         };
-    //         link.onerror = reject;
-    //         document.head.appendChild(link);
-    //     });
-    // }
 
     startLoad() {
         if (this.page && typeof this.page.component) {
