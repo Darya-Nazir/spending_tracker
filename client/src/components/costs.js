@@ -1,4 +1,5 @@
 import {Unselect} from "../../scripts/services/unselect.js";
+import {Auth} from "../../scripts/services/auth";
 
 // export class Costs {
 //     constructor() {}
@@ -160,12 +161,16 @@ import {Unselect} from "../../scripts/services/unselect.js";
 export class Costs {
     constructor(navigateTo) {
         this.navigateToPath = navigateTo;
+        this.container = document.getElementById('costsContainer');
+        this.apiUrl = 'http://localhost:3000/api/categories/expense';
     }
 
     init() {
         new Unselect().init();
         this.selectCosts();
-        this.editCost();
+        this.renderCategories();
+        this.addCategoryButtonListener();
+        this.deleteCategoryButtonListener();
     }
 
     selectCosts() {
@@ -174,11 +179,6 @@ export class Costs {
 
         categoriesElement.classList.add('btn-primary', 'text-white');
         costsElement.classList.add('bg-primary', 'text-white');
-    }
-
-    editCost() {
-        this.addCategoryButtonListener();
-        // this.deleteCategoryButtonListener();
     }
 
     addCategoryButtonListener() {
@@ -212,6 +212,65 @@ export class Costs {
 
             const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
             deleteModal.hide();
+        });
+    }
+
+    async fetchCategories() {
+        const accessToken = localStorage.getItem(Auth.accessTokenKey);
+
+        if (!accessToken) {
+            alert('Вы не авторизованы! Пожалуйста, войдите в систему.');
+            return;
+        }
+
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`, // Добавляем accessToken в заголовок Authorization
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            return [];
+        }
+    }
+
+    createCard(category) {
+        const card = document.createElement('div');
+        card.className = 'col-md-4';
+
+        card.innerHTML = `
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title text-primary-emphasis">${category.title}</h5>
+          <div class="mt-3">
+            <button class="btn btn-primary me-2">Редактировать</button>
+            <button class="btn btn-danger">Удалить</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+        return card;
+    }
+
+    async renderCategories() {
+        const categories = await this.fetchCategories();
+
+        // Clear the container before rendering
+        this.container.innerHTML = '';
+
+        // Add each category card to the container
+        categories.forEach(category => {
+            const card = this.createCard(category);
+            this.container.appendChild(card);
         });
     }
 }
