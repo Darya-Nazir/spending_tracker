@@ -194,24 +194,56 @@ export class Costs {
 
     deleteCategoryButtonListener() {
         let cardToDelete = null;
+        let categoryIdToDelete = null;
 
+        // Слушатель на клик по кнопке "Удалить"
         document.querySelector('.row.g-4').addEventListener('click', (event) => {
             if (event.target.classList.contains('btn-danger')) {
                 cardToDelete = event.target.closest('.col-md-4');
+                categoryIdToDelete = cardToDelete.dataset.id;  // Получаем id категории
 
+                // Показываем модальное окно подтверждения
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
                 deleteModal.show();
             }
         });
 
-        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-            if (cardToDelete) {
-                cardToDelete.remove();
-                cardToDelete = null;
-            }
+        // Слушатель на кнопку "Подтвердить удаление" в модальном окне
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            if (cardToDelete && categoryIdToDelete) {
+                try {
+                    const accessToken = localStorage.getItem(Auth.accessTokenKey);
 
-            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
-            deleteModal.hide();
+                    if (!accessToken) {
+                        alert('Вы не авторизованы! Пожалуйста, войдите в систему.');
+                        return;
+                    }
+
+                    // Отправляем запрос на удаление категории с бэкенда
+                    const response = await fetch(`http://localhost:3000/api/categories/expense/${categoryIdToDelete}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}`,
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Ошибка при удалении категории: ${response.status}`);
+                    }
+
+                    // Если удаление прошло успешно, удаляем карточку с фронтенда
+                    cardToDelete.remove();
+                    cardToDelete = null;
+                    categoryIdToDelete = null;
+
+                    // Закрываем модальное окно
+                    const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
+                    deleteModal.hide();
+                } catch (error) {
+                    console.error('Error deleting category:', error);
+                }
+            }
         });
     }
 
@@ -245,6 +277,7 @@ export class Costs {
     createCard(category) {
         const card = document.createElement('div');
         card.className = 'col-md-4';
+        card.dataset.id = category.id;  // Добавляем атрибут data-id
 
         card.innerHTML = `
       <div class="card">
@@ -274,5 +307,4 @@ export class Costs {
         });
     }
 }
-
 
