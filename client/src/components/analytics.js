@@ -5,7 +5,6 @@ export class Analytics {
     }
 
     init() {
-        console.log('Analytics');
         this.startChart();
     }
 
@@ -25,7 +24,6 @@ export class Analytics {
             if (typeof Chart === 'undefined') {
                 console.error('Chart.js не загрузился корректно');
             } else {
-                console.log('Chart.js загружен');
                 this.startDiagrams();
                 new Unselect().init();
                 this.selectMain();
@@ -76,7 +74,6 @@ export class Analytics {
     }
     selectMain() {
         document.getElementById('mainPage').classList.add('bg-primary', 'text-white');
-        console.log('selectMain!')
     }
 }
 

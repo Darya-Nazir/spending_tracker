@@ -31,6 +31,7 @@ export class Costs {
             return;
         }
         document.getElementById('addCategoryBtn').addEventListener('click', () => {
+            debugger;
             this.navigateToPath('/create-cost');
         });
     }
@@ -63,10 +64,10 @@ export class Costs {
                     }
 
                     // Проверяем, если токен истек, обновляем его
-                    const isTokenValid = await Auth.processUnauthorizedResponse(this.navigateToPath);
-                    if (!isTokenValid) {
-                        return; // Прерываем выполнение, если токен не удалось обновить
-                    }
+                    // const isTokenValid = await Auth.processUnauthorizedResponse(this.navigateToPath);
+                    // if (!isTokenValid) {
+                    //     return; // Прерываем выполнение, если токен не удалось обновить
+                    // }
 
                     // Отправляем запрос на удаление категории с бэкенда
                     const response = await fetch(`http://localhost:3000/api/categories/expense/${categoryIdToDelete}`, {
@@ -105,10 +106,10 @@ export class Costs {
         }
 
         // Проверяем, если токен истек, обновляем его
-        const isTokenValid = await Auth.processUnauthorizedResponse(this.navigateToPath);
-        if (!isTokenValid) {
-            return []; // Прерываем выполнение, если токен не удалось обновить
-        }
+        // const isTokenValid = await Auth.processUnauthorizedResponse(this.navigateToPath);
+        // if (!isTokenValid) {
+        //     return []; // Прерываем выполнение, если токен не удалось обновить
+        // }
 
         try {
             const response = await fetch(this.apiUrl, {

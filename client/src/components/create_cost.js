@@ -24,11 +24,14 @@ export class NewCost {
             }
 
             // Получаем accessToken из localStorage
-            const accessToken = localStorage.getItem(Auth.accessTokenKey);
+            // const accessToken = localStorage.getItem(Auth.accessTokenKey);
+            const tokens = JSON.parse(localStorage.getItem('tokens'));
+            const accessToken = tokens?.accessToken;
 
-            if (!accessToken) {
-                alert('Вы не авторизованы! Пожалуйста, войдите в систему.');
-                return;
+            if (accessToken === 'undefined') {
+                Auth.processUnauthorizedResponse(this.navigateToPath);
+                // alert('Вы не авторизованы! Пожалуйста, войдите в систему.');
+                // return;
             }
 
             try {

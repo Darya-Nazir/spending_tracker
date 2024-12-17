@@ -44,10 +44,10 @@ export class Login extends Validation {
 
             Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
             Auth.setUserInfo({email: emailValue, password: passwordValue});
-            console.log('Everything all right!');
             this.jumpIntoApp();
         } catch (error) {
             console.error('Ошибка при отправке:', error);
         }
     }
 }
+

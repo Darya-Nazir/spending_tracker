@@ -22,15 +22,17 @@ export class Auth {
             if (response && response.status === 200) {
                 const result = await response.json();
                 if (result && !result.error) {
-                    this.setTokens(result.accessToken, result.refreshToken);
+                    const tokens = result.tokens;
+                    this.setTokens(tokens.accessToken, tokens.refreshToken);
                     console.log('Set refreshToken!');
-                    return true;
+                    return;
                 }
             }
         }
 
         this.removeTokens();
-        navigateToPath('/');
+        // navigateToPath('/');
+        console.log('Arent refresh')
         return false;
     }
 
