@@ -151,15 +151,22 @@ export class Costs {
 
     async renderCategories() {
         const categories = await this.fetchCategories();
+        const addCategoryCard = document.getElementById('addCategoryCard');
 
-        // Clear the container before rendering
-        this.container.innerHTML = '';
+        // Удалить все элементы из контейнера, кроме блока с id="addCategoryCard"
+        Array.from(this.container.children).forEach(child => {
+            if (child !== addCategoryCard) {
+                this.container.removeChild(child);
+            }
+        });
 
-        // Add each category card to the container
+        // Добавить карточки категорий в контейнер
         categories.forEach(category => {
             const card = this.createCard(category);
             this.container.appendChild(card);
         });
+
+        this.container.appendChild(addCategoryCard);
     }
 }
 
