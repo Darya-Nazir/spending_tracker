@@ -11,7 +11,6 @@ export class NewCost {
         this.cancelCategoryButtonListener();
     }
     addCategoryConfirmListener() {
-        // debugger;
         document.getElementById('create').addEventListener('click', async (event) => {
             event.preventDefault(); // Предотвращаем отправку формы
 
@@ -24,9 +23,8 @@ export class NewCost {
             }
 
             // Получаем accessToken из localStorage
-            // const accessToken = localStorage.getItem(Auth.accessTokenKey);
-            const tokens = JSON.parse(localStorage.getItem('tokens'));
-            const accessToken = tokens?.accessToken;
+            const accessToken = localStorage.getItem('accessToken');
+            // const accessToken = tokens?.accessToken;
 
             if (accessToken === 'undefined') {
                 Auth.processUnauthorizedResponse(this.navigateToPath);
@@ -35,6 +33,7 @@ export class NewCost {
             }
 
             try {
+                debugger;
                 const response = await fetch('http://localhost:3000/api/categories/expense', {
                     method: 'POST',
                     headers: {
@@ -45,12 +44,12 @@ export class NewCost {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Ошибка при добавлении категории');
+                    throw new Error('Ошибка при добавлении категории: ' + response.message);
                 }
 
                 // Если категория успешно добавлена, переходим на страницу создания затрат
                 console.log(response)
-                // this.navigateToPath('/costs');
+                this.navigateToPath('/costs');
 
             } catch (error) {
                 console.error('Ошибка при отправке запроса:', error);
@@ -61,7 +60,7 @@ export class NewCost {
 
     cancelCategoryButtonListener() {
         document.getElementById('cancel').addEventListener('click', (event) => {
-            event.preventDefault(); // Предотвращаем стандартное поведение кнопки
+            event.preventDefault();
             this.navigateToPath('/costs');
         });
     }

@@ -31,7 +31,6 @@ export class Costs {
             return;
         }
         document.getElementById('addCategoryBtn').addEventListener('click', () => {
-            debugger;
             this.navigateToPath('/create-cost');
         });
     }
