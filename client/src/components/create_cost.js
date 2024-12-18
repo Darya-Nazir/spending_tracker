@@ -3,61 +3,75 @@ import {Auth} from "../../scripts/services/auth.js";
 export class NewCost {
     constructor(navigateTo) {
         this.navigateToPath = navigateTo;
-        this.categoryName = null;
-
     }
+
     init() {
-        this. addCategoryConfirmListener();
+        this.addCategoryConfirmListener();
         this.cancelCategoryButtonListener();
     }
+
     addCategoryConfirmListener() {
-        document.getElementById('create').addEventListener('click', async (event) => {
-            event.preventDefault(); // Предотвращаем отправку формы
+        document.getElementById('create').addEventListener('click',
+            (event) => this.handleCategoryCreation(event));
+    }
 
-            const input = document.querySelector('.form-control');
-            this.categoryName = input.value.trim();
+    async handleCategoryCreation(event) {
+        event.preventDefault(); // Предотвращаем отправку формы
 
-            if (this.categoryName === '') {
-                alert('Введите название категории!');
+        const categoryName = this.getCategoryName();
+        if (!categoryName) {
+            alert('Введите название категории!');
+            return;
+        }
+
+        try {
+            const accessToken = this.getAccessToken();
+            const response = await this.sendCategoryToServer(categoryName, accessToken);
+
+            if (response.status === 401) {
+                await this.handleUnauthorizedAccess();
                 return;
             }
 
-            // Получаем accessToken из localStorage
-            const accessToken = localStorage.getItem('accessToken');
-            // const accessToken = tokens?.accessToken;
-
-            if (accessToken === 'undefined') {
-                Auth.processUnauthorizedResponse(this.navigateToPath);
-                // alert('Вы не авторизованы! Пожалуйста, войдите в систему.');
-                // return;
+            const jsonResponse = await response.json();
+            if (!response.ok) {
+                throw new Error(jsonResponse.message);
             }
 
-            try {
-                debugger;
-                const response = await fetch('http://localhost:3000/api/categories/expense', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`, // Добавляем accessToken в заголовок Authorization
-                    },
-                    body: JSON.stringify({ title: this.categoryName}), // Тело запроса
-                });
+            this.navigateToPath('/costs'); // Успешное добавление
+        } catch (error) {
+            this.handleCategoryCreationError(error);
+        }
+    }
 
-                const jsonResponse = await response.json();
+    getCategoryName() {
+        const input = document.querySelector('.form-control');
+        return input.value.trim();
+    }
 
-                if (!response.ok) {
-                    throw new Error(jsonResponse.message);
-                }
+    getAccessToken() {
+        return localStorage.getItem('accessToken');
+    }
 
-                // Если категория успешно добавлена, переходим на страницу создания затрат
-                this.navigateToPath('/costs');
-
-            } catch (error) {
-                console.error('Category addition: ', error);
-                alert('Не удалось добавить категорию, попробуйте еще раз. ' +
-                    'Если категория уже существует, она не будет добавлена.');
-            }
+    async sendCategoryToServer(categoryName, accessToken) {
+        return await fetch('http://localhost:3000/api/categories/expense', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({title: categoryName}),
         });
+    }
+
+    async handleUnauthorizedAccess() {
+        await Auth.processUnauthorizedResponse(this.navigateToPath);
+    }
+
+    handleCategoryCreationError(error) {
+        console.error('Category addition: ', error);
+        alert('Не удалось добавить категорию, попробуйте еще раз. ' +
+            'Если категория уже существует, она не будет добавлена.');
     }
 
     cancelCategoryButtonListener() {
