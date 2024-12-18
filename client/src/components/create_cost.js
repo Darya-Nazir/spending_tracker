@@ -43,17 +43,19 @@ export class NewCost {
                     body: JSON.stringify({ title: this.categoryName}), // Тело запроса
                 });
 
+                const jsonResponse = await response.json();
+
                 if (!response.ok) {
-                    throw new Error('Ошибка при добавлении категории: ' + response.message);
+                    throw new Error(jsonResponse.message);
                 }
 
                 // Если категория успешно добавлена, переходим на страницу создания затрат
-                console.log(response)
                 this.navigateToPath('/costs');
 
             } catch (error) {
-                console.error('Ошибка при отправке запроса:', error);
-                alert('Не удалось добавить категорию. Попробуйте еще раз.');
+                console.error('Category addition: ', error);
+                alert('Не удалось добавить категорию, попробуйте еще раз. ' +
+                    'Если категория уже существует, она не будет добавлена.');
             }
         });
     }
