@@ -50,7 +50,7 @@ export class Signup extends Validation {
     async submitForm(data) {
         try {
             const path = 'http://localhost:3000/api/signup';
-            const result = await Http.request(path, data);
+            const result = await Http.request(path, 'POST', data);
 
             if (result) {
                 this.navigateToPath('/');

@@ -40,12 +40,11 @@ export class Login extends Validation {
             };
 
             const path = 'http://localhost:3000/api/login';
-            const result = await Http.request(path, dataObject);
+            const result = await Http.request(path, 'POST', dataObject);
 
-            Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
+            // Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
             Auth.setUserInfo(result);
-            // Auth.setUserInfo({email: emailValue, password: passwordValue});
-            debugger;
+            console.log(result)
             this.jumpIntoApp();
         } catch (error) {
             console.error('Ошибка при отправке:', error);

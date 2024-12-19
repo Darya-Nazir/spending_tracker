@@ -1,4 +1,4 @@
-import {Auth} from "../../scripts/services/auth";
+import {Auth} from "../../scripts/services/auth.js";
 
 export class User {
     constructor(navigateTo) {
@@ -6,7 +6,7 @@ export class User {
     }
 
     init() {
-        this.initUser()
+        // this.initUser()
         this.logoutButton();
         this.logOfUser();
     }

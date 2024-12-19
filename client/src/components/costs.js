@@ -1,5 +1,6 @@
 import {Unselect} from "../../scripts/services/unselect.js";
-import {Auth} from "../../scripts/services/auth";
+import {Auth} from "../../scripts/services/auth.js";
+import {Http} from "../../scripts/services/http.js";
 
 export class Costs {
     constructor(navigateTo) {
@@ -55,31 +56,11 @@ export class Costs {
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
             if (cardToDelete && categoryIdToDelete) {
                 try {
-                    const accessToken = localStorage.getItem(Auth.accessTokenKey);
+                    const url = `http://localhost:3000/api/categories/expense/${categoryIdToDelete}`;
 
-                    if (!accessToken) {
-                        alert('Вы не авторизованы! Пожалуйста, войдите в систему.');
-                        return;
-                    }
+                    const result = await Http.request(url, 'DELETE');
 
-                    // Проверяем, если токен истек, обновляем его
-                    // const isTokenValid = await Auth.processUnauthorizedResponse(this.navigateToPath);
-                    // if (!isTokenValid) {
-                    //     return; // Прерываем выполнение, если токен не удалось обновить
-                    // }
-
-                    // Отправляем запрос на удаление категории с бэкенда
-                    const response = await fetch(`http://localhost:3000/api/categories/expense/${categoryIdToDelete}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${accessToken}`,
-                        },
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`Ошибка при удалении категории: ${response.status}`);
-                    }
+                    console.log(result)
 
                     // Если удаление прошло успешно, удаляем карточку с фронтенда
                     cardToDelete.remove();
@@ -97,36 +78,7 @@ export class Costs {
     }
 
     async fetchCategories() {
-        const accessToken = localStorage.getItem(Auth.accessTokenKey);
-
-        if (!accessToken) {
-            alert('Вы не авторизованы! Пожалуйста, войдите в систему.');
-            return [];
-        }
-
-        // Проверяем, если токен истек, обновляем его
-        // const isTokenValid = await Auth.processUnauthorizedResponse(this.navigateToPath);
-        // if (!isTokenValid) {
-        //     return []; // Прерываем выполнение, если токен не удалось обновить
-        // }
-
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Error fetching categories:', error);
-            return [];
-        }
+        return await Http.request(this.apiUrl, 'GET');
     }
 
     createCard(category) {
