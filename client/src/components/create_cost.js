@@ -26,11 +26,21 @@ export class NewCost {
 
         try {
             const accessToken = this.getAccessToken();
-            const response = await this.sendCategoryToServer(categoryName, accessToken);
+            let response = await this.sendCategoryToServer(categoryName, accessToken);
 
             if (response.status === 401) {
+                console.log('Going to get a new token')
                 await this.handleUnauthorizedAccess();
-                return;
+
+                // Получаем новый токен после обработки неавторизованного доступа
+                const newAccessToken = this.getAccessToken();
+
+                // После обновления токена повторно отправляем запрос
+                if (newAccessToken) {
+                    response = await this.sendCategoryToServer(categoryName, newAccessToken);
+                } else {
+                    throw new Error('Не удалось получить новый токен.');
+                }
             }
 
             const jsonResponse = await response.json();

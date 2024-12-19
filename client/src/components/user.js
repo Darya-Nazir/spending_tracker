@@ -6,8 +6,16 @@ export class User {
     }
 
     init() {
+        this.initUser()
         this.logoutButton();
         this.logOfUser();
+    }
+
+    initUser() {
+        const userName = document.getElementById('userName');
+        const userInfo = Auth.getUserInfo();
+
+        userName.innerText = userInfo.user.name;
     }
 
     logoutButton() {

@@ -43,7 +43,9 @@ export class Login extends Validation {
             const result = await Http.request(path, dataObject);
 
             Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
-            Auth.setUserInfo({email: emailValue, password: passwordValue});
+            Auth.setUserInfo(result);
+            // Auth.setUserInfo({email: emailValue, password: passwordValue});
+            debugger;
             this.jumpIntoApp();
         } catch (error) {
             console.error('Ошибка при отправке:', error);
