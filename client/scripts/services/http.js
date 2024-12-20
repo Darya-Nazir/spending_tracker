@@ -12,7 +12,7 @@ export class Http {
         }
 
         const jsonResponse = await response.json();
-        console.log('static async request: ', jsonResponse.message);
+        // console.log('static async request: ', jsonResponse.message);
         return jsonResponse;
     }
 

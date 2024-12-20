@@ -1,4 +1,5 @@
 import {Auth} from "../../scripts/services/auth.js";
+import {Http} from "../../scripts/services/http.js";
 
 export class NewCost {
     constructor(navigateTo) {
@@ -25,28 +26,11 @@ export class NewCost {
         }
 
         try {
-            const accessToken = this.getAccessToken();
-            let response = await this.sendCategoryToServer(categoryName, accessToken);
-
-            if (response.status === 401) {
-                console.log('Going to get a new token')
-                await this.handleUnauthorizedAccess();
-
-                // Получаем новый токен после обработки неавторизованного доступа
-                const newAccessToken = this.getAccessToken();
-
-                // После обновления токена повторно отправляем запрос
-                if (newAccessToken) {
-                    response = await this.sendCategoryToServer(categoryName, newAccessToken);
-                } else {
-                    throw new Error('Не удалось получить новый токен.');
-                }
-            }
-
-            const jsonResponse = await response.json();
-            if (!response.ok) {
-                throw new Error(jsonResponse.message);
-            }
+            const response = await Http.request(
+                'http://localhost:3000/api/categories/expense',
+                'POST',
+                { title: categoryName }
+            );
 
             this.navigateToPath('/costs'); // Успешное добавление
         } catch (error) {
@@ -57,25 +41,6 @@ export class NewCost {
     getCategoryName() {
         const input = document.querySelector('.form-control');
         return input.value.trim();
-    }
-
-    getAccessToken() {
-        return localStorage.getItem('accessToken');
-    }
-
-    async sendCategoryToServer(categoryName, accessToken) {
-        return await fetch('http://localhost:3000/api/categories/expense', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({title: categoryName}),
-        });
-    }
-
-    async handleUnauthorizedAccess() {
-        await Auth.processUnauthorizedResponse(this.navigateToPath);
     }
 
     handleCategoryCreationError(error) {
