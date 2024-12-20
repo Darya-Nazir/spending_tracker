@@ -23,7 +23,8 @@ export class Auth {
                 const result = await response.json();
                 if (result && !result.error) {
                     const tokens = result.tokens;
-                    // this.setTokens(tokens.accessToken, tokens.refreshToken);
+                    this.setTokens(tokens.accessToken, tokens.refreshToken);
+                    console.log(tokens.accessToken, tokens.refreshToken);
                     return true;
                 }
             }

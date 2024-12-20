@@ -78,6 +78,7 @@ export class Costs {
     }
 
     async fetchCategories() {
+        await Http.request(this.apiUrl, 'GET');
         return await Http.request(this.apiUrl, 'GET');
     }
 

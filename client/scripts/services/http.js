@@ -2,7 +2,7 @@ import {Auth} from "./auth.js";
 
 export class Http {
     static async request(url, method = 'GET', body = null) {
-        debugger;
+        // debugger
         const params = await this.createRequestParams(method, body);
 
         const response = await fetch(url, params);
@@ -39,7 +39,7 @@ export class Http {
     static addAuthTokenToHeaders(params) {
         let token = localStorage.getItem(Auth.accessTokenKey);
         if (token) {
-            params.headers['x-access-token'] = token;
+            params.headers['Authorization'] =`Bearer ${token}` ;
         }
     }
 
@@ -48,6 +48,7 @@ export class Http {
         if (response.status === 401) {
             const result = await this.handleUnauthorizedAccess();
             if (result) {
+
                 return await this.request(url, method, body); // Повторный запрос с новым токеном
             } else {
                 return null;
