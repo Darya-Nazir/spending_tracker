@@ -1,5 +1,4 @@
 import {Unselect} from "../../scripts/services/unselect.js";
-import {Auth} from "../../scripts/services/auth.js";
 import {Http} from "../../scripts/services/http.js";
 
 export class Costs {
