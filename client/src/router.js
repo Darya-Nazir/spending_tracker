@@ -3,7 +3,7 @@ import {Login} from "./components/login.js";
 import {Costs} from "./components/costs.js";
 import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
-import {Revenue} from "./components/revenue.js";
+import {Incomes} from "./components/incomes.js";
 import {Transaction} from "./components/transaction.js";
 import {User} from "./components/user";
 import {NewCost} from "./components/create_cost.js";
@@ -156,12 +156,12 @@ const routes = {
         state: states.STATE_AUTHORIZED,
         component: Costs
     },
-    '/revenues': {
-        html: 'templates/revenues.html',
+    '/incomes': {
+        html: 'templates/incomes.html',
         title: 'Категории доходов',
         css: [],
         state: states.STATE_AUTHORIZED,
-        component: Revenue
+        component: Incomes
     },
     '/transactions': {
         html: 'templates/transactions.html',
@@ -184,8 +184,8 @@ const routes = {
         state: states.STATE_AUTHORIZED,
         component: NewCost
     },
-    '/create-revenue': {
-        html: 'templates/create_revenue.html',
+    '/create-income': {
+        html: 'templates/create_income.html',
         title: 'Создание категории доходов',
         css: [],
         state: states.STATE_AUTHORIZED,
@@ -198,8 +198,8 @@ const routes = {
         state: states.STATE_AUTHORIZED,
         component: Costs
     },
-    '/edit-revenue': {
-        html: 'templates/edit_revenue.html',
+    '/edit-income': {
+        html: 'templates/edit_income.html',
         title: 'Редактирование категории доходов',
         css: [],
         state: states.STATE_AUTHORIZED,

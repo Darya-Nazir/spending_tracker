@@ -60,9 +60,7 @@ export class Http {
 
     // Метод для обработки неавторизованного доступа (статус 401)
     static async handleUnauthorizedAccess() {
-        const result = await Auth.processUnauthorizedResponse();
-        console.log('static async handleUnauthorizedAccess:', result);
-        return result;
+        return await Auth.processUnauthorizedResponse();
     }
 }
 

@@ -1,10 +1,10 @@
 <div class="col-10 p-4">
     <!--                    TODO: цвет титлы-->
 
-    <h2 class="mb-4">Доходы</h2>
+    <h2 class="mb-4 text-primary-emphasis">Доходы</h2>
 
     <!-- Сетка категорий -->
-    <div class="row g-4">
+    <div class="row g-4" id="incomesContainer">
         <!-- Депозиты -->
         <div class="col-md-4">
             <div class="card">
@@ -60,10 +60,10 @@
 
         <!-- Кнопка добавления новой категории -->
         <!--                TODO: в макете не кнопка, а маленький крестик-->
-        <div class="col-md-4">
+        <div class="col-md-4" id="addCategoryCard">
             <div class="card h-100 border-dashed">
                 <div class="card-body d-flex align-items-center justify-content-center">
-                    <button class="btn btn-outline-primary">
+                    <button class="btn btn-outline-primary" id="addCategoryBtn">
                         <i class="bi bi-plus-lg"></i>
                         Добавить категорию
                     </button>
@@ -73,30 +73,20 @@
     </div>
 </div>
 
-<!--TODO: стили модалки.-->
-<!--TODO: к модалке подключена только кнопка Удалить из Инвестиции. Надо все это настроить.-->
-
-
-<!-- Кнопка-триггер модального окна -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-    Запустить модальное окно со статическим фоном
-</button>
-
 <!-- Модальное окно -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="deleteCategoryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="deleteCategoryLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content p-4">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Заголовок модального окна</h1>
+                <h1 class="modal-title fs-5 text-primary-emphasis" id="deleteCategoryLabel">
+                    Вы действительно хотите удалить категорию? Связанные доходы будут удалены навсегда.
+                </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body">
-                ...
-            </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <button type="button" class="btn btn-primary">Понял</button>
+                <button type="button" class="btn btn-success" id="confirmDeleteBtn">Да, удалить</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Не удалять</button>
             </div>
         </div>
     </div>
