@@ -91,12 +91,16 @@ export class Costs {
         <div class="card-body">
           <h5 class="card-title text-primary-emphasis">${category.title}</h5>
           <div class="mt-3">
-            <button class="btn btn-primary me-2">Редактировать</button>
+            <button class="btn btn-primary me-2 edit-category-btn">Редактировать</button>
             <button class="btn btn-danger">Удалить</button>
           </div>
         </div>
       </div>
     `;
+        const editButton = card.querySelector('.edit-category-btn');
+        editButton.addEventListener('click', () => {
+            this.navigateToPath(`/edit-cost?id=${category.id}`);
+        });
 
         return card;
     }

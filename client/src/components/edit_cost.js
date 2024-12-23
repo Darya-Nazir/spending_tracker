@@ -1,20 +1,17 @@
 import { Http } from "../../scripts/services/http.js";
 
-export class EditIncome {
+export class EditCost {
     constructor(navigateTo) {
         this.navigateToPath = navigateTo;
-        this.apiUrl = 'http://localhost:3000/api/categories/income'; // Базовый URL API
+        this.apiUrl = 'http://localhost:3000/api/categories/expense'; // Базовый URL API
     }
 
-     init() {
-        this.startEditIncome();
-    }
-
-    async startEditIncome() {
+    async init() {
+        debugger
         const categoryId = this.getCategoryIdFromUrl();
         if (!categoryId) {
             alert('Идентификатор категории не найден!');
-            this.navigateToPath('/incomes');
+            this.navigateToPath('/costs');
             return;
         }
 
@@ -36,7 +33,7 @@ export class EditIncome {
         } catch (error) {
             console.error('Error loading category data:', error);
             alert('Не удалось загрузить данные категории!');
-            this.navigateToPath('/incomes');
+            this.navigateToPath('/costs');
         }
     }
 
@@ -67,7 +64,7 @@ export class EditIncome {
                 { title: updatedName }
             );
 
-            this.navigateToPath('/incomes'); // Успешное редактирование
+            this.navigateToPath('/costs'); // Успешное редактирование
         } catch (error) {
             this.handleCategoryEditError(error);
         }
@@ -86,7 +83,7 @@ export class EditIncome {
     cancelCategoryButtonListener() {
         document.getElementById('cancel').addEventListener('click', (event) => {
             event.preventDefault();
-            this.navigateToPath('/incomes');
+            this.navigateToPath('/costs');
         });
     }
 }
