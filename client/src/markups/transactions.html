@@ -2,7 +2,7 @@
     <div class="container mt-4">
         <!--                                TODO: цвет заглавия. И проверить отступы-->
 
-        <h2 class="mb-4 text-navy">Доходы и расходы</h2>
+        <h2 class="mb-4 text-navy text-primary-emphasis">Доходы и расходы</h2>
 
         <!-- Кнопки создания -->
         <div class="mb-4">
@@ -29,12 +29,12 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>№ операции</th>
-                    <th>Тип</th>
-                    <th>Категория</th>
-                    <th>Сумма</th>
-                    <th>Дата</th>
-                    <th>Комментарий</th>
+                    <th class="text-primary-emphasis">№ операции</th>
+                    <th class="text-primary-emphasis">Тип</th>
+                    <th class="text-primary-emphasis">Категория</th>
+                    <th class="text-primary-emphasis">Сумма</th>
+                    <th class="text-primary-emphasis">Дата</th>
+                    <th class="text-primary-emphasis">Комментарий</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -48,10 +48,14 @@
                     <td></td>
                     <td>
                         <button class="btn btn-sm btn-light me-1">
-                            <i class="bi bi-pencil"></i>
+                            <i class="bi bi-pencil">
+                                <img src="images/trash-icon.svg" alt="Trash icon">
+                            </i>
                         </button>
                         <button class="btn btn-sm btn-light">
-                            <i class="bi bi-trash"></i>
+                            <i class="bi bi-trash">
+                                <img src="images/pen-icon.svg" alt="Pen icon">
+                            </i>
                         </button>
                     </td>
                 </tr>
@@ -67,10 +71,14 @@
                         <!--                                TODO: надо вставить иконки-->
 
                         <button class="btn btn-sm btn-light me-1">
-                            <i class="bi bi-pencil"></i>
+                            <i class="bi bi-pencil">
+                                <img src="images/trash-icon.svg" alt="Trash icon">
+                            </i>
                         </button>
                         <button class="btn btn-sm btn-light">
-                            <i class="bi bi-trash"></i>
+                            <i class="bi bi-trash">
+                                <img src="images/pen-icon.svg" alt="Pen icon">
+                            </i>
                         </button>
                     </td>
                 </tr>
@@ -80,30 +88,20 @@
     </div>
 </div>
 
-<!--TODO: стили модалки.-->
-<!--TODO: модалка не настроена.-->
-
-
-<!-- Кнопка-триггер модального окна -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-    Запустить модальное окно со статическим фоном
-</button>
-
 <!-- Модальное окно -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="deleteCategoryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="deleteCategoryLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content p-4">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Заголовок модального окна</h1>
+                <h1 class="modal-title fs-5 text-primary-emphasis" id="deleteCategoryLabel">
+                    Вы действительно хотите удалить операцию?
+                </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
-            <div class="modal-body">
-                ...
-            </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <button type="button" class="btn btn-primary">Понял</button>
+                <button type="button" class="btn btn-success" id="confirmDeleteBtn">Да, удалить</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Не удалять</button>
             </div>
         </div>
     </div>
