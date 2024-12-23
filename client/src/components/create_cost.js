@@ -1,6 +1,6 @@
-import {CreatingCard} from "../../scripts/base-class/creating-card.js";
+import {NewCard} from "../../scripts/base-class/new-card.js";
 
-export class NewCost extends CreatingCard {
+export class NewCost extends NewCard {
     constructor(navigateTo) {
         super(navigateTo, 'http://localhost:3000/api/categories/expense', '/costs');
     }
