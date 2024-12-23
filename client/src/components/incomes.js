@@ -7,6 +7,7 @@ export class Incomes {
         this.navigateToPath = navigateTo;
         this.container = document.getElementById('incomesContainer');
         this.apiUrl = 'http://localhost:3000/api/categories/income';
+        this.card = null;
     }
 
     async init() {
@@ -83,24 +84,37 @@ export class Incomes {
     }
 
     createCard(category) {
-        const card = document.createElement('div');
-        card.className = 'col-md-4';
-        card.dataset.id = category.id;  // Добавляем атрибут data-id
+        this.card = document.createElement('div');
+        this.card.className = 'col-md-4';
+        this.card.dataset.id = category.id;  // Добавляем атрибут data-id
 
-        card.innerHTML = `
+        this.card.innerHTML = `
       <div class="card">
         <div class="card-body">
           <h5 class="card-title text-primary-emphasis">${category.title}</h5>
           <div class="mt-3">
-            <button class="btn btn-primary me-2">Редактировать</button>
+            <button class="btn btn-primary me-2 edit-category-btn">Редактировать</button>
             <button class="btn btn-danger">Удалить</button>
           </div>
         </div>
       </div>
     `;
+        const editButton = this.card.querySelector('.edit-category-btn');
+            editButton.addEventListener('click', () => {
+                this.navigateToPath(`/edit-income?id=${category.id}`);
+            });
 
-        return card;
+        // this.addEditButton();
+        return this.card;
     }
+
+    // addEditButton() {
+    //     // Добавляем обработчик события на кнопку "Редактировать"
+    //     const editButton = this.card.querySelector('.edit-category-btn');
+    //     editButton.addEventListener('click', () => {
+    //         this.navigateToPath(`/edit-income?id=${category.id}`);
+    //     });
+    // }
 
     async renderCategories() {
         const categories = await this.fetchCategories();
