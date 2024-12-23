@@ -7,7 +7,6 @@ export class EditCost {
     }
 
     async init() {
-        debugger
         const categoryId = this.getCategoryIdFromUrl();
         if (!categoryId) {
             alert('Идентификатор категории не найден!');

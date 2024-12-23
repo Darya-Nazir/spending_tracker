@@ -6,11 +6,7 @@ export class EditIncome {
         this.apiUrl = 'http://localhost:3000/api/categories/income'; // Базовый URL API
     }
 
-     init() {
-        this.startEditIncome();
-    }
-
-    async startEditIncome() {
+    async init() {
         const categoryId = this.getCategoryIdFromUrl();
         if (!categoryId) {
             alert('Идентификатор категории не найден!');
