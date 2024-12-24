@@ -6,7 +6,7 @@ export class User {
     }
 
     init() {
-        this.initUser();
+        // this.initUser();
         this.logoutButton();
         this.logOfUser();
     }
