@@ -1,5 +1,4 @@
-import {Http} from "../../scripts/services/http.js";
-import {NewCard} from "../../scripts/base-class/new-card.js";
+import {NewCard} from "./base-class/new-card.js";
 
 export class NewIncome extends NewCard {
     constructor(navigateTo) {

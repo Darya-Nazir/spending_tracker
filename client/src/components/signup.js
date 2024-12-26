@@ -1,5 +1,5 @@
 import {Http} from "../../scripts/services/http.js";
-import {Validation} from "../../scripts/base-class/validation";
+import {Validation} from "./base-class/validation.js";
 import {Auth} from "../../scripts/services/auth";
 
 export class Signup extends Validation {

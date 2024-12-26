@@ -45,3 +45,4 @@ export class Validation {
         inputElement.classList.add('is-valid');
     }
 }
+

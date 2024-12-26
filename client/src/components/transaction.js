@@ -1,5 +1,5 @@
 import {Unselect} from "../../scripts/services/unselect.js";
-import {CardPage} from "../../scripts/base-class/card-page.js";
+import {CardPage} from "./base-class/card-page.js";
 
 
 

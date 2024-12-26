@@ -1,6 +1,6 @@
 import {Auth} from "../../scripts/services/auth.js";
 import {Http} from "../../scripts/services/http.js";
-import {Validation} from "../../scripts/base-class/validation.js";
+import {Validation} from "./base-class/validation.js";
 
 export class Login extends Validation {
     constructor(navigateTo) {
