@@ -1,6 +1,6 @@
 import {Http} from "../../../scripts/services/http.js";
 
-export class ModifiedCard {
+export class EditCard {
     constructor(navigateTo, apiUrl, redirectPath) {
         this.navigateToPath = navigateTo;
         this.apiUrl = apiUrl; // Базовый URL API
