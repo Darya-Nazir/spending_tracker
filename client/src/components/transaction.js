@@ -147,11 +147,14 @@ export class Transaction extends CardPage {
         const createExpenseButton = document.getElementById('createExpense');
 
         createIncomeButton.addEventListener("click", () => {
-            this.navigateToPath('create-transaction');
-        })
+            // Передаем 'income' как параметр типа при перенаправлении
+            this.navigateToPath('create-transaction?type=income');
+        });
+
         createExpenseButton.addEventListener("click", () => {
-            this.navigateToPath('create-transaction');
-        })
+            // Передаем 'expense' как параметр типа при перенаправлении
+            this.navigateToPath('create-transaction?type=expense');
+        });
     }
 }
 

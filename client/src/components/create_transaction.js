@@ -17,11 +17,41 @@ export class NewTransaction extends NewCard {
         this.createButton = document.querySelector('.btn-success');
         this.cancelButton = document.querySelector('.btn-danger');
     }
-
     init() {
+        this.setInitialType();
         this.setupDatePicker();
         this.addCreateTransactionListener();
         this.addCancelButtonListener();
+    }
+    setInitialType() {
+        // Получаем тип из параметров URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+
+        if (type === 'income' || type === 'expense') {
+            // Устанавливаем значение поля
+            this.typeInput.value = type === 'income' ? 'Доход' : 'Расход';
+            // Делаем поле типа только для чтения
+            this.typeInput.readOnly = true;
+            // Добавляем стилизацию, чтобы показать, что поле только для чтения
+            this.typeInput.style.backgroundColor = '#f8f9fa';
+        }
+    }
+
+    getTransactionData() {
+        // В объекте данных конвертируем русские названия типов в английские для сервера
+        const typeMapping = {
+            'Доход': 'income',
+            'Расход': 'expense'
+        };
+
+        return {
+            type: typeMapping[this.typeInput.value] || this.typeInput.value.toLowerCase(),
+            amount: parseFloat(this.amountInput.value),
+            date: this.formatDateForAPI(this.dateInput.value),
+            comment: this.commentInput.value.trim(),
+            category_id: parseInt(this.categoryInput.value) || null
+        };
     }
 
     setupDatePicker() {
