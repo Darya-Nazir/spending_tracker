@@ -3,9 +3,9 @@ import {CardPage} from "./base-class/card-page.js";
 import {Http} from "../../scripts/services/http";
 
 export class Transaction extends CardPage {
-    constructor() {
+    constructor(navigateTo) {
         super(
-            () => {},
+            navigateTo,
             'transactionsTable',
             'http://localhost:3000/api/operations',
             '',
@@ -20,6 +20,8 @@ export class Transaction extends CardPage {
         this.turnOnDatePicker();
         this.renderTransactions();
         this.setupDeleteListener();
+        this.redirectToCreateOperation();
+
     }
 
     highlightPage() {
@@ -139,6 +141,17 @@ export class Transaction extends CardPage {
     async deleteTransaction(transactionId) {
         const url = `${this.apiUrl}/${transactionId}`;
         return await Http.request(url, 'DELETE');
+    }
+    redirectToCreateOperation() {
+        const createIncomeButton = document.getElementById('createIncome');
+        const createExpenseButton = document.getElementById('createExpense');
+
+        createIncomeButton.addEventListener("click", () => {
+            this.navigateToPath('create-transaction');
+        })
+        createExpenseButton.addEventListener("click", () => {
+            this.navigateToPath('create-transaction');
+        })
     }
 }
 

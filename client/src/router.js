@@ -5,11 +5,12 @@ import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
 import {Incomes} from "./components/incomes.js";
 import {Transaction} from "./components/transaction.js";
-import {User} from "./components/user";
+import {User} from "./components/user.js";
 import {NewCost} from "./components/create_cost.js";
-import {NewIncome} from "./components/create_income";
-import {EditIncome} from "./components/edit_income";
-import {EditCost} from "./components/edit_cost";
+import {NewIncome} from "./components/create_income.js";
+import {EditIncome} from "./components/edit_income.js";
+import {EditCost} from "./components/edit_cost.js";
+import {NewTransaction} from "./components/create_transaction.js";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
@@ -155,63 +156,60 @@ const routes = {
     '/costs': {
         html: 'templates/costs.html',
         title: 'Категории расходов',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: Costs
     },
     '/incomes': {
         html: 'templates/incomes.html',
         title: 'Категории доходов',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: Incomes
     },
     '/transactions': {
         html: 'templates/transactions.html',
         title: 'Доходы и расходы',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: Transaction
     },
     '/analytics': {
         html: 'templates/analytics.html',
         title: 'Главная',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: Analytics
     },
     '/create-cost': {
         html: 'templates/create_cost.html',
         title: 'Создание категории расходов',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: NewCost
     },
     '/create-income': {
         html: 'templates/create_income.html',
         title: 'Создание категории доходов',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: NewIncome
     },
     '/edit-cost': {
         html: 'templates/edit_cost.html',
         title: 'Редактирование категории расходов',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: EditCost
     },
     '/edit-income': {
         html: 'templates/edit_income.html',
         title: 'Редактирование категории доходов',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: EditIncome
+    },
+    '/create-transaction': {
+        html: 'templates/create_transaction.html',
+        title: 'Создание дохода/расхода',
+        state: states.STATE_AUTHORIZED,
+        component: NewTransaction
     },
     '/edit-transaction': {
         html: 'templates/edit_transaction.html',
         title: 'Редактирование дохода/расхода',
-        css: [],
         state: states.STATE_AUTHORIZED,
         component: Costs
     },
