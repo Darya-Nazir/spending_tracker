@@ -5,8 +5,20 @@
             <div class="form-group mb-2">
                 <input type="text" class="form-control" placeholder="Тип..." style="width: 398px;" readonly>
             </div>
-            <div class="form-group mb-2">
-                <input type="text" class="form-control" placeholder="Категория..." style="width: 398px;">
+            <div class="form-group mb-2 position-relative">
+                <input
+                        type="text"
+                        class="form-control"
+                        id="categoryInput"
+                        placeholder="Выберите категорию"
+                        readonly
+                        style="width: 398px; cursor: pointer;"
+                />
+                <ul
+                        class="dropdown-menu position-absolute w-25"
+                        id="categoriesList"
+                        style="display: none; max-height: 200px; overflow-y: auto;"
+                ></ul>
             </div>
             <div class="form-group mb-2">
                 <input type="text" class="form-control" placeholder="Сумма в $..." style="width: 398px;">

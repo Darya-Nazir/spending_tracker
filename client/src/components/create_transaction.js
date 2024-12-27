@@ -9,19 +9,79 @@ export class NewTransaction extends NewCard {
             'http://localhost:3000/api/operations',
             'transactions'
         );
+
+
         this.typeInput = document.querySelector('input[placeholder="Тип..."]');
-        this.categoryInput = document.querySelector('input[placeholder="Категория..."]');
+        this.categoryDropdown = document.getElementById('categoryDropdown');
+        this.categoriesList = document.getElementById('categoriesList');
+        this.selectedCategoryIdInput = document.getElementById('selectedCategoryId');
+
+        // this.categoryInput = document.querySelector('input[placeholder="Категория..."]');
         this.amountInput = document.querySelector('input[placeholder="Сумма в $..."]');
         this.dateInput = document.querySelector('input[placeholder="Дата..."]');
         this.commentInput = document.querySelector('input[placeholder="Комментарий..."]');
         this.createButton = document.querySelector('.btn-success');
         this.cancelButton = document.querySelector('.btn-danger');
+
+        this.categoryInput = document.getElementById('categoryInput');
+        this.categoriesList = document.getElementById('categoriesList');
+        this.selectedCategoryId = null;
     }
-    init() {
+    async init() {
         this.setInitialType();
         this.setupDatePicker();
         this.addCreateTransactionListener();
         this.addCancelButtonListener();
+        await this.loadCategories();
+
+        // Добавляем обработчик для инпута категории
+        this.categoryInput.addEventListener('focus', () => this.showCategories());
+        this.categoryInput.addEventListener('blur', () => setTimeout(() => this.hideCategories(), 150));
+    }
+
+    async loadCategories() {
+        const type = this.typeInput.value === 'Доход' ? 'income' : 'expense';
+        const apiUrl = `http://localhost:3000/api/categories/${type}`;
+        try {
+            const categories = await Http.request(apiUrl, 'GET');
+            this.renderCategories(categories);
+        } catch (error) {
+            console.error('Failed to load categories:', error);
+        }
+    }
+
+    renderCategories(categories) {
+        this.categoriesList.innerHTML = categories.map(category => `
+            <li>
+                <button
+                    type="button"
+                    class="dropdown-item"
+                    data-id="${category.id}">
+                    ${category.title}
+                </button>
+            </li>
+        `).join('');
+
+        this.categoriesList.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', (event) => this.handleCategorySelect(event));
+        });
+    }
+
+    handleCategorySelect(event) {
+        const button = event.target;
+        this.selectedCategoryId = button.getAttribute('data-id');
+        this.categoryInput.value = button.textContent.trim();
+
+        // Скрываем список
+        this.hideCategories();
+    }
+
+    showCategories() {
+        this.categoriesList.style.display = 'block';
+    }
+
+    hideCategories() {
+        this.categoriesList.style.display = 'none';
     }
     setInitialType() {
         // Получаем тип из параметров URL
