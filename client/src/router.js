@@ -11,6 +11,7 @@ import {NewIncome} from "./components/create_income.js";
 import {EditIncome} from "./components/edit_income.js";
 import {EditCost} from "./components/edit_cost.js";
 import {NewTransaction} from "./components/create_transaction.js";
+import {EditTransaction} from "./components/edit_transaction.js";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
@@ -211,7 +212,7 @@ const routes = {
         html: 'templates/edit_transaction.html',
         title: 'Редактирование дохода/расхода',
         state: states.STATE_AUTHORIZED,
-        component: Costs
+        component: EditTransaction
     },
 };
 

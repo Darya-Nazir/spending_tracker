@@ -21,15 +21,17 @@ export class Transaction extends CardPage {
         this.renderTransactions();
         this.setupDeleteListener();
         this.redirectToCreateOperation();
+        this.setupEditListener();
 
     }
 
     highlightPage() {
-        document.getElementById('transactionsPage').classList.add('bg-primary', 'text-white');
+        document.getElementById('transactionsPage')
+            .classList.add('bg-primary', 'text-white');
     }
 
     turnOnDatePicker() {
-        $(document).ready(function(){
+        $(document).ready(function () {
             $('.datepicker').datepicker({
                 format: 'dd.mm.yyyy',
                 language: 'ru',
@@ -58,7 +60,7 @@ export class Transaction extends CardPage {
             <td>${this.formatDate(transaction.date)}</td>
             <td><input type="text" class="form-control border-0" value="${transaction.comment || ''}"></td>
             <td>
-                <button class="btn btn-sm btn-light me-1">
+                <button class="btn btn-sm btn-light me-1 edit-transaction">
                     <i class="bi bi-pencil">
                         <img src="images/pen-icon.svg" alt="Pen icon">
                     </i>
@@ -142,6 +144,7 @@ export class Transaction extends CardPage {
         const url = `${this.apiUrl}/${transactionId}`;
         return await Http.request(url, 'DELETE');
     }
+
     redirectToCreateOperation() {
         const createIncomeButton = document.getElementById('createIncome');
         const createExpenseButton = document.getElementById('createExpense');
@@ -154,6 +157,20 @@ export class Transaction extends CardPage {
         createExpenseButton.addEventListener("click", () => {
             // Передаем 'expense' как параметр типа при перенаправлении
             this.navigateToPath('create-transaction?type=expense');
+        });
+    }
+
+    setupEditListener() {
+        this.container.addEventListener('click', (event) => {
+            const editButton = event.target.closest('.edit-transaction');
+            if (!editButton) return;
+
+            const row = editButton.closest('tr');
+            const transactionId = row.dataset.id;
+
+            if (transactionId) {
+                this.navigateToPath(`edit-transaction?id=${transactionId}`);
+            }
         });
     }
 }

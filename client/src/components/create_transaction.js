@@ -43,8 +43,6 @@ export class NewTransaction extends NewCard {
         event.preventDefault();
 
         const transactionData = this.getTransactionData();
-        console.log(transactionData)
-        return;
         if (!this.validateTransactionData(transactionData)) {
             return;
         }
