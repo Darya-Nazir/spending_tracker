@@ -49,7 +49,7 @@ export class EditTransaction extends EditCard {
             this.commentInput = document.querySelector('input[name="comment"]');
             this.categoriesList = document.querySelector('.categories-list');
             this.saveButton = document.querySelector('button[type="submit"]');
-            this.cancelButton = document.querySelector('button[type="button"]');
+            this.cancelButton = document.getElementById('cancel');
 
             // Проверяем, что все необходимые элементы найдены
             return !!(this.typeInput && this.categoryInput && this.amountInput &&
@@ -79,6 +79,8 @@ export class EditTransaction extends EditCard {
     async loadTransactionData(transactionId) {
         try {
             const transaction = await Http.request(`${this.apiUrl}/${transactionId}`, 'GET');
+            console.log(transaction)
+            debugger
             await this.loadCategories(transaction.type);
             this.fillFormWithTransactionData(transaction);
         } catch (error) {
@@ -249,3 +251,4 @@ export class EditTransaction extends EditCard {
         return true;
     }
 }
+

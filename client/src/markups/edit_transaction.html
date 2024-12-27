@@ -1,53 +1,53 @@
-<!--        TODO: отступы и цвет названия блока-->
-<!--<div class="col">-->
-<!--    <div class="container mt-5">-->
-<!--        <h2 class="mb-4">Редактирование дохода/расхода</h2>-->
-<!--        <form>-->
-<!--            <div class="form-group">-->
-<!--                <input type="text" class="form-control" placeholder="Тип..." style="width: 398px;">-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <input type="text" class="form-control" placeholder="Категория..." style="width: 398px;">-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <input type="text" class="form-control" placeholder="Сумма в $..." style="width: 398px;">-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <input type="text" class="form-control" placeholder="Дата..." style="width: 398px;">-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <input type="text" class="form-control" placeholder="Комментарий..." style="width: 398px;">-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <button type="submit" class="btn btn-success mr-2">Создать</button>-->
-<!--                <button type="button" class="btn btn-danger">Отмена</button>-->
-<!--            </div>-->
-<!--        </form>-->
-<!--    </div>-->
-<!--</div>-->
-
-<div class="container">
-    <form class="edit-transaction-form">
-        <div class="mb-3">
-            <input type="text" name="type" class="form-control" readonly>
-        </div>
-        <div class="mb-3">
-            <input type="text" name="category" class="form-control" id="categoryInput">
-            <ul class="categories-list dropdown-menu"></ul>
-        </div>
-        <div class="mb-3">
-            <input type="number" name="amount" class="form-control">
-        </div>
-        <div class="mb-3">
-            <input type="text" name="date" class="form-control datepicker">
-        </div>
-        <div class="mb-3">
-            <input type="text" name="comment" class="form-control">
-        </div>
-        <div class="d-flex justify-content-between">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <button type="button" class="btn btn-secondary">Отмена</button>
-        </div>
-    </form>
+<div class="col">
+    <div class="container mt-5">
+        <h2 class="mb-4 text-primary-emphasis">Редактирование дохода/расхода</h2>
+        <form class="edit-transaction-form">
+            <div class="form-group">
+                <input type="text" class="form-control mb-2" name="type" placeholder="Тип..." style="width: 398px;" readonly>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control mb-2" name="category" placeholder="Категория..." style="width: 398px;" id="categoryInput">
+                <ul class="categories-list dropdown-menu"></ul>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control mb-2" name="amount" placeholder="Сумма в $..." style="width: 398px;">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control mb-2 datepicker" name="date" placeholder="Дата..." style="width: 398px;">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control mb-4" name="comment" placeholder="Комментарий..." style="width: 398px;">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success btn-primary mr-2" id="create">Создать</button>
+                <button type="button" class="btn btn-danger btn-secondary" id="cancel">Отмена</button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<!--<div class="container">-->
+<!--    <form class="edit-transaction-form">-->
+<!--        <div class="mb-3">-->
+<!--            <input type="text" name="type" class="form-control" readonly>-->
+<!--        </div>-->
+<!--        <div class="mb-3">-->
+<!--            <input type="text" name="category" class="form-control" id="categoryInput">-->
+<!--            <ul class="categories-list dropdown-menu"></ul>-->
+<!--        </div>-->
+<!--        <div class="mb-3">-->
+<!--            <input type="number" name="amount" class="form-control">-->
+<!--        </div>-->
+<!--        <div class="mb-3">-->
+<!--            <input type="text" name="date" class="form-control datepicker">-->
+<!--        </div>-->
+<!--        <div class="mb-3">-->
+<!--            <input type="text" name="comment" class="form-control">-->
+<!--        </div>-->
+<!--        <div class="d-flex justify-content-between">-->
+<!--            <button type="submit" class="btn btn-primary">Сохранить</button>-->
+<!--            <button type="button" class="btn btn-secondary">Отмена</button>-->
+<!--        </div>-->
+<!--    </form>-->
+<!--</div>-->
 
