@@ -38,6 +38,7 @@ export class EditTransaction extends EditCard {
         this.setupDatePicker();
         await this.loadTransactionData(transactionId);
         this.setupEventListeners();
+        this.renderTypes(['income', 'expense']);
     }
 
     initializeFormElements() {
@@ -50,6 +51,7 @@ export class EditTransaction extends EditCard {
             this.categoriesList = document.querySelector('.categories-list');
             this.saveButton = document.querySelector('button[type="submit"]');
             this.cancelButton = document.getElementById('cancel');
+            this.typesList = document.querySelector('.type-list');
 
             // Проверяем, что все необходимые элементы найдены
             return !!(this.typeInput && this.categoryInput && this.amountInput &&
@@ -74,13 +76,16 @@ export class EditTransaction extends EditCard {
             this.categoryInput.addEventListener('focus', () => this.showCategories());
             this.categoryInput.addEventListener('blur', () => setTimeout(() => this.hideCategories(), 150));
         }
+
+        if (this.typeInput && this.typesList) {
+            this.typeInput.addEventListener('focus', () => this.showTypes());
+            this.typeInput.addEventListener('blur', () => setTimeout(() => this.hideTypes(), 150));
+        }
     }
 
     async loadTransactionData(transactionId) {
         try {
             const transaction = await Http.request(`${this.apiUrl}/${transactionId}`, 'GET');
-            console.log(transaction)
-            debugger
             await this.loadCategories(transaction.type);
             this.fillFormWithTransactionData(transaction);
         } catch (error) {
@@ -138,11 +143,13 @@ export class EditTransaction extends EditCard {
             this.amountInput.value = transaction.amount;
             this.dateInput.value = this.formatDateForDisplay(transaction.date);
             this.commentInput.value = transaction.comment || '';
-            this.selectedCategoryId = transaction.category_id;
 
             if (this.categoriesList) {
-                const categoryButton = this.categoriesList.querySelector(`button[data-id="${transaction.category_id}"]`);
+                const categoryButton = Array.from(this.categoriesList.querySelectorAll('.dropdown-item'))
+                    .find(item => item.textContent.trim() === transaction.category);
+
                 if (categoryButton) {
+                    this.selectedCategoryId = categoryButton.getAttribute('data-id');
                     this.categoryInput.value = categoryButton.textContent.trim();
                 }
             }
@@ -249,6 +256,48 @@ export class EditTransaction extends EditCard {
         }
 
         return true;
+    }
+    renderTypes(types) {
+        if (!this.typesList) return;
+
+        try {
+            this.typesList.innerHTML = types.map(type => `
+            <li>
+                <button
+                    type="button"
+                    class="dropdown-item"
+                    data-type="${type}">
+                    ${type === 'income' ? 'Доход' : 'Расход'}
+                </button>
+            </li>
+        `).join('');
+
+            this.typesList.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (event) => this.handleTypeSelect(event));
+            });
+        } catch (error) {
+            console.error('Ошибка рендеринга типов:', error);
+        }
+    }
+
+    handleTypeSelect(event) {
+        const button = event.target;
+        const selectedType = button.getAttribute('data-type');
+        this.typeInput.value = selectedType === 'income' ? 'Доход' : 'Расход';
+        this.typeInput.setAttribute('data-type', selectedType); // Сохраняем текущий тип
+
+        this.selectedCategoryId = null; // Сбрасываем выбранную категорию
+        this.categoryInput.value = ''; // Очищаем поле категории
+        this.loadCategories(selectedType); // Подгружаем категории нового типа
+        this.hideTypes();
+    }
+
+    showTypes() {
+        this.typesList.style.display = 'block';
+    }
+
+    hideTypes() {
+        this.typesList.style.display = 'none';
     }
 }
 
