@@ -1,6 +1,7 @@
 import {Unselect} from "../../scripts/services/unselect.js";
 import {CardPage} from "./base-class/card-page.js";
 import {Http} from "../../scripts/services/http";
+import {DatePickerManager} from "../../scripts/services/datePicker.js";
 
 export class Transaction extends CardPage {
     constructor(navigateTo) {
@@ -12,12 +13,13 @@ export class Transaction extends CardPage {
             ''
         );
         this.container = document.querySelector('.table tbody');
+        this.datePickerManager = new DatePickerManager();
     }
 
     init() {
         new Unselect().init();
         this.highlightPage();
-        this.turnOnDatePicker();
+        this.datePickerManager.init();
         this.renderTransactions();
         this.setupDeleteListener();
         this.redirectToCreateOperation();
@@ -28,17 +30,6 @@ export class Transaction extends CardPage {
     highlightPage() {
         document.getElementById('transactionsPage')
             .classList.add('bg-primary', 'text-white');
-    }
-
-    turnOnDatePicker() {
-        $(document).ready(function () {
-            $('.datepicker').datepicker({
-                format: 'dd.mm.yyyy',
-                language: 'ru',
-                autoclose: true,
-                todayHighlight: true
-            });
-        });
     }
 
     async fetchTransactions() {
@@ -57,7 +48,7 @@ export class Transaction extends CardPage {
             <td class="${typeClass}">${typeText}</td>
             <td>${transaction.category || '-'}</td>
             <td>${transaction.amount}$</td>
-            <td>${this.formatDate(transaction.date)}</td>
+            <td>${this.datePickerManager.formatDate(transaction.date)}</td>
             <td><input type="text" class="form-control border-0" value="${transaction.comment || ''}"></td>
             <td>
                 <button class="btn btn-sm btn-light me-1 edit-transaction">
@@ -74,15 +65,6 @@ export class Transaction extends CardPage {
         `;
 
         return row;
-    }
-
-    formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('ru-RU', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
     }
 
     async renderTransactions() {
