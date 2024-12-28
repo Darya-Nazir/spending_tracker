@@ -15,10 +15,14 @@ export class DatePickerManager {
         };
     }
 
-    init(selector = '.datepicker') {
-        $(document).ready(() => {
-            $(selector).datepicker(this.options);
-        });
+    init(element) {
+        if (typeof element === 'string') {
+            $(element).datepicker(this.options);
+        } else if (element instanceof HTMLElement) {
+            $(element).datepicker(this.options);
+        } else {
+            console.error('Элемент для датапикера не определен');
+        }
     }
 
     formatDate(dateString) {
@@ -26,7 +30,13 @@ export class DatePickerManager {
         return date.toLocaleDateString('ru-RU', this.dateFormatOptions);
     }
 
-    // Методы для дополнительной функциональности
+    formatDateForAPI(dateString) {
+        if (!dateString) return '';
+        const parts = dateString.split('.');
+        if (parts.length !== 3) return '';
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
     getValue(element) {
         return $(element).datepicker('getDate');
     }
@@ -43,3 +53,4 @@ export class DatePickerManager {
         $(element).datepicker('update', newOptions);
     }
 }
+

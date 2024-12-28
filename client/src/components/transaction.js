@@ -14,17 +14,18 @@ export class Transaction extends CardPage {
         );
         this.container = document.querySelector('.table tbody');
         this.datePickerManager = new DatePickerManager();
+        document.querySelectorAll('.datepicker').forEach((input) => {
+            this.datePickerManager.init(input);
+        });
     }
 
     init() {
         new Unselect().init();
         this.highlightPage();
-        this.datePickerManager.init();
         this.renderTransactions();
         this.setupDeleteListener();
         this.redirectToCreateOperation();
         this.setupEditListener();
-
     }
 
     highlightPage() {
@@ -43,12 +44,14 @@ export class Transaction extends CardPage {
         const typeClass = transaction.type === 'income' ? 'text-success' : 'text-danger';
         const typeText = transaction.type === 'income' ? 'доход' : 'расход';
 
+        const formattedDate = this.datePickerManager.formatDate(transaction.date);
+
         row.innerHTML = `
             <td>${transaction.number}</td>
             <td class="${typeClass}">${typeText}</td>
             <td>${transaction.category || '-'}</td>
             <td>${transaction.amount}$</td>
-            <td>${this.datePickerManager.formatDate(transaction.date)}</td>
+            <td><input type="text" class="datepicker form-control border-0" value="${formattedDate}" readonly></td>
             <td><input type="text" class="form-control border-0" value="${transaction.comment || ''}"></td>
             <td>
                 <button class="btn btn-sm btn-light me-1 edit-transaction">
@@ -71,17 +74,24 @@ export class Transaction extends CardPage {
         try {
             const transactions = await this.fetchTransactions();
 
-            // Сортируем операции по дате (по возрастанию)
-            transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            transactions.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateA - dateB;
+            });
 
-            // Очищаем существующие строки в таблице
             this.container.innerHTML = '';
 
-            // Присваиваем номера по порядку и создаём строки
             transactions.forEach((transaction, index) => {
                 transaction.number = index + 1;
                 const row = this.createTableRow(transaction);
                 this.container.appendChild(row);
+
+                // Инициализируем датапикер после добавления строки в DOM
+                const dateInput = row.querySelector('.datepicker');
+                if (dateInput) {
+                    this.datePickerManager.init(dateInput);
+                }
             });
         } catch (error) {
             console.error('Ошибка при загрузке транзакций:', error);

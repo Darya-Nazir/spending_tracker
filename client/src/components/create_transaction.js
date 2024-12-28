@@ -1,5 +1,6 @@
 import {NewCard} from "./base-class/new-card.js";
 import {Http} from "../../scripts/services/http.js";
+import {DatePickerManager} from "../../scripts/services/datePicker.js";
 
 
 export class NewTransaction extends NewCard {
@@ -19,11 +20,14 @@ export class NewTransaction extends NewCard {
         this.createButton = document.getElementById('create');
         this.cancelButton = document.getElementById('cancel');
         this.categoriesList = document.getElementById('categoriesList');
+
+        this.datePickerManager = new DatePickerManager();
     }
 
     async init() {
         this.setInitialType();
-        this.setupDatePicker();
+        // this.setupDatePicker();
+        this.datePickerManager.init(this.dateInput);
         await this.loadCategories();
 
         // Установка обработчиков событий
@@ -43,6 +47,8 @@ export class NewTransaction extends NewCard {
         event.preventDefault();
 
         const transactionData = this.getTransactionData();
+        // console.log(transactionData);
+        // return;
         if (!this.validateTransactionData(transactionData)) {
             return;
         }
@@ -66,7 +72,7 @@ export class NewTransaction extends NewCard {
         return {
             type: typeMapping[this.typeInput.value] || this.typeInput.value.toLowerCase(),
             amount: parseFloat(this.amountInput.value) || 0, // Указываем 0, если значение некорректное
-            date: this.formatDateForAPI(this.dateInput.value), // Форматируем дату для сервера
+            date: this.datePickerManager.formatDateForAPI(this.dateInput.value), // Форматируем дату для сервера
             comment: this.commentInput.value.trim() || '', // Указываем пустую строку, если комментарий не указан
             category_id: this.selectedCategoryId ? parseInt(this.selectedCategoryId, 10) : null // Приводим ID категории к числу
         };
