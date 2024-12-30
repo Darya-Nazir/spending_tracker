@@ -2,6 +2,7 @@ import {Unselect} from "../../scripts/services/unselect.js";
 import {CardPage} from "./base-class/card-page.js";
 import {Http} from "../../scripts/services/http";
 import {DatePickerManager} from "../../scripts/services/datePicker.js";
+import {User} from "./user.js";
 
 export class Transaction extends CardPage {
     constructor(navigateTo) {
@@ -14,6 +15,7 @@ export class Transaction extends CardPage {
         );
         this.container = document.querySelector('.table tbody');
         this.datePickerManager = new DatePickerManager();
+        this.balanceManager = new User(navigateTo);
         document.querySelectorAll('.datepicker').forEach((input) => {
             this.datePickerManager.init(input);
         });
@@ -26,6 +28,11 @@ export class Transaction extends CardPage {
         this.setupDeleteListener();
         this.redirectToCreateOperation();
         this.setupEditListener();
+        this.updateBalance();
+    }
+
+    async updateBalance() {
+        await this.balanceManager.showBalance();
     }
 
     highlightPage() {
@@ -102,7 +109,6 @@ export class Transaction extends CardPage {
         let rowToDelete = null;
         let transactionIdToDelete = null;
 
-        // Слушаем клики на таблице
         this.container.addEventListener('click', (event) => {
             const deleteButton = event.target.closest('.delete-transaction');
             if (!deleteButton) return;
@@ -116,7 +122,6 @@ export class Transaction extends CardPage {
             }
         });
 
-        // Обработчик подтверждения удаления
         const confirmButton = document.getElementById('confirmDeleteBtn');
         confirmButton.addEventListener('click', async () => {
             if (rowToDelete && transactionIdToDelete) {
@@ -126,15 +131,21 @@ export class Transaction extends CardPage {
                     rowToDelete = null;
                     transactionIdToDelete = null;
                 } catch (error) {
-                    console.error('Ошибка при удалении операции:', error);
+                    console.error('Ошибка при подтверждении удаления:', error);
                 }
             }
         });
     }
 
+
     async deleteTransaction(transactionId) {
         const url = `${this.apiUrl}/${transactionId}`;
-        return await Http.request(url, 'DELETE');
+        try {
+            await Http.request(url, 'DELETE');
+            await this.updateBalance(); // Обновляем баланс после успешного удаления
+        } catch (error) {
+            console.error('Ошибка при удалении транзакции и обновлении баланса:', error);
+        }
     }
 
     redirectToCreateOperation() {
