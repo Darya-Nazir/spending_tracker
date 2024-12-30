@@ -1,4 +1,5 @@
 import {Auth} from "../../scripts/services/auth.js";
+import {Http} from "../../scripts/services/http.js";
 
 export class User {
     constructor(navigateTo) {
@@ -9,6 +10,7 @@ export class User {
         this.initUser();
         this.logoutButton();
         this.logOfUser();
+        this.showBalance();
     }
 
     initUser() {
@@ -25,6 +27,7 @@ export class User {
             [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
         });
     }
+
     logOfUser() {
         const logoutButton = document.getElementById('logout');
 
@@ -33,6 +36,14 @@ export class User {
             Auth.removeTokens();
             this.navigateToPath('/');
         });
+    }
+
+    async showBalance() {
+        const url = 'http://localhost:3000/api/balance';
+        debugger;
+        const balanceSpan = document.getElementById('balance');
+        const balance = (await Http.request(url, 'GET')).balance;
+        balanceSpan.innerText = `${balance}$`;
     }
 }
 
