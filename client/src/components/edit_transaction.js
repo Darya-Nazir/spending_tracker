@@ -1,5 +1,7 @@
 import {EditCard} from "./base-class/edit-card.js";
 import {Http} from "../../scripts/services/http.js";
+import {DatePickerManager} from "../../scripts/services/datePicker.js";
+
 export class EditTransaction extends EditCard {
     constructor(navigateTo) {
         super(
@@ -16,6 +18,8 @@ export class EditTransaction extends EditCard {
         this.commentInput = null;
         this.categoriesList = null;
         this.selectedCategoryId = null;
+
+        this.datePickerManager = new DatePickerManager();
     }
 
     async init() {
@@ -35,7 +39,7 @@ export class EditTransaction extends EditCard {
             return;
         }
 
-        this.setupDatePicker();
+        this.datePickerManager.init(this.dateInput);
         await this.loadTransactionData(transactionId);
         this.setupEventListeners();
         this.renderTypes(['income', 'expense']);
@@ -141,7 +145,7 @@ export class EditTransaction extends EditCard {
             this.typeInput.style.backgroundColor = '#f8f9fa';
 
             this.amountInput.value = transaction.amount;
-            this.dateInput.value = this.formatDateForDisplay(transaction.date);
+            this.datePickerManager.setValue(this.dateInput, new Date(transaction.date));
             this.commentInput.value = transaction.comment || '';
 
             if (this.categoriesList) {
@@ -228,7 +232,7 @@ export class EditTransaction extends EditCard {
         return {
             type: typeMapping[this.typeInput.value] || this.typeInput.value.toLowerCase(),
             amount: parseFloat(this.amountInput.value) || 0,
-            date: this.formatDateForAPI(this.dateInput.value),
+            date: this.datePickerManager.formatDateForAPI(this.dateInput.value),
             comment: this.commentInput.value.trim() || '',
             category_id: this.selectedCategoryId ? parseInt(this.selectedCategoryId, 10) : null
         };
