@@ -1,10 +1,16 @@
 import {Unselect} from "../../scripts/services/unselect.js";
+import {DatePickerManager} from "../../scripts/services/datePicker.js";
+
 
 export class Analytics {
     constructor() {
     }
 
     init() {
+        this.datePickerManager = new DatePickerManager();
+        document.querySelectorAll('.datepicker').forEach((input) => {
+            this.datePickerManager.init(input);
+        });
         this.startChart();
     }
 
