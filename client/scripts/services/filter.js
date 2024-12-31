@@ -160,6 +160,8 @@ export class Filter extends BaseOperations {
         const dateToInput = document.querySelector('.datepicker:last-of-type');
 
         if (dateFromInput && dateToInput) {
+            dateFromInput.addEventListener('focus', () => this.activateRangeFilter());
+            dateToInput.addEventListener('focus', () => this.activateRangeFilter());
             dateFromInput.addEventListener('change', () => this.handleDateRangeChange(dateFromInput, dateToInput));
             dateToInput.addEventListener('change', () => this.handleDateRangeChange(dateFromInput, dateToInput));
         }
@@ -168,15 +170,17 @@ export class Filter extends BaseOperations {
     handleFilterClick(period, button) {
         this.setActiveFilter(period);
         this.fetchFilteredOperations(period);
+    }
 
-        const dateInputs = document.querySelectorAll('.datepicker');
-        dateInputs.forEach(input => {
-            input.style.display = period === 'range' ? 'block' : 'none';
-        });
+    activateRangeFilter() {
+        const rangeButton = this.findButtonByText('Интервал');
+        if (rangeButton) {
+            this.setActiveFilter('range');
+        }
     }
 
     setActiveFilter(period) {
-        // Теперь выбираем только кнопки фильтров, а не все кнопки на странице
+        // Обновляем только кнопки фильтров
         document.querySelectorAll('.filter-button').forEach(btn => {
             btn.classList.remove('btn-secondary');
             btn.classList.add('btn-light');
