@@ -40,7 +40,6 @@ export class User {
 
     async showBalance() {
         const url = 'http://localhost:3000/api/balance';
-        debugger;
         const balanceSpan = document.getElementById('balance');
         const balance = (await Http.request(url, 'GET')).balance;
         balanceSpan.innerText = `${balance}$`;
