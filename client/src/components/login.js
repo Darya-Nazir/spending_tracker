@@ -6,6 +6,7 @@ export class Login extends Validation {
     constructor(navigateTo) {
         super(navigateTo);
         this.rememberMeElement = document.getElementById('rememberMe');
+        Auth.initialize(navigateTo);
     }
 
     initializeEventListeners() {
@@ -40,7 +41,8 @@ export class Login extends Validation {
             };
 
             const path = 'http://localhost:3000/api/login';
-            const result = await Http.request(path, 'POST', dataObject);
+            // Указываем false для requiresAuth
+            const result = await Http.request(path, 'POST', dataObject, false);
 
             const userInfo = {
                 id: result.user.id,
@@ -49,10 +51,11 @@ export class Login extends Validation {
 
             Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
             Auth.setUserInfo(userInfo);
-            console.log(userInfo)
             this.jumpIntoApp();
         } catch (error) {
             console.error('Ошибка при отправке:', error);
+            // Здесь можно добавить обработку ошибки для пользователя
+            // например, показать сообщение о неверном логине/пароле
         }
     }
 }

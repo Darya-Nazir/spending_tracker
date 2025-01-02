@@ -1,23 +1,18 @@
 import {Auth} from "./auth.js";
 
 export class Http {
-    static async request(url, method = 'GET', body = null) {
-        // debugger
-        const params = await this.createRequestParams(method, body);
-
+    static async request(url, method = 'GET', body = null, requiresAuth = true) {
+        const params = await this.createRequestParams(method, body, requiresAuth);
         const response = await fetch(url, params);
 
         if (response.status < 200 || response.status >= 300) {
-            return await this.handleError(response, url, method, body);
+            return await this.handleError(response, url, method, body, requiresAuth);
         }
 
-        const jsonResponse = await response.json();
-        // console.log('static async request: ', jsonResponse.message);
-        return jsonResponse;
+        return await response.json();
     }
 
-    // Метод для создания параметров запроса
-    static async createRequestParams(method, body) {
+    static async createRequestParams(method, body, requiresAuth = true) {
         const params = {
             method: method,
             headers: {
@@ -26,7 +21,9 @@ export class Http {
             }
         };
 
-        this.addAuthTokenToHeaders(params); // Добавление токена
+        if (requiresAuth) {
+            this.addAuthTokenToHeaders(params);
+        }
 
         if (body) {
             params.body = JSON.stringify(body);
@@ -35,30 +32,23 @@ export class Http {
         return params;
     }
 
-    // Метод для добавления токена в заголовки запроса
     static addAuthTokenToHeaders(params) {
-        let token = localStorage.getItem(Auth.accessTokenKey);
+        const token = localStorage.getItem(Auth.accessTokenKey);
         if (token) {
-            params.headers['Authorization'] =`Bearer ${token}` ;
+            params.headers['Authorization'] = `Bearer ${token}`;
         }
     }
 
-    // Метод для обработки ошибок, включая статус 401
-    static async handleError(response, url, method, body) {
-        if (response.status === 401) {
+    static async handleError(response, url, method, body, requiresAuth) {
+        if (response.status === 401 && requiresAuth) {
             const result = await this.handleUnauthorizedAccess();
             if (result) {
-
-                return await this.request(url, method, body); // Повторный запрос с новым токеном
-            } else {
-                return null;
+                return await this.request(url, method, body, requiresAuth);
             }
         }
-
-        throw new Error('static async handleError: ' + response.statusText);
+        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
     }
 
-    // Метод для обработки неавторизованного доступа (статус 401)
     static async handleUnauthorizedAccess() {
         return await Auth.processUnauthorizedResponse();
     }
