@@ -1,85 +1,171 @@
-import {Unselect} from "../../scripts/services/unselect.js";
-import {DatePickerManager} from "../../scripts/services/datePicker.js";
-
+import { Unselect } from "../../scripts/services/unselect.js";
+import { DatePickerManager } from "../../scripts/services/datePicker.js";
+import {Filter} from "../../scripts/services/filter";
 
 export class Analytics {
     constructor() {
+        this.charts = {
+            income: null,
+            expenses: null
+        };
+        // Создаем экземпляр Filter и передаем метод обновления графиков как callback
+        this.filter = new Filter((operations) => {
+            this.updateCharts(operations);
+        });
     }
 
     init() {
-        this.datePickerManager = new DatePickerManager();
-        document.querySelectorAll('.datepicker').forEach((input) => {
-            this.datePickerManager.init(input);
-        });
-        this.startChart();
+        // Инициализируем фильтры
+        this.initFilters();
+        this.loadChartLibrary();
     }
 
-    startChart() {
-        // При использовании innerHTML браузеры не всегда выполняют добавленные теги <script>.
-        // Предпочтительнее использовать document.createElement,
-        //     так как это более надежно и безопасно.
+    initFilters() {
+        // Добавляем класс filter-button ко всем кнопкам фильтра
+        const filterButtons = document.querySelectorAll('.btn-light, .btn-secondary');
+        filterButtons.forEach(button => {
+            if (!button.classList.contains('filter-button')) {
+                button.classList.add('filter-button');
+            }
+        });
 
+        // Инициализируем DatePicker для полей с датами
+        document.querySelectorAll('.datepicker').forEach((input) => {
+            this.datePickerManager = new DatePickerManager();
+            this.datePickerManager.init(input);
+        });
+    }
+
+    loadChartLibrary() {
         const script = document.createElement('script');
         script.src = './scripts/lib/chart.js';
-        script.async = true; // Загружается асинхронно
+        script.async = true;
 
-        document.body.appendChild(script);
-
-        // Опционально: обработка события загрузки
         script.onload = () => {
             if (typeof Chart === 'undefined') {
                 console.error('Chart.js не загрузился корректно');
             } else {
-                this.startDiagrams();
+                this.initializeCharts();
                 new Unselect().init();
                 this.selectMain();
+
+                // После инициализации графиков запрашиваем данные за весь период
+                this.filter.fetchFilteredOperations('all');
             }
         };
+
+        document.body.appendChild(script);
     }
 
-    startDiagrams() {
-        // Данные для графиков
-        const incomeData = {
-            labels: ['Red', 'Orange', 'Yellow', 'Green', 'Blue'],
-            datasets: [{
-                data: [30, 40, 15, 10, 5],
-                backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#198754', '#0d6efd']
-            }]
-        };
-
-        const expensesData = {
-            labels: ['Red', 'Orange', 'Yellow', 'Green', 'Blue'],
-            datasets: [{
-                data: [10, 20, 30, 35, 5],
-                backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#198754', '#0d6efd']
-            }]
-        };
-
-        // Опции для графиков
+    initializeCharts() {
         const options = {
             responsive: true,
             plugins: {
                 legend: {
                     position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${percentage}%`;
+                        }
+                    }
                 }
             }
         };
 
-        // Создание графиков
-        new Chart(document.getElementById('incomeChart'), {
+        this.charts.income = new Chart(document.getElementById('incomeChart'), {
             type: 'pie',
-            data: incomeData,
+            data: this.createEmptyChartData(),
             options: options
         });
 
-        new Chart(document.getElementById('expensesChart'), {
+        this.charts.expenses = new Chart(document.getElementById('expensesChart'), {
             type: 'pie',
-            data: expensesData,
+            data: this.createEmptyChartData(),
             options: options
         });
     }
+
+    createEmptyChartData() {
+        return {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: []
+            }]
+        };
+    }
+
+    updateCharts(operations) {
+        if (!operations || !Array.isArray(operations)) {
+            console.error('Получены некорректные данные операций:', operations);
+            return;
+        }
+
+        const { incomeData, expensesData } = this.processOperationsData(operations);
+
+        this.updateChart(this.charts.income, incomeData);
+        this.updateChart(this.charts.expenses, expensesData);
+    }
+
+    processOperationsData(operations) {
+        const incomeCategories = {};
+        const expensesCategories = {};
+
+        operations.forEach(operation => {
+            const categories = operation.type === 'income' ? incomeCategories : expensesCategories;
+            const amount = parseFloat(operation.amount) || 0;
+
+            if (!categories[operation.category]) {
+                categories[operation.category] = 0;
+            }
+            categories[operation.category] += amount;
+        });
+
+        const colors = [
+            '#dc3545', '#fd7e14', '#ffc107', '#198754', '#0d6efd',
+            '#6610f2', '#6f42c1', '#d63384', '#20c997', '#0dcaf0'
+        ];
+
+        return {
+            incomeData: this.prepareChartData(incomeCategories, colors),
+            expensesData: this.prepareChartData(expensesCategories, colors)
+        };
+    }
+
+    prepareChartData(categories, colors) {
+        const labels = Object.keys(categories);
+        const data = Object.values(categories);
+        const backgroundColors = colors.slice(0, labels.length);
+
+        return {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors
+            }]
+        };
+    }
+
+    updateChart(chart, newData) {
+        if (!chart) return;
+
+        chart.data.labels = newData.labels;
+        chart.data.datasets[0].data = newData.datasets[0].data;
+        chart.data.datasets[0].backgroundColor = newData.datasets[0].backgroundColor;
+        chart.update();
+    }
+
     selectMain() {
-        document.getElementById('mainPage').classList.add('bg-primary', 'text-white');
+        const mainPage = document.getElementById('mainPage');
+        if (mainPage) {
+            mainPage.classList.add('bg-primary', 'text-white');
+        }
     }
 }
 
