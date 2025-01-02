@@ -31,7 +31,7 @@ export class Auth {
         }
 
         this.removeTokens();
-        // navigateToPath('/');
+        navigateToPath('/');
         return false;
     }
 

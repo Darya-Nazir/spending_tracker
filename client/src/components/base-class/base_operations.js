@@ -53,8 +53,6 @@ export class BaseOperations {
 
     renderOperations(operations) {
         if (!this.container) {
-            console.warn('Контейнер для операций не найден');
-            // Всё равно вызываем callback, если он есть
             if (typeof this.navigateTo === 'function') {
                 this.navigateTo(operations);
             }

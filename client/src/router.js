@@ -36,10 +36,9 @@ export class Router {
     }
 
     // для охраны от неавторизованных пользователей
-
-    // isAuthenticated() {
-    //     return localStorage.getItem(Auth.accessTokenKey) !== null;
-    // }
+    isAuthenticated() {
+        return localStorage.getItem(Auth.accessTokenKey) !== null;
+    }
 
     initEvents() {
         window.addEventListener('DOMContentLoaded', this.handleNavigation.bind(this));
@@ -84,12 +83,12 @@ export class Router {
 
     async handleNavigation() {
         // для охраны от неавторизованных пользователей
-        // if (handlePage.state === states.STATE_AUTHORIZED && !this.isAuthenticated()) {
-        //     this.navigateTo('/');
-        //     return;
-        // }
-
         const handlePage = this.page ?? null;
+
+        if (handlePage?.state === states.STATE_AUTHORIZED && !this.isAuthenticated()) {
+            this.navigateTo('/');
+            return;
+        }
 
         if (handlePage) {
             try {
