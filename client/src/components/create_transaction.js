@@ -1,6 +1,6 @@
 import {NewCard} from "./base-class/new-card.js";
-import {Http} from "../../scripts/services/http.js";
-import {DatePickerManager} from "../../scripts/services/datePicker.js";
+import {DatePickerManager} from "../services/datePicker.js";
+import {Http} from "../services/http.js";
 
 
 export class NewTransaction extends NewCard {

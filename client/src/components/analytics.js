@@ -1,6 +1,6 @@
-import { Unselect } from "../../scripts/services/unselect.js";
-import { DatePickerManager } from "../../scripts/services/datePicker.js";
-import {Filter} from "../../scripts/services/filter";
+import {Filter} from "../services/filter.js";
+import {DatePickerManager} from "../services/datePicker.js";
+import {Unselect} from "../services/unselect.js";
 
 export class Analytics {
     constructor() {

@@ -1,7 +1,7 @@
-import {Unselect} from "../../scripts/services/unselect.js";
-import {Http} from "../../scripts/services/http";
-import {Filter} from "../../scripts/services/filter.js";
+import {Http} from "../services/http.js";
 import {BaseOperations} from "./base-class/base_operations.js";
+import {Unselect} from "../services/unselect.js";
+import {Filter} from "../services/filter.js";
 
 export class Transaction extends BaseOperations {
     constructor(navigateTo) {

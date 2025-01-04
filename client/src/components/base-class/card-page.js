@@ -1,5 +1,6 @@
-import {Http} from "../../../scripts/services/http.js";
-import {Unselect} from "../../../scripts/services/unselect";
+import {Unselect} from "../../services/unselect.js";
+import {Http} from "../../services/http.js";
+
 
 export class CardPage {
     constructor(navigateTo, containerId, apiUrl, addCategoryPath, editCategoryPath) {

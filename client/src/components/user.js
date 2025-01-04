@@ -1,5 +1,5 @@
-import {Auth} from "../../scripts/services/auth.js";
-import {Http} from "../../scripts/services/http.js";
+import {Auth} from "../services/auth.js";
+import {Http} from "../services/http.js";
 
 export class User {
     constructor(navigateTo) {

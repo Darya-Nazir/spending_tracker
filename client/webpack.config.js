@@ -11,7 +11,7 @@ module.exports = {
     },
     devServer: {
         static: {
-            directory: path.join(__dirname, 'styles'),
+            directory: path.join(__dirname, 'dist'),
         },
         compress: true,
         port: 9000,
@@ -26,9 +26,8 @@ module.exports = {
                 {from: "./src/markups", to: "templates"},
                 {from: "styles", to: "styles"},
                 {from: "images", to: "images"},
-                // { from: "./scripts/lib/chart.js", to: "scripts/lib/chart.js" },
-                { from: "node_modules/@popperjs/core/dist/umd/popper.js", to: "scripts/lib/popper.js" },
-                { from: "./scripts/lib", to: "scripts/lib" },
+                {from: "node_modules/@popperjs/core/dist/umd/popper.js", to: "scripts/lib/popper.js"},
+                {from: "./src/lib", to: "lib"},
             ],
         }),
     ],

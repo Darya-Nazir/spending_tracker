@@ -1,7 +1,6 @@
 import {Signup} from "./components/signup.js";
 import {Login} from "./components/login.js";
 import {Costs} from "./components/costs.js";
-import {Auth} from "../scripts/services/auth.js";
 import {Analytics} from "./components/analytics.js";
 import {Incomes} from "./components/incomes.js";
 import {Transaction} from "./components/transaction.js";
@@ -12,6 +11,7 @@ import {EditIncome} from "./components/edit_income.js";
 import {EditCost} from "./components/edit_cost.js";
 import {NewTransaction} from "./components/create_transaction.js";
 import {EditTransaction} from "./components/edit_transaction.js";
+import {Auth} from "./services/auth.js";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 

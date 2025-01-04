@@ -1,6 +1,6 @@
 import {EditCard} from "./base-class/edit-card.js";
-import {Http} from "../../scripts/services/http.js";
-import {DatePickerManager} from "../../scripts/services/datePicker.js";
+import {DatePickerManager} from "../services/datePicker.js";
+import {Http} from "../services/http.js";
 
 export class EditTransaction extends EditCard {
     constructor(navigateTo) {
