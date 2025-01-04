@@ -1,5 +1,10 @@
 .idea
-server/node_modules/
-client/node_modules/
-client/dist/
-client/.DS_Store
+
+# Dependencies
+**/node_modules/
+
+# Production build
+**/dist/
+
+# macOS system files
+**/.DS_Store
