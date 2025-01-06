@@ -46,11 +46,19 @@ export class Http {
                 return await this.request(url, method, body, requiresAuth);
             }
         }
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        const responseBody = await response.json();
+        let errorMsg = `HTTP: ${response.status} ${response.statusText}`;
+        if (responseBody.message) {
+            errorMsg += '. ' + responseBody.message;
+        }
+        throw new Error(errorMsg);
     }
 
     static async handleUnauthorizedAccess() {
         return await Auth.processUnauthorizedResponse();
     }
 }
+
+// const errorData = await response.json();
+// throw new Error(errorData.message || `HTTP Error: ${response.status} ${response.statusText}`);
 

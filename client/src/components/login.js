@@ -55,8 +55,8 @@ export class Login extends Validation {
         } catch (error) {
             console.error('Ошибка при отправке:', error);
             
-            const statusMatch = error.message.match(/HTTP Error: (\d+)/);
-            if (statusMatch && parseInt(statusMatch[1]) === 401) {
+            const statusMatch = error.message.match(/HTTP: (\d+)/);
+            if (statusMatch.length !== 0 && parseInt(statusMatch[1]) === 401) {
                 alert('Пользователь с такими данными не зарегистрирован');
                 return;
             }

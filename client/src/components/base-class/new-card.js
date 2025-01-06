@@ -40,9 +40,11 @@ export class NewCard {
     }
 
     handleCategoryCreationError(error) {
-        console.error('Category addition: ', error);
-        alert('Не удалось добавить категорию, попробуйте еще раз. ' +
-            'Если категория уже существует, она не будет добавлена.');
+        if (error.toString().includes('already exist')) {
+            alert('Такая категория уже существует');
+            return;
+        }
+        alert('Не удалось добавить категорию, попробуйте еще раз.');
     }
 
     cancelCategoryButtonListener() {
