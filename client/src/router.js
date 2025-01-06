@@ -90,33 +90,32 @@ export class Router {
             return;
         }
 
-        if (handlePage) {
-            try {
-                // Сначала загружаем HTML
-                const html = await fetch(handlePage.html).then(response => response.text());
-
-                // Создаем observer перед обновлением DOM
-                const observer = new MutationObserver((mutations, obs) => {
-                    this.startLoad();
-                    this.addTitle();
-                    obs.disconnect(); // Отключаем observer после первого срабатывания
-                });
-
-                // Начинаем наблюдение за изменениями
-                observer.observe(this.appElement, { childList: true });
-
-                // Обновляем DOM
-                this.appElement.innerHTML = html;
-
-                this.toggleNav();
-
-            } catch (error) {
-                console.error('Ошибка при загрузке страницы:', error);
-                this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
-            }
-        } else {
+        if (!handlePage) {
             console.error('Маршрут не найден:', this.path);
             this.appElement.innerHTML = '<h1>Маршрут не найден</h1>';
+        }
+        try {
+            // Сначала загружаем HTML
+            const html = await fetch(handlePage.html).then(response => response.text());
+
+            // Создаем observer перед обновлением DOM
+            const observer = new MutationObserver((mutations, obs) => {
+                this.startLoad();
+                this.addTitle();
+                obs.disconnect(); // Отключаем observer после первого срабатывания
+            });
+
+            // Начинаем наблюдение за изменениями
+            observer.observe(this.appElement, { childList: true });
+
+            // Обновляем DOM
+            this.appElement.innerHTML = html;
+
+            this.toggleNav();
+
+        } catch (error) {
+            console.error('Ошибка при загрузке страницы:', error);
+            this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
         }
     }
 
