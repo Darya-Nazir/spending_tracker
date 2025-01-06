@@ -1,6 +1,0 @@
-node_modules/
-dist/
-src/lib/**
-webpack.config.js
-eslint.config.mjs
-**/*.min.js
