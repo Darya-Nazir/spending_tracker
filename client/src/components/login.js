@@ -54,8 +54,14 @@ export class Login extends Validation {
             this.jumpIntoApp();
         } catch (error) {
             console.error('Ошибка при отправке:', error);
-            // Здесь можно добавить обработку ошибки для пользователя
-            // например, показать сообщение о неверном логине/пароле
+            
+            const statusMatch = error.message.match(/HTTP Error: (\d+)/);
+            if (statusMatch && parseInt(statusMatch[1]) === 401) {
+                alert('Пользователь с такими данными не зарегистрирован');
+                return;
+            }
+
+            alert('Произошла ошибка при входе. Пожалуйста, попробуйте позже.');
         }
     }
 }
