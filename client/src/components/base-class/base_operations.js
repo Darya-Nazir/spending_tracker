@@ -1,5 +1,5 @@
-import {User} from "../user.js";
-import {DatePickerManager} from "../../services/datePicker.js";
+import { User } from "../user.js";
+import { DatePickerManager } from "../../services/datePicker.js";
 
 export class BaseOperations {
     constructor(navigateTo) {

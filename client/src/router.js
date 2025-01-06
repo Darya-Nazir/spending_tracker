@@ -1,17 +1,17 @@
-import {Signup} from "./components/signup.js";
-import {Login} from "./components/login.js";
-import {Costs} from "./components/costs.js";
-import {Analytics} from "./components/analytics.js";
-import {Incomes} from "./components/incomes.js";
-import {Transaction} from "./components/transaction.js";
-import {User} from "./components/user.js";
-import {NewCost} from "./components/create_cost.js";
-import {NewIncome} from "./components/create_income.js";
-import {EditIncome} from "./components/edit_income.js";
-import {EditCost} from "./components/edit_cost.js";
-import {NewTransaction} from "./components/create_transaction.js";
-import {EditTransaction} from "./components/edit_transaction.js";
-import {Auth} from "./services/auth.js";
+import { Signup } from "./components/signup.js";
+import { Login } from "./components/login.js";
+import { Costs } from "./components/costs.js";
+import { Analytics } from "./components/analytics.js";
+import { Incomes } from "./components/incomes.js";
+import { Transaction } from "./components/transaction.js";
+import { User } from "./components/user.js";
+import { NewCost } from "./components/create_cost.js";
+import { NewIncome } from "./components/create_income.js";
+import { EditIncome } from "./components/edit_income.js";
+import { EditCost } from "./components/edit_cost.js";
+import { NewTransaction } from "./components/create_transaction.js";
+import { EditTransaction } from "./components/edit_transaction.js";
+import { Auth } from "./services/auth.js";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
@@ -103,9 +103,7 @@ export class Router {
                 });
 
                 // Начинаем наблюдение за изменениями
-                observer.observe(this.appElement, {
-                    childList: true
-                });
+                observer.observe(this.appElement, { childList: true });
 
                 // Обновляем DOM
                 this.appElement.innerHTML = html;

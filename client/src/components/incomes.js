@@ -1,4 +1,4 @@
-import {CardPage} from "./base-class/card-page.js";
+import { CardPage } from "./base-class/card-page.js";
 export class Incomes extends CardPage {
     constructor(navigateTo) {
         super(

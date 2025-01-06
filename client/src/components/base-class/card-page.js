@@ -1,5 +1,5 @@
-import {Unselect} from "../../services/unselect.js";
-import {Http} from "../../services/http.js";
+import { Unselect } from "../../services/unselect.js";
+import { Http } from "../../services/http.js";
 
 
 export class CardPage {

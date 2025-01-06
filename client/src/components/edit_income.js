@@ -1,4 +1,4 @@
-import {EditCard} from "./base-class/edit-card.js";
+import { EditCard } from "./base-class/edit-card.js";
 
 export class EditIncome extends EditCard {
     constructor(navigateTo) {

@@ -1,6 +1,6 @@
-import {Filter} from "../services/filter.js";
-import {DatePickerManager} from "../services/datePicker.js";
-import {Unselect} from "../services/unselect.js";
+import { Filter } from "../services/filter.js";
+import { DatePickerManager } from "../services/datePicker.js";
+import { Unselect } from "../services/unselect.js";
 
 export class Analytics {
     constructor() {
@@ -61,9 +61,7 @@ export class Analytics {
         const options = {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'top',
-                },
+                legend: { position: 'top', },
                 tooltip: {
                     callbacks: {
                         label: function(context) {

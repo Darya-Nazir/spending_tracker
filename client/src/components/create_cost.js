@@ -1,4 +1,4 @@
-import {NewCard} from "./base-class/new-card.js";
+import { NewCard } from "./base-class/new-card.js";
 
 export class NewCost extends NewCard {
     constructor(navigateTo) {

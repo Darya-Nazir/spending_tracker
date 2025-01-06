@@ -1,6 +1,6 @@
-import {Http} from './http.js';
-import {BaseOperations} from "../../src/components/base-class/base_operations.js";
-import {DatePickerManager} from "./datePicker.js";
+import { Http } from './http.js';
+import { BaseOperations } from "../../src/components/base-class/base_operations.js";
+import { DatePickerManager } from "./datePicker.js";
 
 export class Filter extends BaseOperations {
     findButtonByText(text) {

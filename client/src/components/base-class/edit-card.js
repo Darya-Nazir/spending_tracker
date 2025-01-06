@@ -1,4 +1,4 @@
-import {Http} from "../../services/http.js";
+import { Http } from "../../services/http.js";
 
 export class EditCard {
     constructor(navigateTo, apiUrl, redirectPath) {

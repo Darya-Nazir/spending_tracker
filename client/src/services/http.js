@@ -1,4 +1,4 @@
-import {Auth} from "./auth.js";
+import { Auth } from "./auth.js";
 
 export class Http {
     static async request(url, method = 'GET', body = null, requiresAuth = true) {
