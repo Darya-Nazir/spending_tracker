@@ -49,22 +49,23 @@ export class CardPage {
         });
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-            if (cardToDelete && categoryIdToDelete) {
-                try {
-                    const url = `${this.apiUrl}/${categoryIdToDelete}`;
-                    const result = await Http.request(url, 'DELETE');
+            if (!cardToDelete || !categoryIdToDelete) {
+                return;
+            }
+            try {
+                const url = `${this.apiUrl}/${categoryIdToDelete}`;
+                const result = await Http.request(url, 'DELETE');
 
-                    console.log(result);
+                console.log(result);
 
-                    cardToDelete.remove();
-                    cardToDelete = null;
-                    categoryIdToDelete = null;
+                cardToDelete.remove();
+                cardToDelete = null;
+                categoryIdToDelete = null;
 
-                    const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
-                    deleteModal.hide();
-                } catch (error) {
-                    console.error('Error deleting category:', error);
-                }
+                const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
+                deleteModal.hide();
+            } catch (error) {
+                console.error('Error deleting category:', error);
             }
         });
     }

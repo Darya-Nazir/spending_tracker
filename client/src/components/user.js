@@ -32,7 +32,6 @@ export class User {
         const logoutButton = document.getElementById('logout');
 
         logoutButton.addEventListener('click', () => {
-            console.log('logoutButton click!');
             Auth.removeTokens();
             this.navigateToPath('/');
         });
