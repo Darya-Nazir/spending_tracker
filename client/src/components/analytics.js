@@ -3,6 +3,20 @@ import { DatePickerManager } from "../services/datePicker.js";
 import { Unselect } from "../services/unselect.js";
 
 export class Analytics {
+    // Определяем статическое свойство с цветами и делаем его неизменяемым
+    static CHART_COLORS = Object.freeze([
+        '#dc3545', // red
+        '#fd7e14', // orange
+        '#ffc107', // yellow
+        '#198754', // green
+        '#0d6efd', // blue
+        '#6610f2', // indigo
+        '#6f42c1', // purple
+        '#d63384', // pink
+        '#20c997', // teal
+        '#0dcaf0'  // cyan
+    ]);
+
     constructor() {
         this.charts = {
             income: null,
@@ -125,21 +139,19 @@ export class Analytics {
             categories[operation.category] += amount;
         });
 
-        const colors = [
-            '#dc3545', '#fd7e14', '#ffc107', '#198754', '#0d6efd',
-            '#6610f2', '#6f42c1', '#d63384', '#20c997', '#0dcaf0'
-        ];
-
         return {
-            incomeData: this.prepareChartData(incomeCategories, colors),
-            expensesData: this.prepareChartData(expensesCategories, colors)
+            incomeData: this.prepareChartData(incomeCategories),
+            expensesData: this.prepareChartData(expensesCategories)
         };
     }
 
-    prepareChartData(categories, colors) {
+    prepareChartData(categories) {
         const labels = Object.keys(categories);
         const data = Object.values(categories);
-        const backgroundColors = colors.slice(0, labels.length);
+        const backgroundColors = labels.map((_, index) =>
+            // Используем остаток от деления для циклического повторения цветов
+            Analytics.CHART_COLORS[index % Analytics.CHART_COLORS.length]
+        );
 
         return {
             labels: labels,
