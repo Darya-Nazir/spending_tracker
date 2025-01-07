@@ -1,50 +1,17 @@
 import { Http } from './http.js';
-import { BaseOperations } from "../../src/components/base-class/base_operations.js";
 import { DatePickerManager } from "./datePicker.js";
+import { BaseOperations } from "../components/base-class/base_operations.js";
+
+const PERIOD_MAP = {
+    today: 'Сегодня',
+    week: 'Неделя',
+    month: 'Месяц',
+    year: 'Год',
+    all: 'Все',
+    interval: 'Интервал'
+};
 
 export class Filter extends BaseOperations {
-    findButtonByText(text) {
-        const buttons = document.querySelectorAll('.filter-button');
-        return Array.from(buttons).find(button => button.textContent.trim() === text);
-    }
-
-    bindFilterButtons() {
-        const filterButtons = {
-            'today': this.findButtonByText("Сегодня"),
-            'week': this.findButtonByText("Неделя"),
-            'month': this.findButtonByText("Месяц"),
-            'year': this.findButtonByText("Год"),
-            'all': this.findButtonByText("Все"),
-            'interval': this.findButtonByText("Интервал")
-        };
-
-        Object.entries(filterButtons).forEach(([period, button]) => {
-            if (button) {
-                button.addEventListener('click', () => this.handleFilterClick(period, button));
-            }
-        });
-    }
-
-    initDatePickers() {
-        const dateFromInput = document.querySelector('.datepicker:first-of-type');
-        const dateToInput = document.querySelector('.datepicker:last-of-type');
-
-        if (dateFromInput && dateToInput) {
-            this.datePicker.init('.datepicker');
-
-            $(dateFromInput).on('changeDate', (e) => {
-                this.handleDateSelect($(e.target).val(), 'from');
-            });
-
-            $(dateToInput).on('changeDate', (e) => {
-                this.handleDateSelect($(e.target).val(), 'to');
-            });
-
-            dateFromInput.addEventListener('focus', () => this.activateRangeFilter());
-            dateToInput.addEventListener('focus', () => this.activateRangeFilter());
-        }
-    }
-
     constructor(navigateTo) {
         super(navigateTo);
         this.dateInputsState = {
@@ -53,128 +20,114 @@ export class Filter extends BaseOperations {
             hadInitialSelection: false
         };
         this.datePicker = new DatePickerManager();
-        this.bindFilterButtons();
+        this.filterButtons = this.initFilterButtons();
         this.initDatePickers();
         this.setActiveFilter('all');
     }
 
-    handleDateSelect(date, inputType) {
-        // Сразу форматируем дату для API при выборе
-        const formattedDate = this.datePicker.formatDateForAPI(date);
+    initFilterButtons() {
+        const buttons = {};
+        document.querySelectorAll('.filter-button').forEach(button => {
+            const text = button.textContent?.trim();
+            const period = Object.entries(PERIOD_MAP).find(([_, value]) => value === text)?.[0];
 
-        // Сохраняем новое значение в соответствующее поле
-        this.dateInputsState[inputType] = {
-            value: date,
-            formatted: formattedDate
+            if (period) {
+                buttons[period] = button;
+                button.addEventListener('click', () => this.handleFilterClick(period, button));
+            }
+        });
+        return buttons;
+    }
+
+    initDatePickers() {
+        const [dateFromInput, dateToInput] = Array.from(document.querySelectorAll('.datepicker'));
+
+        if (!dateFromInput || !dateToInput) return;
+
+        this.datePicker.init('.datepicker');
+
+        const setupDatePicker = (input, type) => {
+            $(input).on('changeDate', (e) => {
+                this.handleDateSelect($(e.target).val(), type);
+            });
+            input.addEventListener('focus', () => this.activateRangeFilter());
         };
 
-        // Проверяем условия для запуска фильтрации
+        setupDatePicker(dateFromInput, 'from');
+        setupDatePicker(dateToInput, 'to');
+    }
+
+    handleDateSelect(date, inputType) {
+        const formattedDate = this.datePicker.formatDateForAPI(date);
+        this.dateInputsState[inputType] = { value: date, formatted: formattedDate };
+
         if (!this.dateInputsState.hadInitialSelection) {
-            // Если это первый выбор дат, нужны оба значения
             if (this.dateInputsState.from && this.dateInputsState.to) {
                 this.dateInputsState.hadInitialSelection = true;
                 this.processDateRange();
             }
         } else {
-            // После первого выбора фильтруем при любом изменении
             this.processDateRange();
         }
     }
 
     processDateRange() {
-        // Проверяем наличие обеих дат
-        if (this.dateInputsState.from && this.dateInputsState.to) {
-            const fromDate = this.parseDate(this.dateInputsState.from.value);
-            const toDate = this.parseDate(this.dateInputsState.to.value);
+        const { from, to } = this.dateInputsState;
+        if (!from || !to) return;
 
-            let dateFrom, dateTo;
+        const [fromDate, toDate] = [from.value, to.value].map(this.parseDate);
+        const [dateFrom, dateTo] = fromDate <= toDate
+            ? [from.formatted, to.formatted]
+            : [to.formatted, from.formatted];
 
-            if (fromDate.getTime() <= toDate.getTime()) {
-                dateFrom = this.dateInputsState.from.formatted;
-                dateTo = this.dateInputsState.to.formatted;
-            } else {
-                dateFrom = this.dateInputsState.to.formatted;
-                dateTo = this.dateInputsState.from.formatted;
-            }
-
-            this.fetchFilteredOperations('interval', {
-                dateFrom,
-                dateTo
-            });
-        }
+        this.fetchFilteredOperations('interval', { dateFrom, dateTo });
     }
 
     parseDate(dateString) {
-        const [day, month, year] = dateString.split('.');
-        // Устанавливаем время в полночь по местному времени
-        const date = new Date(year, month - 1, day);
-        date.setHours(0, 0, 0, 0);
-        return date;
+        const [day, month, year] = dateString.split('.').map(Number);
+        return new Date(year, month - 1, day, 0, 0, 0, 0);
     }
 
     handleFilterClick(period, button) {
         if (period !== 'interval') {
-            // Сбрасываем состояние дат при выборе другого фильтра
-            this.dateInputsState = {
-                from: null,
-                to: null,
-                hadInitialSelection: false
-            };
-            // Очищаем значения в полях ввода дат
-            const dateInputs = document.querySelectorAll('.datepicker');
-            dateInputs.forEach(input => {
-                input.value = '';
-            });
+            this.dateInputsState = { from: null, to: null, hadInitialSelection: false };
+            document.querySelectorAll('.datepicker').forEach(input => input.value = '');
         }
         this.setActiveFilter(period);
         this.fetchFilteredOperations(period);
     }
 
     activateRangeFilter() {
-        const rangeButton = this.findButtonByText('Интервал');
+        const rangeButton = this.filterButtons['interval'];
         if (rangeButton) {
             this.setActiveFilter('interval');
         }
     }
 
     setActiveFilter(period) {
-        document.querySelectorAll('.filter-button').forEach(btn => {
+        Object.values(this.filterButtons).forEach(btn => {
             btn.classList.remove('btn-secondary');
             btn.classList.add('btn-light');
         });
 
-        const periodText = this.getPeriodText(period);
-        const activeButton = this.findButtonByText(periodText);
+        const activeButton = this.filterButtons[period];
         if (activeButton) {
             activeButton.classList.remove('btn-light');
             activeButton.classList.add('btn-secondary');
         }
     }
 
-    getPeriodText(period) {
-        const periodMap = {
-            'today': 'Сегодня',
-            'week': 'Неделя',
-            'month': 'Месяц',
-            'year': 'Год',
-            'all': 'Все',
-            'interval': 'Интервал'
-        };
-        return periodMap[period] || period;
-    }
-
-    async fetchFilteredOperations(period, dateRange = null) {
+    async fetchFilteredOperations(period, dateRange) {
         try {
-            let url = `${this.apiUrl}?period=${period}`;
+            const params = new URLSearchParams({ period });
 
             if (period === 'interval' && dateRange) {
-                // Добавляем время к датам для корректного включения граничных дней
                 const { dateFrom, dateTo } = dateRange;
-                url += `&dateFrom=${dateFrom}T00:00:00&dateTo=${dateTo}T23:59:59`;
+                params.append('dateFrom', `${dateFrom}T00:00:00`);
+                params.append('dateTo', `${dateTo}T23:59:59`);
             }
 
-            const operations = await Http.request(url);
-
+            const operations = await Http.request(`${this.apiUrl}?${params}`);
             if (operations) {
                 this.renderOperations(operations);
             }
