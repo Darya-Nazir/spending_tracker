@@ -1,5 +1,9 @@
 export class Validation {
     constructor(navigateTo) {
+        if (this.constructor === Validation) {
+            throw new Error('Validation is an abstract class and cannot be instantiated directly');
+        }
+
         this.form = document.getElementById('registrationForm');
         this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
@@ -14,7 +18,7 @@ export class Validation {
     }
 
     initializeEventListeners() {
-        // Метод для наследования, можно переопределить в дочерних классах
+        throw new Error('Method initializeEventListeners() must be implemented in derived class');
     }
 
     validateEmail() {
