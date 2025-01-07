@@ -16,13 +16,12 @@ export class DatePickerManager {
     }
 
     init(element) {
-        if (typeof element === 'string') {
-            $(element).datepicker(this.options);
-        } else if (element instanceof HTMLElement) {
-            $(element).datepicker(this.options);
-        } else {
+        if (!(typeof element === 'string' || element instanceof HTMLElement)) {
             console.error('Элемент для датапикера не определен');
+            return;
         }
+
+        $(element).datepicker(this.options);
     }
 
     formatDate(dateString) {
