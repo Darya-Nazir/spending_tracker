@@ -1,14 +1,14 @@
 import { Unselect } from "../../services/unselect.js";
 import { Http } from "../../services/http.js";
+import { DefaultCategoriesManager } from "../../services/default_categories.js";
 
 export class CardPage {
-    constructor(navigateTo, containerId, apiUrl, addCategoryPath, editCategoryPath, defaultCategories) {
+    constructor(navigateTo, containerId, apiUrl, addCategoryPath, editCategoryPath) {
         this.navigateToPath = navigateTo;
         this.container = document.getElementById(containerId);
         this.apiUrl = apiUrl;
         this.addCategoryPath = addCategoryPath;
         this.editCategoryPath = editCategoryPath;
-        this.defaultCategories = defaultCategories;
     }
 
     async init() {
@@ -20,26 +20,12 @@ export class CardPage {
         this.deleteCategoryButtonListener();
     }
 
-    getDefaultCategories() {
-        throw new Error("Метод 'getDefaultCategories' должен быть переопределён в производном классе.");
-    }
-
     highlightPage() {
         throw new Error("Метод 'highlightPage' должен быть переопределён в производном классе.");
     }
 
     async checkAndCreateDefaultCategories() {
-        try {
-            const categories = await this.fetchCategories();
-
-            if (categories.length === 0) {
-                for (const title of this.defaultCategories) {
-                    await Http.request(this.apiUrl, 'POST', { title });
-                }
-            }
-        } catch (error) {
-            console.error('Ошибка при создании категорий:', error);
-        }
+        await DefaultCategoriesManager.createIfEmpty(this.apiUrl, this.defaultCategories);
     }
 
     addCategoryButtonListener() {

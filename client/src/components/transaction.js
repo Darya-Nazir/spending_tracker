@@ -2,6 +2,7 @@ import { Http } from "../services/http.js";
 import { BaseOperations } from "./base-class/base_operations.js";
 import { Unselect } from "../services/unselect.js";
 import { Filter } from "../services/filter.js";
+import { DefaultCategoriesManager } from "../services/default_categories.js";
 
 export class Transaction extends BaseOperations {
     constructor(navigateTo) {
@@ -93,11 +94,19 @@ export class Transaction extends BaseOperations {
         const createIncomeButton = document.getElementById('createIncome');
         const createExpenseButton = document.getElementById('createExpense');
 
-        createIncomeButton.addEventListener("click", () => {
+        createIncomeButton.addEventListener("click", async () => {
+            await DefaultCategoriesManager.createIfEmpty(
+                'http://localhost:3000/api/categories/income',
+                DefaultCategoriesManager.incomeCategories
+            );
             this.navigateToPath('create-transaction?type=income');
         });
 
-        createExpenseButton.addEventListener("click", () => {
+        createExpenseButton.addEventListener("click", async () => {
+            await DefaultCategoriesManager.createIfEmpty(
+                'http://localhost:3000/api/categories/expense',
+                DefaultCategoriesManager.expenseCategories
+            );
             this.navigateToPath('create-transaction?type=expense');
         });
     }

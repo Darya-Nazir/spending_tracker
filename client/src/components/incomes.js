@@ -2,20 +2,12 @@ import { CardPage } from "./base-class/card-page.js";
 
 export class Incomes extends CardPage {
     constructor(navigateTo) {
-        const defaultCategories = [
-            'Депозиты',
-            'Зарплата',
-            'Сбережения',
-            'Инвестиции'
-        ];
-
         super(
             navigateTo,
             'incomesContainer',
             'http://localhost:3000/api/categories/income',
             '/create-income',
             '/edit-income',
-            defaultCategories
         );
     }
 
