@@ -33,7 +33,7 @@ export class User {
 
         logoutButton.addEventListener('click', () => {
             Auth.removeTokens();
-            this.navigateToPath('/');
+            this.navigateToPath('/login');
         });
     }
 

@@ -86,7 +86,7 @@ export class Router {
         const handlePage = this.page ?? null;
 
         if (handlePage?.state === states.STATE_AUTHORIZED && !this.isAuthenticated()) {
-            this.navigateTo('/');
+            this.navigateTo('/login');
             return;
         }
 
@@ -138,7 +138,7 @@ export class Router {
 }
 
 const routes = {
-    '/': {
+    '/login': {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
         state: states.STATE_UNAUTHORIZED,
@@ -168,7 +168,7 @@ const routes = {
         state: states.STATE_AUTHORIZED,
         component: Transaction
     },
-    '/analytics': {
+    '/': {
         html: 'templates/analytics.html',
         title: 'Главная',
         state: states.STATE_AUTHORIZED,

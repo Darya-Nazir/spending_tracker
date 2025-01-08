@@ -26,7 +26,7 @@ export class Login extends Validation {
     }
 
     jumpIntoApp() {
-        this.navigateToPath('/analytics');
+        this.navigateToPath('/');
     }
 
     async submitForm() {

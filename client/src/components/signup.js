@@ -52,7 +52,7 @@ export class Signup extends Validation {
             const result = await Http.request(path, 'POST', data);
 
             if (result) {
-                this.navigateToPath('/');
+                this.navigateToPath('/login');
             }
         } catch (error) {
             console.error('Ошибка при отправке:', error);

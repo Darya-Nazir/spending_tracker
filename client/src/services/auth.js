@@ -34,7 +34,7 @@ export class Auth {
 
         this.removeTokens();
         if (this.navigateToPath) {
-            this.navigateToPath('/');
+            this.navigateToPath('/login');
         }
         return false;
     }
