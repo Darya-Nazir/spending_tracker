@@ -2,7 +2,6 @@ import { NewCard } from "./base-class/new-card.js";
 import { DatePickerManager } from "../services/datePicker.js";
 import { Http } from "../services/http.js";
 
-
 export class NewTransaction extends NewCard {
     constructor(navigateTo) {
         super(
@@ -26,7 +25,6 @@ export class NewTransaction extends NewCard {
 
     async init() {
         this.setInitialType();
-        // this.setupDatePicker();
         this.datePickerManager.init(this.dateInput);
         await this.loadCategories();
 
@@ -160,24 +158,6 @@ export class NewTransaction extends NewCard {
             this.typeInput.readOnly = true;
             this.typeInput.style.backgroundColor = '#f8f9fa';
         }
-    }
-
-    // Форматирование даты для API
-    formatDateForAPI(dateString) {
-        if (!dateString) return '';
-        const parts = dateString.split('.');
-        if (parts.length !== 3) return '';
-        return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-
-    // Настройка выбора даты
-    setupDatePicker() {
-        $(this.dateInput).datepicker({
-            format: 'dd.mm.yyyy',
-            language: 'ru',
-            autoclose: true,
-            todayHighlight: true
-        });
     }
 }
 
