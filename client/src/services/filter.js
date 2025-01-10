@@ -3,7 +3,11 @@ import { DatePickerManager } from "./date_picker.js";
 import { BaseOperations } from "../components/base-class/base_operations.js";
 
 export class Filter extends BaseOperations {
-    dateInputsState;
+    dateInputsState = {
+        from: null,
+        to: null,
+        hadInitialSelection: false
+    };
     periodMap = {
         'today': 'Сегодня',
         'week': 'Неделя',
@@ -15,11 +19,6 @@ export class Filter extends BaseOperations {
 
     constructor(navigateTo) {
         super(navigateTo);
-        this.dateInputsState = {
-            from: null,
-            to: null,
-            hadInitialSelection: false
-        };
         this.datePicker = new DatePickerManager();
         this.bindFilterButtons();
         this.initDatePickers();
@@ -43,7 +42,7 @@ export class Filter extends BaseOperations {
 
         Object.entries(filterButtons).forEach(([period, button]) => {
             if (button) {
-                button.addEventListener('click', () => this.handleFilterClick(period, button));
+                button.addEventListener('click', () => this.handleFilterClick(period));
             }
         });
     }
@@ -118,7 +117,7 @@ export class Filter extends BaseOperations {
         return date;
     }
 
-    handleFilterClick(period, button) {
+    handleFilterClick(period) {
         if (period !== 'interval') {
             this.dateInputsState = {
                 from: {

@@ -1,6 +1,5 @@
 import { Unselect } from "../../services/unselect.js";
 import { Http } from "../../services/http.js";
-import { DefaultCategoriesManager } from "../../services/default_categories.js";
 
 export class Card_page {
     constructor(navigateTo, containerId, apiUrl, addCategoryPath, editCategoryPath) {
@@ -14,7 +13,6 @@ export class Card_page {
     async init() {
         new Unselect().init();
         this.highlightPage();
-        await this.checkAndCreateDefaultCategories();
         await this.renderCategories();
         this.addCategoryButtonListener();
         this.deleteCategoryButtonListener();
@@ -22,10 +20,6 @@ export class Card_page {
 
     highlightPage() {
         throw new Error("Метод 'highlightPage' должен быть переопределён в производном классе.");
-    }
-
-    async checkAndCreateDefaultCategories() {
-        await DefaultCategoriesManager.createIfEmpty(this.apiUrl, this.defaultCategories);
     }
 
     addCategoryButtonListener() {
