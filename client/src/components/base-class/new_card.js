@@ -1,6 +1,6 @@
 import { Http } from "../../services/http.js";
 
-export class NewCard {
+export class New_card {
     constructor(navigateTo, apiUrl, redirectPath) {
         this.navigateToPath = navigateTo;
         this.apiUrl = apiUrl;

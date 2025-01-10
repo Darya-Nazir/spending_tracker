@@ -1,5 +1,5 @@
 import { Filter } from "../services/filter.js";
-import { DatePickerManager } from "../services/datePicker.js";
+import { DatePickerManager } from "../services/date_picker.js";
 import { Unselect } from "../services/unselect.js";
 
 export class Analytics {

@@ -2,7 +2,7 @@ import { Unselect } from "../../services/unselect.js";
 import { Http } from "../../services/http.js";
 import { DefaultCategoriesManager } from "../../services/default_categories.js";
 
-export class CardPage {
+export class Card_page {
     constructor(navigateTo, containerId, apiUrl, addCategoryPath, editCategoryPath) {
         this.navigateToPath = navigateTo;
         this.container = document.getElementById(containerId);
