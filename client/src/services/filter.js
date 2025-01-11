@@ -1,6 +1,6 @@
 import { Http } from './http.js';
 import { DatePickerManager } from "./date_picker.js";
-import { BaseOperations } from "../components/base-class/base_operations.js";
+import { BaseOperations } from "../components/base-class/base-operations.js";
 
 export class Filter extends BaseOperations {
     dateInputsState = {

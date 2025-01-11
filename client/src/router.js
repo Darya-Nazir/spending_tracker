@@ -5,12 +5,12 @@ import { Analytics } from "./components/analytics.js";
 import { Incomes } from "./components/incomes.js";
 import { Transaction } from "./components/transaction.js";
 import { User } from "./components/user.js";
-import { NewCost } from "./components/create_cost.js";
-import { NewIncome } from "./components/create_income.js";
-import { EditIncome } from "./components/edit_income.js";
-import { EditCost } from "./components/edit_cost.js";
-import { NewTransaction } from "./components/create_transaction.js";
-import { EditTransaction } from "./components/edit_transaction.js";
+import { NewCost } from "./components/create-cost.js";
+import { NewIncome } from "./components/create-income.js";
+import { EditIncome } from "./components/edit-income.js";
+import { EditCost } from "./components/edit-cost.js";
+import { NewTransaction } from "./components/create-transaction.js";
+import { EditTransaction } from "./components/edit-transaction.js";
 import { Auth } from "./services/auth.js";
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
@@ -175,37 +175,37 @@ const routes = {
         component: Analytics
     },
     '/create-cost': {
-        html: 'templates/create_cost.html',
+        html: 'templates/create-cost.html',
         title: 'Создание категории расходов',
         state: states.STATE_AUTHORIZED,
         component: NewCost
     },
     '/create-income': {
-        html: 'templates/create_income.html',
+        html: 'templates/create-income.html',
         title: 'Создание категории доходов',
         state: states.STATE_AUTHORIZED,
         component: NewIncome
     },
     '/edit-cost': {
-        html: 'templates/edit_cost.html',
+        html: 'templates/edit-cost.html',
         title: 'Редактирование категории расходов',
         state: states.STATE_AUTHORIZED,
         component: EditCost
     },
     '/edit-income': {
-        html: 'templates/edit_income.html',
+        html: 'templates/edit-income.html',
         title: 'Редактирование категории доходов',
         state: states.STATE_AUTHORIZED,
         component: EditIncome
     },
     '/create-transaction': {
-        html: 'templates/create_transaction.html',
+        html: 'templates/create-transaction.html',
         title: 'Создание дохода/расхода',
         state: states.STATE_AUTHORIZED,
         component: NewTransaction
     },
     '/edit-transaction': {
-        html: 'templates/edit_transaction.html',
+        html: 'templates/edit-transaction.html',
         title: 'Редактирование дохода/расхода',
         state: states.STATE_AUTHORIZED,
         component: EditTransaction

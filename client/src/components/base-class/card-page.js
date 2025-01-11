@@ -1,7 +1,7 @@
 import { Unselect } from "../../services/unselect.js";
 import { Http } from "../../services/http.js";
 
-export class Card_page {
+export class CardPage {
     constructor(navigateTo, containerId, apiUrl, addCategoryPath, editCategoryPath) {
         this.navigateToPath = navigateTo;
         this.container = document.getElementById(containerId);

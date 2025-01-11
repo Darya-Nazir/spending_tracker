@@ -1,6 +1,6 @@
-import { Card_page } from "./base-class/card_page.js";
+import { CardPage } from "./base-class/card-page.js";
 
-export class Costs extends Card_page {
+export class Costs extends CardPage {
     constructor(navigateTo) {
         super(
             navigateTo,
