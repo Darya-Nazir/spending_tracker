@@ -8,7 +8,6 @@ export class Signup extends Validation {
         super(navigateTo);
         this.fullNameInput = document.getElementById('fullName');
         this.confirmPasswordInput = document.getElementById('confirmPassword');
-        // this.login = new Login(navigateTo);
     }
 
     initializeEventListeners() {
@@ -51,43 +50,20 @@ export class Signup extends Validation {
 
     async submitForm(data) {
         try {
-            // 1. Регистрация
             const signupPath = 'http://localhost:3000/api/signup';
             const signupResult = await Http.request(signupPath, 'POST', data, false);
 
             if (signupResult) {
-                // 2. Автоматический логин
                 const loginData = {
                     email: data.email,
                     password: data.password,
                     rememberMe: false
                 };
 
-                const loginPath = 'http://localhost:3000/api/login';
-                const loginResult = await Http.request(loginPath, 'POST', loginData, false);
+                const loginSuccess = await DefaultCategoriesManager.processLogin(loginData);
 
-                if (loginResult && loginResult.tokens) {
-                    const userInfo = {
-                        id: loginResult.user.id,
-                        name: loginResult.user.name,
-                    };
-
-                    // Сохраняем токены и информацию о пользователе
-                    Auth.setTokens(loginResult.tokens.accessToken, loginResult.tokens.refreshToken);
-                    Auth.setUserInfo(userInfo);
-
-                    // 3. Создаем шаблонные категории
-                    await Promise.all([
-                        DefaultCategoriesManager.createIfEmpty(
-                            'http://localhost:3000/api/categories/expense',
-                            DefaultCategoriesManager.expenseCategories
-                        ),
-                        DefaultCategoriesManager.createIfEmpty(
-                            'http://localhost:3000/api/categories/income',
-                            DefaultCategoriesManager.incomeCategories
-                        )
-                    ]);
-
+                if (loginSuccess) {
+                    await DefaultCategoriesManager.setupDefaultCategories();
                     this.navigateToPath('/');
                 }
             }

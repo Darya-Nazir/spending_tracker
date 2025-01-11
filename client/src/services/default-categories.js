@@ -1,5 +1,5 @@
 import { Http } from "./http.js";
-// import { Auth } from "./auth.js";
+import { Auth } from "./auth.js";
 
 export class DefaultCategoriesManager {
     static expenseCategories = [
@@ -21,6 +21,48 @@ export class DefaultCategoriesManager {
         'Инвестиции'
     ];
 
+    static async processLogin(loginData) {
+        try {
+            const loginPath = 'http://localhost:3000/api/login';
+            const loginResult = await Http.request(loginPath, 'POST', loginData, false);
+
+            if (loginResult && loginResult.tokens) {
+                const userInfo = {
+                    id: loginResult.user.id,
+                    name: loginResult.user.name,
+                };
+
+                Auth.setTokens(loginResult.tokens.accessToken, loginResult.tokens.refreshToken);
+                Auth.setUserInfo(userInfo);
+
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Ошибка при входе:', error);
+            return false;
+        }
+    }
+
+    static async setupDefaultCategories() {
+        try {
+            await Promise.all([
+                this.createIfEmpty(
+                    'http://localhost:3000/api/categories/expense',
+                    this.expenseCategories
+                ),
+                this.createIfEmpty(
+                    'http://localhost:3000/api/categories/income',
+                    this.incomeCategories
+                )
+            ]);
+            return true;
+        } catch (error) {
+            console.error('Созданиe категорий:', error);
+            return false;
+        }
+    }
+
     static async createIfEmpty(apiUrl, categories) {
         try {
             const existingCategories = await Http.request(apiUrl, 'GET');
@@ -31,37 +73,9 @@ export class DefaultCategoriesManager {
                 }
             }
         } catch (error) {
-            console.error('Ошибка при создании категорий:', error);
+            console.error('Созданиe категорий:', error);
+            throw error;
         }
     }
-
-    // async sendCategoriesToBackend() {
-    //     const loginPath = 'http://localhost:3000/api/login';
-    //     const loginResult = await Http.request(loginPath, 'POST', loginData, false);
-    //
-    //     if (loginResult && loginResult.tokens) {
-    //         const userInfo = {
-    //             id: loginResult.user.id,
-    //             name: loginResult.user.name,
-    //         };
-    //
-    //         // Сохраняем токены и информацию о пользователе
-    //         Auth.setTokens(loginResult.tokens.accessToken, loginResult.tokens.refreshToken);
-    //         Auth.setUserInfo(userInfo);
-    //
-    //         // 3. Создаем шаблонные категории
-    //         await Promise.all([
-    //             DefaultCategoriesManager.createIfEmpty(
-    //                 'http://localhost:3000/api/categories/expense',
-    //                 DefaultCategoriesManager.expenseCategories
-    //             ),
-    //             DefaultCategoriesManager.createIfEmpty(
-    //                 'http://localhost:3000/api/categories/income',
-    //                 DefaultCategoriesManager.incomeCategories
-    //             )
-    //         ]);
-    //
-    //     }
-    // }
 }
 
