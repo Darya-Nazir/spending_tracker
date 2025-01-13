@@ -24,25 +24,25 @@ export class BaseOperations {
         const formattedDate = this.datePickerManager.formatDate(operation.date);
 
         row.innerHTML = `
-            <td>${operation.number}</td>
-            <td class="${typeClass}">${typeText}</td>
-            <td>${operation.category || '-'}</td>
-            <td>${operation.amount}$</td>
-            <td><input type="text" class="datepicker form-control border-0" value="${formattedDate}" readonly></td>
-            <td><input type="text" class="form-control border-0" value="${operation.comment || ''}"></td>
-            <td>
-                <button class="btn btn-sm btn-light me-1 edit-transaction">
-                    <i class="bi bi-pencil">
-                        <img src="images/pen-icon.svg" alt="Pen icon">
-                    </i>
-                </button>
-                <button class="btn btn-sm btn-light delete-transaction">
-                    <i class="bi bi-trash">
-                        <img src="images/trash-icon.svg" alt="Trash icon">
-                    </i>
-                </button>
-            </td>
-        `;
+    <td class="align-middle">${operation.number}</td>
+    <td class="align-middle ${typeClass}">${typeText}</td>
+    <td class="align-middle">${operation.category || '-'}</td>
+    <td class="align-middle">${operation.amount}$</td>
+    <td class="align-middle"><input type="text" class="datepicker form-control border-0" value="${formattedDate}" readonly></td>
+    <td class="align-middle"><input type="text" class="form-control border-0" value="${operation.comment || ''}"></td>
+    <td class="align-middle">
+        <button class="btn btn-sm btn-light me-1 edit-transaction">
+            <i class="bi bi-pencil">
+                <img src="images/pen-icon.svg" alt="Pen icon">
+            </i>
+        </button>
+        <button class="btn btn-sm btn-light delete-transaction">
+            <i class="bi bi-trash">
+                <img src="images/trash-icon.svg" alt="Trash icon">
+            </i>
+        </button>
+    </td>
+`;
 
         return row;
     }
