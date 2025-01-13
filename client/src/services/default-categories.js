@@ -26,18 +26,20 @@ export class DefaultCategoriesManager {
             const loginPath = 'http://localhost:3000/api/login';
             const loginResult = await Http.request(loginPath, 'POST', loginData, false);
 
-            if (loginResult && loginResult.tokens) {
-                const userInfo = {
-                    id: loginResult.user.id,
-                    name: loginResult.user.name,
-                };
-
-                Auth.setTokens(loginResult.tokens.accessToken, loginResult.tokens.refreshToken);
-                Auth.setUserInfo(userInfo);
-
-                return true;
+            if (!loginResult || !loginResult.tokens) {
+                return false;
             }
-            return false;
+
+            const userInfo = {
+                id: loginResult.user.id,
+                name: loginResult.user.name,
+            };
+
+            Auth.setTokens(loginResult.tokens.accessToken, loginResult.tokens.refreshToken);
+            Auth.setUserInfo(userInfo);
+
+            return true;
+
         } catch (error) {
             console.error('Ошибка при входе:', error);
             return false;
