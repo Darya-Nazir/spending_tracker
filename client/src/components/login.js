@@ -58,6 +58,10 @@ export class Login extends Validation {
             const statusMatch = error.message.match(/HTTP: (\d+)/);
             if (statusMatch.length !== 0 && parseInt(statusMatch[1]) === 401) {
                 alert('Пользователь с такими данными не зарегистрирован');
+            }
+
+            if (error.toString().includes('email or password')) {
+                alert('Неправильная электронная почта или пароль');
                 return;
             }
 
