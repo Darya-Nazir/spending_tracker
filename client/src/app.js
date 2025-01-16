@@ -1,6 +1,7 @@
 import 'jquery';
 import '@popperjs/core';
-import 'bootstrap';
+import * as bootstrap from 'bootstrap';
+window.bootstrap = bootstrap;
 import 'bootstrap-datepicker';
 import 'bootstrap-datepicker/dist/locales/bootstrap-datepicker.ru.min.js';
 

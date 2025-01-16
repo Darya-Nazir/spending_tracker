@@ -53,9 +53,7 @@ export class CardPage {
             }
             try {
                 const url = `${this.apiUrl}/${categoryIdToDelete}`;
-                const result = await Http.request(url, 'DELETE');
-
-                console.log(result);
+                await Http.request(url, 'DELETE');
 
                 cardToDelete.remove();
                 cardToDelete = null;
