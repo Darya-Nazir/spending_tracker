@@ -69,7 +69,8 @@ export default {
         }),
         new webpack.ProvidePlugin({
             $: 'jquery',
-            jQuery: 'jquery'
+            jQuery: 'jquery',
+            bootstrap: 'bootstrap'
         })
     ],
 };
