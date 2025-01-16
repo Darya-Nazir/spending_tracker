@@ -1,0 +1,10 @@
+.idea
+
+# Dependencies
+**/node_modules/
+
+# Production build
+**/dist/
+
+# macOS system files
+**/.DS_Store

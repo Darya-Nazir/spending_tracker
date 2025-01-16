@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="title"></title>
+    <link rel="stylesheet" href="styles/bootstrap.min.css">
+    <link rel="stylesheet" href="styles/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="styles/common.css">
+</head>
+
+<body>
+<div class="container-fluid ">
+    <div class="row d-flex ">
+        <!-- Левая боковая панель -->
+        <div id="navbar" class="col-2 min-vh-100 border-end bg-white d-flex flex-column pb-5">
+            <!-- Логотип -->
+            <div class="text-center my-4">
+                <img src="../images/Logo.svg" alt="Logo" class="img-fluid">
+            </div>
+
+            <!-- Основная навигация -->
+            <nav class="mb-4">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-dark rounded" id="mainPage"
+                               href="/">
+                                    <span class="input-group-text border-0 bg-light me-2">
+                                        <img src="../images/home.svg" alt="Email icon">
+                                    </span>
+                                Главная
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a class="nav-link d-flex align-items-center text-dark rounded" id="transactionsPage"
+                               href="/transactions">
+                                    <span class="input-group-text border-0 bg-light me-2">
+                                        <img src="../images/money.svg" alt="Email icon">
+                                    </span>
+                                Доходы & Расходы
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <!-- Выпадающий список категорий -->
+            <div class="dropdown show">
+                <button class="btn btn-outline-primary dropdown-toggle dropdown-menu-end" style="width: 100%"
+                        type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="true">
+                    Категории
+                </button>
+                <ul class="dropdown-menu border-primary" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item route-link" id="revenuesPage" href="/incomes">Доходы</a></li>
+                    <li><a class="dropdown-item route-link" id="costsPage" href="/costs">Расходы</a></li>
+                </ul>
+            </div>
+
+            <div id="down" class="mt-auto">
+                <!-- Баланс -->
+                <div class="mt-auto p-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Баланс:</span>
+                        <span class="text-primary" id="balance">500$</span>
+                    </div>
+                </div>
+
+                <!-- Информация о пользователе -->
+                <div class="border-top"></div>
+                <div class="d-flex flex-column align-items-start p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="p-2 me-2">
+                            <img src="../images/user.svg" alt="User icon">
+                        </div>
+                        <span id="userName">RomanChernov</span>
+                    </div>
+                    <button class="btn btn-outline-primary" style="width: 100%"
+                            type="button" data-bs-toggle="modal" data-bs-target="#userModal">
+                        Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" id="app"></div>
+
+    </div>
+
+
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Выйти из учетной записи</h5>
+                </div>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="logout">Выйти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
+

@@ -1,0 +1,54 @@
+<div class="container d-flex flex-column align-items-center justify-content-center min-vh-100" id="app">
+    <div class="col-12" style="max-width: 397px;">
+        <div class="text-center mb-5">
+            <img src="images/Logo.svg" alt="Logo">
+        </div>
+
+        <h1 class="display-5 fw-medium text-primary-emphasis text-center fs-2 mb-4">Вход</h1>
+
+        <form id="registrationForm" novalidate>
+            <div class="mb-3">
+                <div class="input-group has-validation">
+                    <span class="input-group-text border-end-0 bg-light">
+                        <img src="images/email.svg" alt="Email icon">
+                    </span>
+                    <input type="email" name="email" class="form-input-text form-control form-control-lg fs-6 fw-normal text-secondary"
+                           id="email" placeholder="Электронная почта" required>
+                    <div class="invalid-feedback">
+                        Пожалуйста, введите корректный email.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group has-validation">
+                    <span class="input-group-text bg-light">
+                        <img src="images/lock.svg" alt="Password icon">
+                    </span>
+                    <input type="password" name="password" class="form-input-text form-control form-control-lg fs-6 fw-normal text-secondary"
+                           id="password" placeholder="Пароль" required minlength="6">
+                    <div class="invalid-feedback">
+                        Введен неправильный пароль.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4 form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label text-body-black fs-6 fw-normal" for="rememberMe">
+                    Запомнить меня
+                </label>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg fs-6">Войти</button>
+            </div>
+        </form>
+
+        <div class="mt-4">
+            <span class="text-body-black fs-7 fw-normal">Ещё нет аккаунта? </span>
+            <a href="/signup" class="text-primary route-link">Пройдите регистрацию</a>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,40 @@
+<div class="col">
+    <div class="container mt-4">
+        <h2 class="mb-4">Главная</h2>
+
+        <!-- Фильтры -->
+        <div class="mb-4 d-flex align-items-center gap-2">
+            <button class="btn btn-secondary filter-button">Сегодня</button>
+            <button class="btn btn-light filter-button">Неделя</button>
+            <button class="btn btn-light filter-button">Месяц</button>
+            <button class="btn btn-light filter-button">Год</button>
+            <button class="btn btn-light filter-button">Все</button>
+            <button class="btn btn-light filter-button">Интервал</button>
+            <span class="ms-2">с</span>
+            <input type="text" class="form-control datepicker" data-range="from" placeholder="Дата" style="width: 100px;">
+            <span>по</span>
+            <input type="text" class="form-control datepicker" data-range="to" placeholder="Дата" style="width: 100px;">
+        </div>
+
+        <!-- Графики -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Доходы</h5>
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Расходы</h5>
+                        <canvas id="expensesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
