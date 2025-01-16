@@ -61,7 +61,7 @@ export class Login extends Validation {
             }
 
             if (error.toString().includes('email or password')) {
-                alert('Неправильная электронная почта или пароль');
+                alert('Неверная электронная почта или пароль');
                 return;
             }
 
