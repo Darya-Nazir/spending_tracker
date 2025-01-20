@@ -10,7 +10,7 @@
     "prod": "npm run build && serve dist -l 9000",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "keywords": [],
   "author": "",
@@ -33,7 +33,8 @@
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.1.0",
-    "whatwg-fetch": "^3.6.20"
+    "whatwg-fetch": "^3.6.20",
+    "yargs": "^17.7.2"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",

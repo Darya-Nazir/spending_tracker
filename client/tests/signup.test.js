@@ -1,4 +1,4 @@
-const { server } = require('../mocks/server.cjs');
+import { server } from '../mocks/server.js';  // поменяли расширение на .js и используем import
 
 describe('Signup tests', () => {
     // Перед всеми тестами запускаем сервер

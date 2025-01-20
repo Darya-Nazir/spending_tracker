@@ -1,4 +1,4 @@
-const createResponse = (data, status = 200, delay = 500) => {
+export const createResponse = (data, status = 200, delay = 500) => {
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve(new Response(JSON.stringify(data), {
@@ -8,5 +8,3 @@ const createResponse = (data, status = 200, delay = 500) => {
         }, delay);
     });
 };
-
-module.exports = { createResponse };
