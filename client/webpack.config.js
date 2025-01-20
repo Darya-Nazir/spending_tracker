@@ -1,5 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
+
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
 import webpack from 'webpack';
@@ -15,17 +16,13 @@ export default {
         path: path.resolve(__dirname, 'dist'),
     },
     devServer: {
-        static: {
-            directory: path.join(__dirname, 'dist'),
-        },
+        static: { directory: path.join(__dirname, 'dist'), },
         compress: true,
         port: 9000,
         historyApiFallback: true,
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            template: "./index.html"
-        }),
+        new HtmlWebpackPlugin({ template: "./index.html" }),
         new CopyPlugin({
             patterns: [
                 { from: "./src/markups", to: "templates" },

@@ -6,12 +6,15 @@ import importPlugin from "eslint-plugin-import";
 export default [
     {
         ignores: [
-            '**/src/lib/**',    // игнорируем библиотеки
             '**/node_modules/**',
             '**/dist/**',       // добавляем игнорирование всего в dist
             'dist/',
             '**/*.min.js',
-            'eslint.config.mjs'
+            'eslint.config.mjs',
+            '**/*.test.js',
+            '**/*.spec.js',
+            '**/__tests__/**',
+            '**/setupTests.js'
         ]
     },
     {
@@ -20,7 +23,8 @@ export default [
             globals: {
                 ...globals.node
             },
-            sourceType: 'commonjs'
+            // sourceType: 'commonjs'
+            sourceType: 'module'
         }
     },
     {
@@ -29,6 +33,8 @@ export default [
             globals: {
                 ...globals.browser,
                 ...globals.jquery,
+                bootstrap: 'readonly',
+                Chart: 'readonly',
             },
         }
     },
