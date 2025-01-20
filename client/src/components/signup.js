@@ -1,7 +1,6 @@
 import { Http } from "../services/http.js";
 import { Validation } from "./base-class/validation.js";
 import { DefaultCategoriesManager } from "../services/default-categories.js";
-import { Auth } from "../services/auth.js";
 
 export class Signup extends Validation {
     constructor(navigateTo) {
