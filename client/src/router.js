@@ -35,10 +35,6 @@ export class Router {
         this.page = this.routes[this.path];
     }
 
-    // для охраны от неавторизованных пользователей
-    isAuthenticated() {
-        return localStorage.getItem(Auth.accessTokenKey) !== null;
-    }
 
     initEvents() {
         window.addEventListener('DOMContentLoaded', this.handleNavigation.bind(this));
