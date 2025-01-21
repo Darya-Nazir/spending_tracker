@@ -1,6 +1,5 @@
 import { rest } from 'msw';
-
-import { users } from '../data/users.js';
+import { users } from '../../fixtures/data/users.js'
 
 export const userHandlers = [
     rest.get('/api/users', async (req, res, ctx) => {
