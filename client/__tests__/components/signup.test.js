@@ -1,12 +1,13 @@
+import { jest } from '@jest/globals';
 import { Http } from '../../src/services/http.js';
 import { DefaultCategoriesManager } from '../../src/services/default-categories.js';
 import '@testing-library/jest-dom';
-import { jest } from '@jest/globals';
 import { Signup } from '../../src/components/signup.js';
-import signupFormTemplate from '../fixtures/signup-form.html';
+import { createMockEvent } from '../mocks/utils/event.js';
+import { createHttpMock } from '../mocks/handlers/http.js';
 
 // Определяем моки
-const httpMock = { request: jest.fn() };
+const httpMock = createHttpMock();
 
 const defaultCategoriesManagerMock = {
     processLogin: jest.fn(),
@@ -23,7 +24,6 @@ describe('Signup Component', () => {
     let mockNavigateTo;
 
     beforeEach(() => {
-        // Создаём DOM с полной структурой из разметки
         document.body.innerHTML = `
            <div class="container">
                <form id="registrationForm" novalidate>
@@ -48,14 +48,8 @@ describe('Signup Component', () => {
        `;
 
         mockNavigateTo = jest.fn();
-
-        // Инициализируем компонент
         signup = new Signup(mockNavigateTo);
-
-        // Инициализируем обработчики событий
         signup.initializeEventListeners();
-
-        // Очищаем все моки
         jest.clearAllMocks();
     });
 
@@ -64,7 +58,7 @@ describe('Signup Component', () => {
         jest.restoreAllMocks();
     });
 
-    test('must successfully submit a registration form', async () => {
+    test('should successfully submit a registration form', async () => {
         const user = {
             name: 'Иван Иванов',
             email: 'test@example.com',
@@ -72,21 +66,17 @@ describe('Signup Component', () => {
             passwordRepeat: 'Password123!'
         };
 
-        // Заполняем поля формы
         signup.fullNameInput.value = user.name;
         signup.emailInput.value = user.email;
         signup.passwordInput.value = user.password;
         signup.confirmPasswordInput.value = user.passwordRepeat;
 
-        // Мокаем успешные ответы
         Http.request.mockResolvedValueOnce(true);
         DefaultCategoriesManager.processLogin.mockResolvedValueOnce(true);
         DefaultCategoriesManager.setupDefaultCategories.mockResolvedValueOnce();
 
-        // Вызываем метод отправки формы
         await signup.submitForm(user);
 
-        // Проверяем, что запросы были вызваны корректно
         expect(Http.request).toHaveBeenCalledWith(
             'http://localhost:3000/api/signup',
             'POST',
@@ -104,36 +94,24 @@ describe('Signup Component', () => {
     });
 
     test('should show validation errors with empty fields', () => {
-        // Создаем событие submit
-        const mockEvent = { preventDefault: jest.fn() };
-
-        // Вызываем обработчик отправки формы
+        const mockEvent = createMockEvent();
         signup.handleSubmit(mockEvent);
 
-        // Проверяем, что preventDefault был вызван
         expect(mockEvent.preventDefault).toHaveBeenCalled();
-
-        // Проверяем, что форма помечена как провалидированная
         expect(signup.form.classList.contains('was-validated')).toBeTruthy();
-
-        // Проверяем, что поля помечены как невалидные
         expect(signup.fullNameInput.classList.contains('is-invalid')).toBeTruthy();
     });
 
-    test('must show an error if passwords do not match', () => {
-        // Заполняем форму с разными паролями
+    test('should show an error if passwords do not match', () => {
         signup.fullNameInput.value = 'Иван Иванов';
         signup.emailInput.value = 'test@example.com';
         signup.passwordInput.value = 'Password123!';
         signup.confirmPasswordInput.value = 'DifferentPassword123!';
 
-        const mockEvent = { preventDefault: jest.fn() };
-
+        const mockEvent = createMockEvent();
         signup.handleSubmit(mockEvent);
 
-        // Проверяем, что поле подтверждения пароля помечено как невалидное
         expect(signup.confirmPasswordInput.classList.contains('is-invalid')).toBeTruthy();
         expect(signup.confirmPasswordInput.validationMessage).toBe('Пароли не совпадают');
     });
 });
-
