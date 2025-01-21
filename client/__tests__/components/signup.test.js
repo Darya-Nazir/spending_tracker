@@ -23,6 +23,14 @@ describe('Signup Component', () => {
     let signup;
     let mockNavigateTo;
 
+    // Выносим тестовые данные пользователя в общую область
+    const user = {
+        name: 'Иван Иванов',
+        email: 'test@example.com',
+        password: 'Password123!',
+        passwordRepeat: 'Password123!'
+    };
+
     beforeEach(() => {
         document.body.innerHTML = `
            <div class="container">
@@ -59,13 +67,6 @@ describe('Signup Component', () => {
     });
 
     test('should successfully submit a registration form', async () => {
-        const user = {
-            name: 'Иван Иванов',
-            email: 'test@example.com',
-            password: 'Password123!',
-            passwordRepeat: 'Password123!'
-        };
-
         signup.fullNameInput.value = user.name;
         signup.emailInput.value = user.email;
         signup.passwordInput.value = user.password;
@@ -103,9 +104,9 @@ describe('Signup Component', () => {
     });
 
     test('should show an error if passwords do not match', () => {
-        signup.fullNameInput.value = 'Иван Иванов';
-        signup.emailInput.value = 'test@example.com';
-        signup.passwordInput.value = 'Password123!';
+        signup.fullNameInput.value = user.name;
+        signup.emailInput.value = user.email;
+        signup.passwordInput.value = user.password;
         signup.confirmPasswordInput.value = 'DifferentPassword123!';
 
         const mockEvent = createMockEvent();
@@ -115,3 +116,4 @@ describe('Signup Component', () => {
         expect(signup.confirmPasswordInput.validationMessage).toBe('Пароли не совпадают');
     });
 });
+
