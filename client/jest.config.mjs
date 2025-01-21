@@ -5,7 +5,7 @@ export default {
         '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js',
         '\\.(html)$': 'jest-transform-stub'
     },
-    setupFilesAfterEnv: ['<rootDir>/__tests__/setupTests.js'],
+    setupFilesAfterEnv: ['<rootDir>/__tests__/setup.test.js'],
     moduleFileExtensions: ['js', 'json', 'html'],
     testEnvironmentOptions: { customExportConditions: ['node', 'node-addons'] },
     transformIgnorePatterns: [
@@ -23,6 +23,6 @@ export default {
         "/node_modules/",
         "/__tests__/fixtures/",
         "/__tests__/mocks/",
-        "/__tests__/setupTests.js"
+        "/__tests__/setup.test.js"
     ]
 };

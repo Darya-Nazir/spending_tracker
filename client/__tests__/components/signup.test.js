@@ -1,10 +1,16 @@
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
 import { jest } from '@jest/globals';
-import { Http } from '../../src/services/http.js';
-import { DefaultCategoriesManager } from '../../src/services/default-categories.js';
 import '@testing-library/jest-dom';
+
 import { Signup } from '../../src/components/signup.js';
-import { createMockEvent } from '../mocks/utils/event.js';
+import { DefaultCategoriesManager } from '../../src/services/default-categories.js';
+import { Http } from '../../src/services/http.js';
 import { createHttpMock } from '../mocks/handlers/http.js';
+import { createMockEvent } from '../mocks/utils/event.js';
+
 
 // Определяем моки
 const httpMock = createHttpMock();
@@ -22,6 +28,14 @@ DefaultCategoriesManager.setupDefaultCategories = defaultCategoriesManagerMock.s
 describe('Signup Component', () => {
     let signup;
     let mockNavigateTo;
+    let signupFormHtml;
+
+    beforeAll(() => {
+        signupFormHtml = readFileSync(
+            join(dirname(fileURLToPath(import.meta.url)), '../fixtures/html/signup-form.html'),
+            'utf8'
+        );
+    });
 
     // Выносим тестовые данные пользователя в общую область
     const user = {
@@ -32,28 +46,7 @@ describe('Signup Component', () => {
     };
 
     beforeEach(() => {
-        document.body.innerHTML = `
-           <div class="container">
-               <form id="registrationForm" novalidate>
-                   <div class="input-group has-validation">
-                       <input type="text" class="form-control" id="fullName" required>
-                       <div class="invalid-feedback"></div>
-                   </div>
-                   <div class="input-group has-validation">
-                       <input type="email" class="form-control" id="email" required>
-                       <div class="invalid-feedback"></div>
-                   </div>
-                   <div class="input-group has-validation">
-                       <input type="password" class="form-control" id="password" required>
-                       <div class="invalid-feedback"></div>
-                   </div>
-                   <div class="input-group has-validation">
-                       <input type="password" class="form-control" id="confirmPassword" required>
-                       <div class="invalid-feedback"></div>
-                   </div>
-               </form>
-           </div>
-       `;
+        document.body.innerHTML = signupFormHtml;
 
         mockNavigateTo = jest.fn();
         signup = new Signup(mockNavigateTo);

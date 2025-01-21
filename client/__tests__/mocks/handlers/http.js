@@ -1,8 +1,6 @@
 import { jest } from '@jest/globals';
 
-export const createHttpMock = () => ({
-    request: jest.fn()
-});
+export const createHttpMock = () => ({ request: jest.fn() });
 
 // Предустановленные ответы для частых случаев
 export const httpResponses = {

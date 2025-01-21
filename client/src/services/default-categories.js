@@ -1,5 +1,5 @@
-import { Http } from "./http.js";
 import { Auth } from "./auth.js";
+import { Http } from "./http.js";
 
 export class DefaultCategoriesManager {
     static expenseCategories = [

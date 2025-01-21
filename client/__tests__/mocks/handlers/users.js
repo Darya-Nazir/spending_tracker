@@ -1,4 +1,5 @@
 import { rest } from 'msw';
+
 import { users } from '../../fixtures/data/users.js'
 
 export const userHandlers = [
