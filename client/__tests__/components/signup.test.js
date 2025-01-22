@@ -11,7 +11,6 @@ import { Http } from '../../src/services/http.js';
 import { createHttpMock } from '../mocks/handlers/http.js';
 import { createMockEvent } from '../mocks/utils/event.js';
 
-
 // Определяем моки
 const httpMock = createHttpMock();
 
@@ -30,6 +29,29 @@ describe('Signup Component', () => {
     let mockNavigateTo;
     let signupFormHtml;
 
+    // Объект, содержащий маппинг полей формы
+    const formFields = {
+        fullName: 'fullNameInput',
+        email: 'emailInput',
+        password: 'passwordInput',
+        passwordRepeat: 'confirmPasswordInput'
+    };
+
+    // Тестовые данные пользователя
+    const user = {
+        fullName: 'Иван Иванов',
+        email: 'test@example.com',
+        password: 'Password123!',
+        passwordRepeat: 'Password123!'
+    };
+
+    // Вспомогательная функция для заполнения формы
+    const fillFormFields = (component, data) => {
+        Object.entries(formFields).forEach(([dataKey, inputField]) => {
+            component[inputField].value = data[dataKey];
+        });
+    };
+
     beforeAll(() => {
         signupFormHtml = readFileSync(
             join(dirname(fileURLToPath(import.meta.url)), '../fixtures/html/signup-form.html'),
@@ -37,17 +59,8 @@ describe('Signup Component', () => {
         );
     });
 
-    // Выносим тестовые данные пользователя в общую область
-    const user = {
-        name: 'Иван Иванов',
-        email: 'test@example.com',
-        password: 'Password123!',
-        passwordRepeat: 'Password123!'
-    };
-
     beforeEach(() => {
         document.body.innerHTML = signupFormHtml;
-
         mockNavigateTo = jest.fn();
         signup = new Signup(mockNavigateTo);
         signup.initializeEventListeners();
@@ -60,10 +73,8 @@ describe('Signup Component', () => {
     });
 
     test('should successfully submit a registration form', async () => {
-        signup.fullNameInput.value = user.name;
-        signup.emailInput.value = user.email;
-        signup.passwordInput.value = user.password;
-        signup.confirmPasswordInput.value = user.passwordRepeat;
+        // Заполняем форму используя вспомогательную функцию
+        fillFormFields(signup, user);
 
         Http.request.mockResolvedValueOnce(true);
         DefaultCategoriesManager.processLogin.mockResolvedValueOnce(true);
@@ -97,10 +108,8 @@ describe('Signup Component', () => {
     });
 
     test('should show an error if passwords do not match', () => {
-        signup.fullNameInput.value = user.name;
-        signup.emailInput.value = user.email;
-        signup.passwordInput.value = user.password;
-        signup.confirmPasswordInput.value = 'DifferentPassword123!';
+        const invalidUser = { ...user, passwordRepeat: 'DifferentPassword123!' };
+        fillFormFields(signup, invalidUser);
 
         const mockEvent = createMockEvent();
         signup.handleSubmit(mockEvent);
@@ -109,4 +118,3 @@ describe('Signup Component', () => {
         expect(signup.confirmPasswordInput.validationMessage).toBe('Пароли не совпадают');
     });
 });
-
