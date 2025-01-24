@@ -6,10 +6,14 @@ import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 
 import { Signup } from '../../src/components/signup.js';
+import { Auth } from "../../src/services/auth.js";
 import { DefaultCategoriesManager } from '../../src/services/default-categories.js';
 import { Http } from '../../src/services/http.js';
 import { createHttpMock } from '../mocks/handlers/http.js';
 import { createMockEvent } from '../mocks/utils/event.js';
+
+Auth.accessTokenKey = 'test_access_token';
+test.describe.configure({ mode: 'serial' });
 
 // Определяем моки
 const httpMock = createHttpMock();
