@@ -12,8 +12,6 @@ import { Http } from '../../src/services/http.js';
 import { createHttpMock } from '../mocks/handlers/http.js';
 import { createMockEvent } from '../mocks/utils/event.js';
 
-Auth.accessTokenKey = 'test_access_token';
-test.describe.configure({ mode: 'serial' });
 
 // Определяем моки
 const httpMock = createHttpMock();
@@ -22,11 +20,6 @@ const defaultCategoriesManagerMock = {
     processLogin: jest.fn(),
     setupDefaultCategories: jest.fn()
 };
-
-// Переопределяем методы
-Http.request = httpMock.request;
-DefaultCategoriesManager.processLogin = defaultCategoriesManagerMock.processLogin;
-DefaultCategoriesManager.setupDefaultCategories = defaultCategoriesManagerMock.setupDefaultCategories;
 
 describe('Signup Component', () => {
     let signup;
@@ -57,6 +50,10 @@ describe('Signup Component', () => {
     };
 
     beforeAll(() => {
+        Http.request = httpMock.request;
+        DefaultCategoriesManager.processLogin = defaultCategoriesManagerMock.processLogin;
+        DefaultCategoriesManager.setupDefaultCategories = defaultCategoriesManagerMock.setupDefaultCategories;
+
         signupFormHtml = readFileSync(
             join(dirname(fileURLToPath(import.meta.url)), '../fixtures/html/signup-form.html'),
             'utf8'
@@ -64,6 +61,8 @@ describe('Signup Component', () => {
     });
 
     beforeEach(() => {
+        Auth.accessTokenKey = 'test_access_token';
+
         document.body.innerHTML = signupFormHtml;
         mockNavigateTo = jest.fn();
         signup = new Signup(mockNavigateTo);
