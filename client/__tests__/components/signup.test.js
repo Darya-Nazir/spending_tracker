@@ -68,8 +68,10 @@ describe('Signup Component', () => {
     });
 
     afterEach(() => {
+        localStorage.clear();
+        sessionStorage.clear();
         document.body.innerHTML = '';
-        jest.restoreAllMocks();
+        jest.clearAllMocks();
     });
 
     test('should successfully submit a registration form', async () => {

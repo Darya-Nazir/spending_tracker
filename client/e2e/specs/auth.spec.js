@@ -2,6 +2,17 @@ import { test, expect } from '@playwright/test';
 
 import { testUsers } from '../fixtures/users.js';
 
+test.describe.configure({ mode: 'serial' });
+
+test.afterEach(async ({ context }) => {
+    await context.clearCookies();
+    const pages = context.pages();
+    await Promise.all(pages.map(page => page.evaluate(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+    })));
+});
+
 test.describe('Authentication', () => {
     const validUser = testUsers.new;
 
