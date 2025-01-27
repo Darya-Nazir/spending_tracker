@@ -62,12 +62,10 @@ describe('Signup Component', () => {
 
     beforeEach(() => {
         Auth.accessTokenKey = 'test_access_token';
-
         document.body.innerHTML = signupFormHtml;
         mockNavigateTo = jest.fn();
         signup = new Signup(mockNavigateTo);
         signup.initializeEventListeners();
-        jest.clearAllMocks();
     });
 
     afterEach(() => {
