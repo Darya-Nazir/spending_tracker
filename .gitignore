@@ -9,3 +9,5 @@
 # macOS system files
 **/.DS_Store
 
+**/.last-run.json
+
