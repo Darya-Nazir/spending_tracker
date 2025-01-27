@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { Auth } from "../../src/services/auth.js";
-import { testUsers } from '../fixtures/users.js';
+import { createTestUser } from '../fixtures/users.js';
 
 Auth.accessTokenKey = 'test_access_token';
 test.describe.configure({ mode: 'serial' });
@@ -16,7 +16,7 @@ test.afterEach(async ({ context }) => {
 });
 
 test.describe('Authentication', () => {
-    const validUser = testUsers.new;
+    const validUser = createTestUser();
 
     test.describe('Registration', () => {
         test.beforeEach(async ({ page }) => {
