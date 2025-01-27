@@ -7,15 +7,16 @@ test.describe('Login', () => {
     const validUser = createTestUser();
 
     test.beforeEach(async ({ page }) => {
-        await page.goto('/signup');
-        await page.fill('#fullName', validUser.fullName);
-        await page.fill('#email', validUser.email);
-        await page.fill('#password', validUser.password);
-        await page.fill('#confirmPassword', validUser.confirmPassword);
-        const responsePromise = page.waitForResponse(res => res.url().includes('/api/signup'));
-        await page.click('button[type="submit"]');
-        await responsePromise;
         await page.goto('/login');
+        // Настраиваем мок для успешного ответа API
+        await page.route('**/api/login', route => route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                tokens: { accessToken: 'mock-token', refreshToken: 'mock-refresh' },
+                user: { id: 1, name: validUser.fullName }
+            })
+        }));
     });
 
     test('successful login', async ({ page }) => {
@@ -28,6 +29,13 @@ test.describe('Login', () => {
     });
 
     test('invalid credentials', async ({ page }) => {
+        // Переопределяем мок для неуспешной авторизации
+        await page.route('**/api/login', route => route.fulfill({
+            status: 401,
+            contentType: 'application/json',
+            body: JSON.stringify({ error: 'Пользователь с такими данными не зарегистрирован' })
+        }));
+
         await page.fill('#email', 'wrong@email.com');
         await page.fill('#password', 'wrongpass');
         await page.click('button[type="submit"]');

@@ -11,13 +11,84 @@ test.describe('Registration', () => {
     });
 
     test('successful registration', async ({ page }) => {
+        // Мок для регистрации
+        await page.route('**/api/signup', route => {
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({ success: true })
+            });
+        });
+
+        // Мок для логина
+        await page.route('**/api/login', route => {
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    tokens: { accessToken: 'mock-token', refreshToken: 'mock-refresh' },
+                    user: { id: 1, name: validUser.fullName }
+                })
+            });
+        });
+
+        // Мок для GET запросов категорий - возвращаем пустые массивы,
+        // чтобы сработало создание дефолтных категорий
+        await page.route('**/api/categories/expense', route => {
+            if (route.request().method() === 'GET') {
+                return route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify([])
+                });
+            }
+            return route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
+        });
+
+        await page.route('**/api/categories/income', route => {
+            if (route.request().method() === 'GET') {
+                return route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify([])
+                });
+            }
+            return route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
+        });
+
+        // Заполняем форму
         await page.fill('#fullName', validUser.fullName);
         await page.fill('#email', validUser.email);
         await page.fill('#password', validUser.password);
         await page.fill('#confirmPassword', validUser.confirmPassword);
-        const responsePromise = page.waitForResponse(res => res.url().includes('/api/signup'));
+
+        // Отправляем форму и ждем все запросы
+        const signupPromise = page.waitForResponse(res => res.url().includes('/api/signup'));
+        const loginPromise = page.waitForResponse(res => res.url().includes('/api/login'));
+        const expenseCategoriesGetPromise = page.waitForResponse(
+            res => res.url().includes('/api/categories/expense') && res.request().method() === 'GET'
+        );
+        const incomeCategoriesGetPromise = page.waitForResponse(
+            res => res.url().includes('/api/categories/income') && res.request().method() === 'GET'
+        );
+
         await page.click('button[type="submit"]');
-        await responsePromise;
+
+        // Ждем выполнения всех запросов
+        await Promise.all([
+            signupPromise,
+            loginPromise,
+            expenseCategoriesGetPromise,
+            incomeCategoriesGetPromise
+        ]);
+
+        // Ждем завершения POST запросов для создания категорий
+        await page.waitForResponse(
+            res => res.url().includes('/api/categories') && res.request().method() === 'POST'
+        );
+
+        // Проверяем редирект на главную
+        await page.waitForURL('/');
         await expect(page).toHaveURL('/');
     });
 
@@ -40,4 +111,3 @@ test.describe('Registration', () => {
         await expect(page.locator('#confirmPassword')).toHaveClass(/is-invalid/);
     });
 });
-
