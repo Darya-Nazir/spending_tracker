@@ -28,14 +28,15 @@ export class Analytics {
         });
     }
 
-    init() {
-        // Инициализируем фильтры
+    async init() {
+        // Сначала инициализируем фильтры, так как они не зависят от графиков
         this.initFilters();
-        this.loadChartLibrary();
+
+        // Загружаем библиотеку и ждем ее инициализации
+        await this.loadChartLibrary();
     }
 
     initFilters() {
-        // Добавляем класс filter-button ко всем кнопкам фильтра
         const filterButtons = document.querySelectorAll('.btn-light, .btn-secondary');
         filterButtons.forEach(button => {
             if (!button.classList.contains('filter-button')) {
@@ -43,7 +44,6 @@ export class Analytics {
             }
         });
 
-        // Инициализируем DatePicker для полей с датами
         document.querySelectorAll('.datepicker').forEach((input) => {
             this.datePickerManager = new DatePickerManager();
             this.datePickerManager.init(input);
@@ -51,31 +51,40 @@ export class Analytics {
     }
 
     loadChartLibrary() {
-        const script = document.createElement('script');
-        script.src = './scripts/lib/chart.js';
-        script.async = true;
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = './scripts/lib/chart.js';
+            script.async = true;
 
-        script.onload = () => {
-            if (typeof Chart === 'undefined') {
-                console.error('Chart.js не загрузился корректно');
-            } else {
-                this.initializeCharts();
-                new Unselect().init();
-                this.selectMain();
+            script.onload = () => {
+                if (typeof Chart === 'undefined') {
+                    reject('Chart.js не загрузился корректно');
+                    return;
+                }
 
-                // После инициализации графиков запрашиваем данные за весь период
-                this.filter.fetchFilteredOperations('all');
-            }
-        };
+                // Ждем следующего тика для гарантии загрузки DOM
+                requestAnimationFrame(() => {
+                    if (this.tryInitializeCharts()) {
+                        new Unselect().init();
+                        this.selectMain();
+                        this.filter.fetchFilteredOperations('all');
+                        resolve();
+                    } else {
+                        reject('Не удалось инициализировать графики');
+                    }
+                });
+            };
 
-        document.body.appendChild(script);
+            script.onerror = () => reject('Ошибка загрузки Chart.js');
+            document.body.appendChild(script);
+        });
     }
 
-    initializeCharts() {
-        const options = {
+    createChartOptions() {
+        return {
             responsive: true,
             plugins: {
-                legend: { position: 'top', },
+                legend: { position: 'top' },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -89,18 +98,49 @@ export class Analytics {
                 }
             }
         };
+    }
 
-        this.charts.income = new Chart(document.getElementById('incomeChart'), {
-            type: 'pie',
-            data: this.createEmptyChartData(),
-            options: options
-        });
+    validateCanvasElements() {
+        const incomeCanvas = document.getElementById('incomeChart');
+        const expensesCanvas = document.getElementById('expensesChart');
 
-        this.charts.expenses = new Chart(document.getElementById('expensesChart'), {
-            type: 'pie',
-            data: this.createEmptyChartData(),
-            options: options
-        });
+        if (!incomeCanvas || !expensesCanvas) {
+            console.error('Canvas элементы не найдены');
+            return null;
+        }
+
+        return { incomeCanvas, expensesCanvas };
+    }
+
+    createCharts(canvasElements) {
+        const { incomeCanvas, expensesCanvas } = canvasElements;
+        const options = this.createChartOptions();
+
+        try {
+            this.charts.income = new Chart(incomeCanvas, {
+                type: 'pie',
+                data: this.createEmptyChartData(),
+                options: options
+            });
+
+            this.charts.expenses = new Chart(expensesCanvas, {
+                type: 'pie',
+                data: this.createEmptyChartData(),
+                options: options
+            });
+
+            return true;
+        } catch (error) {
+            console.error('Ошибка при инициализации графиков:', error);
+            return false;
+        }
+    }
+
+    tryInitializeCharts() {
+        const canvasElements = this.validateCanvasElements();
+        if (!canvasElements) return false;
+
+        return this.createCharts(canvasElements);
     }
 
     createEmptyChartData() {
