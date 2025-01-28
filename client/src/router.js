@@ -81,7 +81,6 @@ export class Router {
     }
 
     async handleNavigation() {
-        // для охраны от неавторизованных пользователей
         const handlePage = this.page ?? null;
 
         if (handlePage?.state === states.STATE_AUTHORIZED && !this.isAuthenticated()) {
@@ -92,24 +91,27 @@ export class Router {
         if (!handlePage) {
             console.error('Маршрут не найден:', this.path);
             this.appElement.innerHTML = '<h1>Маршрут не найден</h1>';
+            return;
         }
+
         try {
-            // Сначала загружаем HTML
             const html = await fetch(handlePage.html).then(response => response.text());
 
-            // Создаем observer перед обновлением DOM
-            const observer = new MutationObserver((mutations, obs) => {
-                this.startLoad();
-                this.addTitle();
-                obs.disconnect(); // Отключаем observer после первого срабатывания
+            // Создаем промис, который разрешится, когда DOM будет готов
+            const domReadyPromise = new Promise(resolve => {
+                requestAnimationFrame(() => {
+                    this.appElement.innerHTML = html;
+                    // Даем браузеру время на обработку DOM
+                    setTimeout(resolve, 0);
+                });
             });
 
-            // Начинаем наблюдение за изменениями
-            observer.observe(this.appElement, { childList: true });
+            // Ждем, пока DOM будет готов
+            await domReadyPromise;
 
-            // Обновляем DOM
-            this.appElement.innerHTML = html;
-
+            // Теперь можно безопасно инициализировать компонент
+            this.startLoad();
+            this.addTitle();
             this.toggleNav();
 
         } catch (error) {
