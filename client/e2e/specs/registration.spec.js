@@ -111,3 +111,4 @@ test.describe('Registration', () => {
         await expect(page.locator('#confirmPassword')).toHaveClass(/is-invalid/);
     });
 });
+
