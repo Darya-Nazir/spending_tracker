@@ -12,4 +12,8 @@ export default defineConfig({
         baseURL: 'http://localhost:9000',
         screenshot: 'only-on-failure'
     },
+    fullyParallel: false,
+    retries: 0,
+    reporter: 'list'
 });
+
