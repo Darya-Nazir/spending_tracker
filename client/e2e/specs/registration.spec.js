@@ -102,8 +102,8 @@ test.describe('Registration', () => {
         await expect(page.locator('#fullName')).toHaveClass(/is-invalid/);
     });
 
-    // Arrange
     test('invalid email format', async ({ page }) => {
+        // Arrange
         await page.fill('#email', 'invalid-email');
         // Act
         await page.click('button[type="submit"]');
@@ -111,8 +111,8 @@ test.describe('Registration', () => {
         await expect(page.locator('#email')).toHaveClass(/is-invalid/);
     });
 
-    // Arrange
     test('password mismatch', async ({ page }) => {
+        // Arrange
         await page.fill('#password', validUser.password);
         await page.fill('#confirmPassword', 'DifferentPass123!');
         // Act
