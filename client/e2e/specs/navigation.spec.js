@@ -31,8 +31,8 @@ test.describe('Navigation tests', () => {
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify([
-                        { id: 1, name: 'Продукты', icon: '🥗' },
-                        { id: 2, name: 'Транспорт', icon: '🚗' }
+                        { id: 1, name: 'Продукты' },
+                        { id: 2, name: 'Транспорт' }
                     ])
                 });
             }
@@ -42,8 +42,8 @@ test.describe('Navigation tests', () => {
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify([
-                        { id: 3, name: 'Зарплата', icon: '💰' },
-                        { id: 4, name: 'Фриланс', icon: '💻' }
+                        { id: 3, name: 'Зарплата' },
+                        { id: 4, name: 'Фриланс' }
                     ])
                 });
             }
@@ -162,31 +162,35 @@ test.describe('Navigation tests', () => {
         // Assert: проверяем результат выхода
         await expect(page.locator('#navbar')).not.toBeVisible();
     });
+
+    test('navigation to main page through logo', async ({ page }) => {
+        // Arrange: переходим сначала на другую страницу
+        await page.click('#transactionsPage');
+        await page.waitForURL('/transactions');
+
+        // Act: кликаем по логотипу
+        await page.click('.logo-link');
+        await page.waitForURL('/');
+
+        // Assert: проверяем, что оказались на главной странице
+        await expect(page.locator('#mainPage')).toHaveClass(/bg-primary/);
+        await expect(page.locator('#incomeChart')).toBeVisible();
+        await expect(page.locator('#expensesChart')).toBeVisible();
+    });
+
+    test('navigation to main page through main button', async ({ page }) => {
+        // Arrange: переходим сначала на другую страницу
+        await page.click('#transactionsPage');
+        await page.waitForURL('/transactions');
+
+        // Act: кликаем по кнопке "Главная"
+        await page.click('#mainPage');
+        await page.waitForURL('/');
+
+        // Assert: проверяем, что оказались на главной странице
+        await expect(page.locator('#mainPage')).toHaveClass(/bg-primary/);
+        await expect(page.locator('#incomeChart')).toBeVisible();
+        await expect(page.locator('#expensesChart')).toBeVisible();
+    });
 });
 
-
-//
-// Давайте подведем итоги того, что мы протестировали:
-//
-//     Навигация:
-//
-// Проверка видимости всех элементов меню
-// Переход между главной и страницей транзакций
-// Работа с выпадающим меню категорий
-// Подсветка активных пунктов меню
-//
-//
-//      Авторизация:
-//
-// Корректное отображение данных после входа (имя пользователя, баланс)
-// Защита маршрутов от неавторизованного доступа
-// Процесс выхода через модальное окно
-// Редиректы на страницу логина
-//
-//
-//      Интерфейс:
-//
-// Отображение графиков на главной странице
-// Корректная работа модального окна при выходе
-// Отображение и форматирование баланса
-// Работа навигационной панели
