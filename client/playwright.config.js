@@ -14,6 +14,6 @@ export default defineConfig({
     },
     fullyParallel: false,
     retries: 0,
-    reporter: 'list'
+    preserveOutput: 'failures-only', // сохраняем файлы только для упавших тестов
 });
 

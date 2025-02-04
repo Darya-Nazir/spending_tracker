@@ -4,6 +4,7 @@ import { test } from './auth.setup.js';
 import { createTestUser } from '../fixtures/users.js';
 
 test.describe('Income Categories tests', () => {
+    // Arrange
     const validUser = createTestUser();
     const mockTokens = {
         accessToken: 'mock-access-token',
@@ -60,22 +61,28 @@ test.describe('Income Categories tests', () => {
             page.click('button[type="submit"]')
         ]);
 
-        // Navigate to incomes page
+        // Act. Navigate to incomes page
         await page.click('#dropdownMenuButton1');
         await page.click('#revenuesPage');
         await page.waitForURL('/incomes');
     });
 
     test('income page navigation and UI elements', async ({ page }) => {
-        // Check menu highlighting
+        // Arrange - уже сделан в beforeEach
+
+        // Act
+        await page.waitForSelector('#dropdownMenuButton1');
+
+        // Assert
+        // Menu highlighting
         await expect(page.locator('#dropdownMenuButton1')).toHaveClass(/btn-primary/);
         await expect(page.locator('#revenuesPage')).toHaveClass(/bg-primary/);
 
-        // Check page elements visibility
+        // Page elements
         await expect(page.locator('#incomesContainer')).toBeVisible();
         await expect(page.locator('#addCategoryBtn')).toBeVisible();
 
-        // Verify income categories are displayed
+        // Categories display
         for (const category of mockIncomeCategories) {
             await expect(page.locator(`[data-id="${category.id}"]`)).toBeVisible();
             await expect(page.locator(`[data-id="${category.id}"] .card-title`))
@@ -84,23 +91,23 @@ test.describe('Income Categories tests', () => {
     });
 
     test('add new income category navigation', async ({ page }) => {
-        // Click add category button
+        // Act. Click add category button
         await page.click('#addCategoryBtn');
 
-        // Verify navigation to create page
+        // Assert. Verify navigation to create page
         await page.waitForURL('/create-income');
     });
 
     test('edit income category navigation', async ({ page }) => {
-        // Click edit button on first category
+        // Act. Click edit button on first category
         await page.click(`[data-id="1"] .btn-primary`);
 
-        // Verify navigation to edit page with correct ID
+        // Assert. Verify navigation to edit page with correct ID
         await page.waitForURL('/edit-income?id=1');
     });
 
     test('delete income category', async ({ page }) => {
-        // Mock delete API call
+        // Arrange
         await page.route('**/api/categories/income/1', route => {
             if (route.request().method() === 'DELETE') {
                 return route.fulfill({
@@ -111,36 +118,29 @@ test.describe('Income Categories tests', () => {
             }
         });
 
-        // Click delete button on first category
+        // Act
         await page.click(`[data-id="1"] .btn-danger`);
-
-        // Verify delete modal appears
-        await expect(page.locator('#deleteCategoryModal')).toBeVisible();
-
-        // Confirm deletion
         await page.click('#confirmDeleteBtn');
 
-        // Verify category is removed
+        // Assert
+        await expect(page.locator('#deleteCategoryModal')).toBeVisible();
         await expect(page.locator(`[data-id="1"]`)).not.toBeVisible();
     });
 
     test('cancel delete income category', async ({ page }) => {
-        // Click delete button
+        // Arrange - не требуется, выполнено в beforeEach
+
+        // Act
         await page.click(`[data-id="1"] .btn-danger`);
-
-        // Verify delete modal appears
-        await expect(page.locator('#deleteCategoryModal')).toBeVisible();
-
-        // Click cancel using the correct selector
         await page.click('button[data-bs-dismiss="modal"]');
 
-        // Wait for modal to be hidden and verify category still exists
+        // Assert
         await expect(page.locator('#deleteCategoryModal')).not.toBeVisible();
         await expect(page.locator(`[data-id="1"]`)).toBeVisible();
     });
 
     test('unauthorized access handling', async ({ page }) => {
-        // Mock ответа с 401 ошибкой для категорий
+        // Arrange. Mock ответа с 401 ошибкой для категорий
         await page.route('**/api/categories/income', route => {
             return route.fulfill({
                 status: 401,
@@ -149,7 +149,7 @@ test.describe('Income Categories tests', () => {
             });
         });
 
-        // Перезагружаем страницу чтобы вызвать запрос категорий
+        // Act. Перезагружаем страницу чтобы вызвать запрос категорий
         await page.reload();
 
         // Ждем ответ с 401 ошибкой
@@ -157,7 +157,8 @@ test.describe('Income Categories tests', () => {
             res => res.url().includes('/api/categories/income')
         );
 
-        // Проверяем что получили 401 статус
+        // Assert. Проверяем что получили 401 статус
         expect(response.status()).toBe(401);
     });
 });
+
