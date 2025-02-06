@@ -59,14 +59,14 @@ test.describe('Income Categories tests', () => {
             page.click('button[type="submit"]')
         ]);
 
-        // Act. Navigate to incomes page
+        // Act - Navigate to incomes page
         await page.click('#dropdownMenuButton1');
         await page.click('#revenuesPage');
         await page.waitForURL('/incomes');
     });
 
     test('income page navigation and UI elements', async ({ page }) => {
-        // Arrange - уже сделан в beforeEach
+        // Arrange - done in beforeEach
 
         // Act
         await page.waitForSelector('#dropdownMenuButton1');
@@ -89,18 +89,18 @@ test.describe('Income Categories tests', () => {
     });
 
     test('add new income category navigation', async ({ page }) => {
-        // Act. Click add category button
+        // Act - Click add category button
         await page.click('#addCategoryBtn');
 
-        // Assert. Verify navigation to create page
+        // Assert - Verify navigation to create page
         await page.waitForURL('/create-income');
     });
 
     test('edit income category navigation', async ({ page }) => {
-        // Act. Click edit button on first category
+        // Act - Click edit button on first category
         await page.click(`[data-id="1"] .btn-primary`);
 
-        // Assert. Verify navigation to edit page with correct ID
+        // Assert - Verify navigation to edit page with correct ID
         await page.waitForURL('/edit-income?id=1');
     });
 
@@ -126,7 +126,7 @@ test.describe('Income Categories tests', () => {
     });
 
     test('cancel delete income category', async ({ page }) => {
-        // Arrange - не требуется, выполнено в beforeEach
+        // Arrange - not needed, done in beforeEach
 
         // Act
         await page.click(`[data-id="1"] .btn-danger`);
@@ -138,7 +138,7 @@ test.describe('Income Categories tests', () => {
     });
 
     test('unauthorized access handling', async ({ page }) => {
-        // Arrange. Mock ответа с 401 ошибкой для категорий
+        // Arrange - Mock response with 401 error for categories
         await page.route('**/api/categories/income', route => {
             return route.fulfill({
                 status: 401,
@@ -147,16 +147,15 @@ test.describe('Income Categories tests', () => {
             });
         });
 
-        // Act. Перезагружаем страницу чтобы вызвать запрос категорий
+        // Act - Reload page to trigger categories request
         await page.reload();
 
-        // Ждем ответ с 401 ошибкой
+        // Wait for 401 error response
         const response = await page.waitForResponse(
             res => res.url().includes('/api/categories/income')
         );
 
-        // Assert. Проверяем что получили 401 статус
+        // Assert - Check 401 status received
         expect(response.status()).toBe(401);
     });
 });
-

@@ -12,7 +12,7 @@ test.describe('Registration', () => {
     });
 
     test('successful registration', async ({ page }) => {
-        // Arrange. Мок для регистрации
+        // Arrange - mock for registration
         await page.route('**/api/signup', route => {
             return route.fulfill({
                 status: 200,
@@ -21,7 +21,7 @@ test.describe('Registration', () => {
             });
         });
 
-        // Arrange. Мок для логина
+        // Arrange - mock for login
         await page.route('**/api/login', route => {
             return route.fulfill({
                 status: 200,
@@ -33,8 +33,8 @@ test.describe('Registration', () => {
             });
         });
 
-        // Arrange. Мок для GET запросов категорий - возвращаем пустые массивы,
-        // чтобы сработало создание дефолтных категорий
+        // Arrange - mock for GET categories requests - return empty arrays
+        // to trigger default categories creation
         await page.route('**/api/categories/expense', route => {
             if (route.request().method() === 'GET') {
                 return route.fulfill({
@@ -58,13 +58,13 @@ test.describe('Registration', () => {
             return route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
         });
 
-        // Arrange. Заполняем форму
+        // Arrange - fill the form
         await page.fill('#fullName', validUser.fullName);
         await page.fill('#email', validUser.email);
         await page.fill('#password', validUser.password);
         await page.fill('#confirmPassword', validUser.confirmPassword);
 
-        // Act. Отправляем форму и ждем все запросы
+        // Act - submit form and wait for all requests
         const signupPromise = page.waitForResponse(res => res.url().includes('/api/signup'));
         const loginPromise = page.waitForResponse(res => res.url().includes('/api/login'));
         const expenseCategoriesGetPromise = page.waitForResponse(
@@ -76,7 +76,7 @@ test.describe('Registration', () => {
 
         await page.click('button[type="submit"]');
 
-        // Act. Ждем выполнения всех запросов
+        // Act - wait for all requests to complete
         await Promise.all([
             signupPromise,
             loginPromise,
@@ -84,12 +84,12 @@ test.describe('Registration', () => {
             incomeCategoriesGetPromise
         ]);
 
-        // Act. Ждем завершения POST запросов для создания категорий
+        // Act - wait for POST requests to create categories
         await page.waitForResponse(
             res => res.url().includes('/api/categories') && res.request().method() === 'POST'
         );
 
-        // Assert. Проверяем редирект на главную
+        // Assert - check redirect to home page
         await page.waitForURL('/');
         await expect(page).toHaveURL('/');
     });
@@ -121,4 +121,3 @@ test.describe('Registration', () => {
         await expect(page.locator('#confirmPassword')).toHaveClass(/is-invalid/);
     });
 });
-

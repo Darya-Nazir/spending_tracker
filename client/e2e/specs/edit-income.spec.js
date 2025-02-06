@@ -16,15 +16,15 @@ test.describe('Edit Income Category', () => {
     };
 
     test.beforeEach(async ({ page }) => {
-        // Пропускаем запросы к статическим файлам
+        // Skip requests to static files
         await page.route('**/*.{css,js,svg}', route => route.continue());
 
-        // Мокаем API запросы
+        // Mock API requests
         await page.route('**/api/**', async route => {
             const url = route.request().url();
             const method = route.request().method();
 
-            // Логин
+            // Login
             if (url.includes('/api/login')) {
                 return route.fulfill({
                     status: 200,
@@ -36,7 +36,7 @@ test.describe('Edit Income Category', () => {
                 });
             }
 
-            // GET список категорий
+            // GET categories list
             if (url.includes('/api/categories/income') && method === 'GET' && !url.includes(`/${mockCategory.id}`)) {
                 return route.fulfill({
                     status: 200,
@@ -45,7 +45,7 @@ test.describe('Edit Income Category', () => {
                 });
             }
 
-            // GET конкретная категория
+            // GET specific category
             if (url.includes(`/api/categories/income/${mockCategory.id}`) && method === 'GET') {
                 return route.fulfill({
                     status: 200,
@@ -54,7 +54,7 @@ test.describe('Edit Income Category', () => {
                 });
             }
 
-            // Дефолтный ответ для остальных запросов
+            // Default response for other requests
             return route.fulfill({
                 status: 200,
                 contentType: 'application/json',
@@ -62,7 +62,7 @@ test.describe('Edit Income Category', () => {
             });
         });
 
-        // Логин
+        // Login
         await page.goto('/login');
         await page.waitForSelector('#registrationForm');
 
@@ -71,7 +71,7 @@ test.describe('Edit Income Category', () => {
         await page.click('button[type="submit"]');
         await page.waitForURL('/');
 
-        // Переходим к редактированию
+        // Navigate to edit page
         await page.click('#dropdownMenuButton1');
         await page.click('#revenuesPage');
         await page.waitForURL('/incomes');
@@ -83,7 +83,7 @@ test.describe('Edit Income Category', () => {
     });
 
     test('successful category edit', async ({ page }) => {
-        // Arrange - мок для успешного PUT запроса
+        // Arrange - mock for successful PUT request
         await page.route(`**/api/categories/income/${mockCategory.id}`, route => {
             if (route.request().method() === 'PUT') {
                 return route.fulfill({
@@ -103,9 +103,10 @@ test.describe('Edit Income Category', () => {
     });
 
     test('empty category name validation', async ({ page }) => {
-        // Arrange & Act
+        // Arrange
         let dialogShown = false;
         page.on('dialog', async dialog => {
+            // Act
             dialogShown = true;
             expect(dialog.message()).toBe('Введите название категории!');
             await dialog.accept();
@@ -114,14 +115,14 @@ test.describe('Edit Income Category', () => {
         await page.fill('.form-control', '');
         await page.click('#save');
 
-        // Assert
-        await page.waitForTimeout(100); // Даем время для появления диалога
+        // Assert - wait for alert to appear
+        await page.waitForTimeout(100);
         expect(dialogShown).toBeTruthy();
         await expect(page).toHaveURL(`/edit-income?id=${mockCategory.id}`);
     });
 
     test('duplicate category error handling', async ({ page }) => {
-        // Arrange - мок для ошибки дубликата
+        // Arrange - mock for duplicate error
         let dialogShown = false;
         page.on('dialog', async dialog => {
             dialogShown = true;
@@ -143,8 +144,8 @@ test.describe('Edit Income Category', () => {
         await page.fill('.form-control', 'Существующая категория');
         await page.click('#save');
 
-        // Assert
-        await page.waitForTimeout(100); // Даем время для появления диалога
+        // Assert - wait for dialog to appear
+        await page.waitForTimeout(100);
         expect(dialogShown).toBeTruthy();
         await expect(page).toHaveURL(`/edit-income?id=${mockCategory.id}`);
     });
@@ -176,8 +177,8 @@ test.describe('Edit Income Category', () => {
         // Act
         await page.goto('/edit-income?id=invalid');
 
-        // Assert
-        await page.waitForTimeout(100); // Даем время для появления диалога
+        // Assert - wait for dialog to appear
+        await page.waitForTimeout(100);
         expect(dialogShown).toBeTruthy();
         await page.waitForURL('/incomes');
     });
@@ -205,14 +206,14 @@ test.describe('Edit Income Category', () => {
         await page.fill('.form-control', 'Новое название');
         await page.click('#save');
 
-        // Assert
-        await page.waitForTimeout(100); // Даем время для появления диалога
+        // Assert - wait for dialog to appear
+        await page.waitForTimeout(100);
         expect(dialogShown).toBeTruthy();
         await expect(page).toHaveURL(`/edit-income?id=${mockCategory.id}`);
     });
 
     test('unauthorized access handling', async ({ page }) => {
-        // Arrange - мокаем 401 ошибку при редактировании
+        // Arrange - mock 401 error for editing
         await page.route(`**/api/categories/income/${mockCategory.id}`, route => {
             if (route.request().method() === 'PUT') {
                 return route.fulfill({
@@ -223,7 +224,7 @@ test.describe('Edit Income Category', () => {
             }
         });
 
-        // Arrange - мокаем refresh token запрос
+        // Arrange - mock refresh token request
         await page.route('**/api/refresh', route => {
             return route.fulfill({
                 status: 401,
@@ -232,24 +233,24 @@ test.describe('Edit Income Category', () => {
             });
         });
 
-        // Act - заполняем форму
+        // Act - fill form
         await page.fill('.form-control', 'Новое название');
 
-        // Act - отправляем форму и ждем все запросы
+        // Act - submit form and wait for all requests
         const savePromise = page.click('#save');
         const responsePromise = page.waitForResponse(
             res => res.url().includes(`/api/categories/income/${mockCategory.id}`) &&
                 res.request().method() === 'PUT'
         );
 
-        // Дожидаемся ответа и проверяем статус
+        // Wait for response and check status
         const response = await responsePromise;
         expect(response.status()).toBe(401);
 
-        // Ждем выполнения клика
+        // Wait for click to complete
         await savePromise;
 
-        // Assert - проверяем редирект на страницу логина
+        // Assert - check redirect to login page
         await page.waitForURL('/login', { waitUntil: 'networkidle' });
     });
 });
