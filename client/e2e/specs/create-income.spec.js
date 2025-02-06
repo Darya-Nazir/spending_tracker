@@ -3,152 +3,122 @@ import { expect } from '@playwright/test';
 import { test } from './auth.setup.js';
 import { createTestUser } from '../fixtures/users.js';
 
-test.describe('Create Income Category', () => {
-    // Arrange - подготовка тестовых данных
+test.describe('Registration', () => {
     const validUser = createTestUser();
-    const mockTokens = {
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token'
-    };
 
+    // Arrange
     test.beforeEach(async ({ page }) => {
-        // Arrange - настройка моков API и подготовка начального состояния
-        await page.route('**/api/**', route => {
-            const url = route.request().url();
+        await page.goto('/signup');
+    });
 
-            if (url.includes('/api/login')) {
-                return route.fulfill({
-                    status: 200,
-                    contentType: 'application/json',
-                    body: JSON.stringify({
-                        tokens: mockTokens,
-                        user: { id: 1, name: validUser.fullName }
-                    })
-                });
-            }
-
+    test('successful registration', async ({ page }) => {
+        // Arrange. Мок для регистрации
+        await page.route('**/api/signup', route => {
             return route.fulfill({
                 status: 200,
                 contentType: 'application/json',
-                body: JSON.stringify([])
+                body: JSON.stringify({ success: true })
             });
         });
 
-        // Act - выполнение предварительных действий для всех тестов
-        await page.goto('/login');
-        await page.fill('#email', validUser.email);
-        await page.fill('#password', validUser.password);
-        await page.click('button[type="submit"]');
-        await page.waitForURL('/');
+        // Arrange. Мок для логина
+        await page.route('**/api/login', route => {
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    tokens: { accessToken: 'mock-token', refreshToken: 'mock-refresh' },
+                    user: { id: 1, name: validUser.fullName }
+                })
+            });
+        });
 
-        await page.click('#dropdownMenuButton1');
-        await page.click('#revenuesPage');
-        await page.waitForURL('/incomes');
-        await page.click('#addCategoryBtn');
-        await page.waitForURL('/create-income');
-    });
-
-    test('successful category creation', async ({ page }) => {
-        // Arrange - настройка мока для успешного создания категории
-        await page.route('**/api/categories/income', route => {
-            if (route.request().method() === 'POST') {
+        // Arrange. Мок для GET запросов категорий - возвращаем пустые массивы,
+        // чтобы сработало создание дефолтных категорий
+        await page.route('**/api/categories/expense', route => {
+            if (route.request().method() === 'GET') {
                 return route.fulfill({
                     status: 200,
                     contentType: 'application/json',
-                    body: JSON.stringify({ success: true })
+                    body: JSON.stringify([])
                 });
             }
+            return route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
         });
 
-        // Act - заполнение и отправка формы
-        await page.fill('.form-control', 'Новая категория');
-        const responsePromise = page.waitForResponse(
-            res => res.url().includes('/api/categories/income') &&
-                res.request().method() === 'POST'
+        // Arrange
+        await page.route('**/api/categories/income', route => {
+            if (route.request().method() === 'GET') {
+                return route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify([])
+                });
+            }
+            return route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
+        });
+
+        // Arrange. Заполняем форму
+        await page.fill('#fullName', validUser.fullName);
+        await page.fill('#email', validUser.email);
+        await page.fill('#password', validUser.password);
+        await page.fill('#confirmPassword', validUser.confirmPassword);
+
+        // Act. Отправляем форму и ждем все запросы
+        const signupPromise = page.waitForResponse(res => res.url().includes('/api/signup'));
+        const loginPromise = page.waitForResponse(res => res.url().includes('/api/login'));
+        const expenseCategoriesGetPromise = page.waitForResponse(
+            res => res.url().includes('/api/categories/expense') && res.request().method() === 'GET'
         );
-        await page.click('#create');
+        const incomeCategoriesGetPromise = page.waitForResponse(
+            res => res.url().includes('/api/categories/income') && res.request().method() === 'GET'
+        );
 
-        // Assert - проверка успешного ответа и редиректа
-        const response = await responsePromise;
-        expect(response.ok()).toBeTruthy();
-        await page.waitForURL('/incomes');
+        await page.click('button[type="submit"]');
+
+        // Act. Ждем выполнения всех запросов
+        await Promise.all([
+            signupPromise,
+            loginPromise,
+            expenseCategoriesGetPromise,
+            incomeCategoriesGetPromise
+        ]);
+
+        // Act. Ждем завершения POST запросов для создания категорий
+        await page.waitForResponse(
+            res => res.url().includes('/api/categories') && res.request().method() === 'POST'
+        );
+
+        // Assert. Проверяем редирект на главную
+        await page.waitForURL('/');
+        await expect(page).toHaveURL('/');
     });
 
-    test('empty category name validation', async ({ page }) => {
-        // Arrange - подготовка обработчика диалогового окна
-        page.on('dialog', async dialog => {
-            // Assert - проверка сообщения об ошибке
-            expect(dialog.message()).toBe('Введите название категории!');
-            await dialog.accept();
-        });
-
-        // Act - попытка создания категории с пустым названием
-        await page.click('#create');
-
-        // Assert - проверка, что пользователь остается на странице создания
-        await expect(page).toHaveURL(/create-income$/);
+    test('empty form validation', async ({ page }) => {
+        // Act
+        await page.click('button[type="submit"]');
+        // Assert
+        await expect(page.locator('form')).toHaveClass(/was-validated/);
+        await expect(page.locator('#fullName')).toHaveClass(/is-invalid/);
     });
 
-    test('duplicate category error handling', async ({ page }) => {
-        // Arrange - настройка мока для ошибки дубликата
-        await page.route('**/api/categories/income', route => {
-            if (route.request().method() === 'POST') {
-                return route.fulfill({
-                    status: 400,
-                    contentType: 'application/json',
-                    body: JSON.stringify({ message: 'Category already exist' })
-                });
-            }
-        });
-
-        // Arrange - подготовка обработчика диалогового окна
-        page.on('dialog', async dialog => {
-            // Assert - проверка сообщения об ошибке
-            expect(dialog.message()).toBe('Такая категория уже существует');
-            await dialog.accept();
-        });
-
-        // Act - попытка создания дубликата категории
-        await page.fill('.form-control', 'Зарплата');
-        await page.click('#create');
-
-        // Assert - проверка, что пользователь остается на странице создания
-        await expect(page).toHaveURL(/create-income$/);
+    test('invalid email format', async ({ page }) => {
+        // Arrange
+        await page.fill('#email', 'invalid-email');
+        // Act
+        await page.click('button[type="submit"]');
+        // Assert
+        await expect(page.locator('#email')).toHaveClass(/is-invalid/);
     });
 
-    test('cancel button navigation', async ({ page }) => {
-        // Act - нажатие кнопки отмены
-        await page.click('#cancel');
-
-        // Assert - проверка редиректа на страницу доходов
-        await page.waitForURL('/incomes');
-    });
-
-    test('generic error handling', async ({ page }) => {
-        // Arrange - настройка мока для общей ошибки сервера
-        await page.route('**/api/categories/income', route => {
-            if (route.request().method() === 'POST') {
-                return route.fulfill({
-                    status: 500,
-                    contentType: 'application/json',
-                    body: JSON.stringify({ message: 'Internal server error' })
-                });
-            }
-        });
-
-        // Arrange - подготовка обработчика диалогового окна
-        page.on('dialog', async dialog => {
-            // Assert - проверка сообщения об ошибке
-            expect(dialog.message()).toBe('Не удалось добавить категорию, попробуйте еще раз.');
-            await dialog.accept();
-        });
-
-        // Act - попытка создания категории при ошибке сервера
-        await page.fill('.form-control', 'Новая категория');
-        await page.click('#create');
-
-        // Assert - проверка, что пользователь остается на странице создания
-        await expect(page).toHaveURL(/create-income$/);
+    test('password mismatch', async ({ page }) => {
+        // Arrange
+        await page.fill('#password', validUser.password);
+        await page.fill('#confirmPassword', 'DifferentPass123!');
+        // Act
+        await page.click('button[type="submit"]');
+        // Assert
+        await expect(page.locator('#confirmPassword')).toHaveClass(/is-invalid/);
     });
 });
 

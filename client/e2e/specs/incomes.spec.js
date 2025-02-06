@@ -1,15 +1,13 @@
 import { expect } from '@playwright/test';
 
 import { test } from './auth.setup.js';
+import { mockTokens } from '../fixtures/test-data.js';
 import { createTestUser } from '../fixtures/users.js';
 
 test.describe('Income Categories tests', () => {
     // Arrange
     const validUser = createTestUser();
-    const mockTokens = {
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token'
-    };
+    const TwoMockTokens = mockTokens;
 
     const mockIncomeCategories = [
         { id: 1, title: 'Зарплата' },
@@ -27,7 +25,7 @@ test.describe('Income Categories tests', () => {
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify({
-                        tokens: mockTokens,
+                        tokens: TwoMockTokens,
                         user: { id: 1, name: validUser.fullName }
                     })
                 });

@@ -1,14 +1,12 @@
 import { expect } from '@playwright/test';
 
 import { test } from './auth.setup.js';
+import { mockTokens } from '../fixtures/test-data.js';
 import { createTestUser } from '../fixtures/users.js';
 
 test.describe('Navigation tests', () => {
     const validUser = createTestUser();
-    const mockTokens = {
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token'
-    };
+    const TwoMockTokens = mockTokens;
 
     test.beforeEach(async ({ page }) => {
         // Arrange: настраиваем моки для API запросов
@@ -20,7 +18,7 @@ test.describe('Navigation tests', () => {
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify({
-                        tokens: mockTokens,
+                        tokens: TwoMockTokens,
                         user: { id: 1, name: validUser.fullName }
                     })
                 });
