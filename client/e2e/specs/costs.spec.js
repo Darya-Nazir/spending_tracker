@@ -4,15 +4,15 @@ import { test } from './auth.setup.js';
 import { mockTokens } from '../fixtures/test-data.js';
 import { createTestUser } from '../fixtures/users.js';
 
-test.describe('Income Categories tests', () => {
+test.describe('Costs Categories tests', () => {
     // Arrange
     const validUser = createTestUser();
     const tokens = mockTokens;
 
-    const mockIncomeCategories = [
-        { id: 1, title: 'Зарплата' },
-        { id: 2, title: 'Фриланс' },
-        { id: 3, title: 'Инвестиции' }
+    const mockCostCategories = [
+        { id: 1, title: 'Продукты' },
+        { id: 2, title: 'Транспорт' },
+        { id: 3, title: 'Развлечения' }
     ];
 
     test.beforeEach(async ({ page }) => {
@@ -31,13 +31,13 @@ test.describe('Income Categories tests', () => {
                 });
             }
 
-            if (url.includes('/api/categories/income')) {
+            if (url.includes('/api/categories/expense')) {
                 const method = route.request().method();
                 if (method === 'GET') {
                     return route.fulfill({
                         status: 200,
                         contentType: 'application/json',
-                        body: JSON.stringify(mockIncomeCategories)
+                        body: JSON.stringify(mockCostCategories)
                     });
                 }
             }
@@ -59,13 +59,13 @@ test.describe('Income Categories tests', () => {
             page.click('button[type="submit"]')
         ]);
 
-        // Act - Navigate to incomes page
+        // Act - Navigate to costs page
         await page.click('#dropdownMenuButton1');
-        await page.click('#revenuesPage');
-        await page.waitForURL('/incomes');
+        await page.click('#costsPage');
+        await page.waitForURL('/costs');
     });
 
-    test('income page navigation and UI elements', async ({ page }) => {
+    test('costs page navigation and UI elements', async ({ page }) => {
         // Arrange - done in beforeEach
 
         // Act
@@ -74,39 +74,39 @@ test.describe('Income Categories tests', () => {
         // Assert
         // Menu highlighting
         await expect(page.locator('#dropdownMenuButton1')).toHaveClass(/btn-primary/);
-        await expect(page.locator('#revenuesPage')).toHaveClass(/bg-primary/);
+        await expect(page.locator('#costsPage')).toHaveClass(/bg-primary/);
 
         // Page elements
-        await expect(page.locator('#incomesContainer')).toBeVisible();
+        await expect(page.locator('#costsContainer')).toBeVisible();
         await expect(page.locator('#addCategoryBtn')).toBeVisible();
 
         // Categories display
-        for (const category of mockIncomeCategories) {
+        for (const category of mockCostCategories) {
             await expect(page.locator(`[data-id="${category.id}"]`)).toBeVisible();
             await expect(page.locator(`[data-id="${category.id}"] .card-title`))
                 .toHaveText(category.title);
         }
     });
 
-    test('add new income category navigation', async ({ page }) => {
+    test('add new cost category navigation', async ({ page }) => {
         // Act - Click add category button
         await page.click('#addCategoryBtn');
 
         // Assert - Verify navigation to create page
-        await page.waitForURL('/create-income');
+        await page.waitForURL('/create-cost');
     });
 
-    test('edit income category navigation', async ({ page }) => {
+    test('edit cost category navigation', async ({ page }) => {
         // Act - Click edit button on first category
         await page.click(`[data-id="1"] .btn-primary`);
 
         // Assert - Verify navigation to edit page with correct ID
-        await page.waitForURL('/edit-income?id=1');
+        await page.waitForURL('/edit-cost?id=1');
     });
 
-    test('delete income category', async ({ page }) => {
+    test('delete cost category', async ({ page }) => {
         // Arrange
-        await page.route('**/api/categories/income/1', route => {
+        await page.route('**/api/categories/expense/1', route => {
             if (route.request().method() === 'DELETE') {
                 return route.fulfill({
                     status: 200,
@@ -125,7 +125,7 @@ test.describe('Income Categories tests', () => {
         await expect(page.locator(`[data-id="1"]`)).not.toBeVisible();
     });
 
-    test('cancel delete income category', async ({ page }) => {
+    test('cancel delete cost category', async ({ page }) => {
         // Arrange - not needed, done in beforeEach
 
         // Act
@@ -139,7 +139,7 @@ test.describe('Income Categories tests', () => {
 
     test('unauthorized access handling', async ({ page }) => {
         // Arrange - Mock response with 401 error for categories
-        await page.route('**/api/categories/income', route => {
+        await page.route('**/api/categories/expense', route => {
             return route.fulfill({
                 status: 401,
                 contentType: 'application/json',
@@ -152,7 +152,7 @@ test.describe('Income Categories tests', () => {
 
         // Wait for 401 error response
         const response = await page.waitForResponse(
-            res => res.url().includes('/api/categories/income')
+            res => res.url().includes('/api/categories/expense')
         );
 
         // Assert - Check 401 status received
