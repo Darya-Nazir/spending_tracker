@@ -3,8 +3,8 @@ import { expect } from '@playwright/test';
 import { test } from './auth.setup.js';
 import { createTestUser } from '../fixtures/users.js';
 
-test.describe('Create Income Category', () => {
-    // Arrange - test data preparation
+test.describe('Create Cost Category', () => {
+    // Arrange - prepare test data
     const validUser = createTestUser();
     const mockTokens = {
         accessToken: 'mock-access-token',
@@ -12,7 +12,7 @@ test.describe('Create Income Category', () => {
     };
 
     test.beforeEach(async ({ page }) => {
-        // Arrange - API mocks setup and initial state preparation
+        // Arrange - setup API mocks and prepare initial state
         await page.route('**/api/**', route => {
             const url = route.request().url();
 
@@ -34,7 +34,7 @@ test.describe('Create Income Category', () => {
             });
         });
 
-        // Act - performing preliminary actions for all tests
+        // Act - perform preliminary actions for all tests
         await page.goto('/login');
         await page.fill('#email', validUser.email);
         await page.fill('#password', validUser.password);
@@ -42,15 +42,15 @@ test.describe('Create Income Category', () => {
         await page.waitForURL('/');
 
         await page.click('#dropdownMenuButton1');
-        await page.click('#revenuesPage');
-        await page.waitForURL('/incomes');
+        await page.click('#costsPage');
+        await page.waitForURL('/costs');
         await page.click('#addCategoryBtn');
-        await page.waitForURL('/create-income');
+        await page.waitForURL('/create-cost');
     });
 
     test('successful category creation', async ({ page }) => {
-        // Arrange - mock setup for successful category creation
-        await page.route('**/api/categories/income', route => {
+        // Arrange - setup mock for successful category creation
+        await page.route('**/api/categories/expense', route => {
             if (route.request().method() === 'POST') {
                 return route.fulfill({
                     status: 200,
@@ -60,38 +60,38 @@ test.describe('Create Income Category', () => {
             }
         });
 
-        // Act - form filling and submission
-        await page.fill('.form-control', 'Новая категория');
+        // Act - fill and submit form
+        await page.fill('.form-control', 'New Category');
         const responsePromise = page.waitForResponse(
-            res => res.url().includes('/api/categories/income') &&
+            res => res.url().includes('/api/categories/expense') &&
                 res.request().method() === 'POST'
         );
         await page.click('#create');
 
-        // Assert - checking successful response and redirect
+        // Assert - check successful response and redirect
         const response = await responsePromise;
         expect(response.ok()).toBeTruthy();
-        await page.waitForURL('/incomes');
+        await page.waitForURL('/costs');
     });
 
     test('empty category name validation', async ({ page }) => {
-        // Arrange - dialog handler setup
+        // Arrange - prepare dialog handler
         page.on('dialog', async dialog => {
-            // Assert - checking error message
+            // Assert - check error message
             expect(dialog.message()).toBe('Введите название категории!');
             await dialog.accept();
         });
 
-        // Act - attempting to create category with empty name
+        // Act - attempt to create category with empty name
         await page.click('#create');
 
-        // Assert - checking that user remains on creation page
-        await expect(page).toHaveURL(/create-income$/);
+        // Assert - check user remains on creation page
+        await expect(page).toHaveURL(/create-cost$/);
     });
 
     test('duplicate category error handling', async ({ page }) => {
-        // Arrange - mock setup for duplicate error
-        await page.route('**/api/categories/income', route => {
+        // Arrange - setup mock for duplicate error
+        await page.route('**/api/categories/expense', route => {
             if (route.request().method() === 'POST') {
                 return route.fulfill({
                     status: 400,
@@ -101,32 +101,32 @@ test.describe('Create Income Category', () => {
             }
         });
 
-        // Arrange - dialog handler setup
+        // Arrange - prepare dialog handler
         page.on('dialog', async dialog => {
-            // Assert - checking error message
+            // Assert - check error message
             expect(dialog.message()).toBe('Такая категория уже существует');
             await dialog.accept();
         });
 
-        // Act - attempting to create duplicate category
-        await page.fill('.form-control', 'Зарплата');
+        // Act - attempt to create duplicate category
+        await page.fill('.form-control', 'Food');
         await page.click('#create');
 
-        // Assert - checking that user remains on creation page
-        await expect(page).toHaveURL(/create-income$/);
+        // Assert - check user remains on creation page
+        await expect(page).toHaveURL(/create-cost$/);
     });
 
     test('cancel button navigation', async ({ page }) => {
-        // Act - clicking cancel button
+        // Act - click cancel button
         await page.click('#cancel');
 
-        // Assert - checking redirect to incomes page
-        await page.waitForURL('/incomes');
+        // Assert - check redirect to costs page
+        await page.waitForURL('/costs');
     });
 
     test('generic error handling', async ({ page }) => {
-        // Arrange - mock setup for general server error
-        await page.route('**/api/categories/income', route => {
+        // Arrange - setup mock for general server error
+        await page.route('**/api/categories/expense', route => {
             if (route.request().method() === 'POST') {
                 return route.fulfill({
                     status: 500,
@@ -136,18 +136,19 @@ test.describe('Create Income Category', () => {
             }
         });
 
-        // Arrange - dialog handler setup
+        // Arrange - prepare dialog handler
         page.on('dialog', async dialog => {
-            // Assert - checking error message
+            // Assert - check error message
             expect(dialog.message()).toBe('Не удалось добавить категорию, попробуйте еще раз.');
             await dialog.accept();
         });
 
-        // Act - attempting to create category with server error
-        await page.fill('.form-control', 'Новая категория');
+        // Act - attempt to create category with server error
+        await page.fill('.form-control', 'New Category');
         await page.click('#create');
 
-        // Assert - checking that user remains on creation page
-        await expect(page).toHaveURL(/create-income$/);
+        // Assert - check user remains on creation page
+        await expect(page).toHaveURL(/create-cost$/);
     });
 });
+
