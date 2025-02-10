@@ -106,19 +106,18 @@ test.describe('Edit Cost Category', () => {
         // Arrange
         let dialogShown = false;
         page.on('dialog', async dialog => {
-            // Act
             dialogShown = true;
             expect(dialog.message()).toBe('Введите название категории!');
             await dialog.accept();
         });
 
+        // Act
         await page.fill('.form-control', '');
         await page.click('#save');
 
         // Assert - wait for alert to appear
-        await page.waitForTimeout(100);
-        expect(dialogShown).toBeTruthy();
         await expect(page).toHaveURL(`/edit-cost?id=${mockCategory.id}`);
+        expect(dialogShown).toBeTruthy();
     });
 
     test('duplicate category error handling', async ({ page }) => {
@@ -145,9 +144,8 @@ test.describe('Edit Cost Category', () => {
         await page.click('#save');
 
         // Assert - wait for dialog to appear
-        await page.waitForTimeout(100);
-        expect(dialogShown).toBeTruthy();
         await expect(page).toHaveURL(`/edit-cost?id=${mockCategory.id}`);
+        expect(dialogShown).toBeTruthy();
     });
 
     test('cancel edit navigation', async ({ page }) => {
@@ -178,9 +176,8 @@ test.describe('Edit Cost Category', () => {
         await page.goto('/edit-cost?id=invalid');
 
         // Assert - wait for dialog to appear
-        await page.waitForTimeout(100);
-        expect(dialogShown).toBeTruthy();
         await page.waitForURL('/costs');
+        expect(dialogShown).toBeTruthy();
     });
 
     test('server error handling', async ({ page }) => {
@@ -207,9 +204,8 @@ test.describe('Edit Cost Category', () => {
         await page.click('#save');
 
         // Assert - wait for dialog to appear
-        await page.waitForTimeout(100);
-        expect(dialogShown).toBeTruthy();
         await expect(page).toHaveURL(`/edit-cost?id=${mockCategory.id}`);
+        expect(dialogShown).toBeTruthy();
     });
 
     test('unauthorized access handling', async ({ page }) => {
