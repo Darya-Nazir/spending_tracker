@@ -25,7 +25,8 @@ test.describe('Login success scenarios', () => {
         // Arrange: fill form with valid data
         await page.fill('#email', validUser.email);
         await page.fill('#password', validUser.password);
-        const responsePromise = page.waitForResponse(res => res.url().includes('/api/login'));
+        const responsePromise = page.waitForResponse(res =>
+            res.url().includes('/api/login'));
 
         // Act: submit form
         await page.click('button[type="submit"]');
@@ -86,11 +87,11 @@ test.describe('Login error scenarios', () => {
         await page.fill('#email', 'wrong@email.com');
         await page.fill('#password', 'wrongpass');
 
-        // Act: submit form
+        // Act & Assert: wait for dialog before clicking submit
+        const dialogPromise = page.waitForEvent('dialog');
         await page.click('button[type="submit"]');
 
-        // Assert: check error dialog appears and contains correct message
-        const dialog = await page.waitForEvent('dialog');
+        const dialog = await dialogPromise;
         expect(dialog.message()).toBe('Пользователь с такими данными не зарегистрирован');
         await dialog.accept();
     });
@@ -102,8 +103,10 @@ test.describe('Login error scenarios', () => {
             contentType: 'application/json',
             body: JSON.stringify({ error: 'Пользователь с такими данными не зарегистрирован' })
         }));
+
         await page.fill('#email', 'wrong@email.com');
         await page.fill('#password', 'wrongpass');
+
         let dialogCount = 0;
         const dialogHandler = dialog => {
             dialogCount++;
@@ -112,9 +115,13 @@ test.describe('Login error scenarios', () => {
         page.on('dialog', dialogHandler);
 
         // Act: submit form and wait for response
+        const responsePromise = page.waitForResponse(res =>
+            res.url().includes('/api/login'));
+        const dialogPromise = page.waitForEvent('dialog');
+
         await page.click('button[type="submit"]');
-        await page.waitForEvent('dialog');
-        await page.waitForTimeout(100);
+        await responsePromise;
+        await dialogPromise;
 
         // Assert: check number of dialogs shown
         page.removeListener('dialog', dialogHandler);
