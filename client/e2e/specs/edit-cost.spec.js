@@ -182,13 +182,6 @@ test.describe('Edit Cost Category', () => {
 
     test('server error handling', async ({ page }) => {
         // Arrange
-        let dialogShown = false;
-        page.on('dialog', async dialog => {
-            dialogShown = true;
-            expect(dialog.message()).toBe('Не удалось обновить категорию, попробуйте еще раз.');
-            await dialog.accept();
-        });
-
         await page.route(`**/api/categories/expense/${mockCategory.id}`, route => {
             if (route.request().method() === 'PUT') {
                 return route.fulfill({
@@ -199,13 +192,17 @@ test.describe('Edit Cost Category', () => {
             }
         });
 
-        // Act
+        // Act & Assert
         await page.fill('.form-control', 'Новое название');
+
+        const dialogPromise = page.waitForEvent('dialog');
         await page.click('#save');
 
-        // Assert - wait for dialog to appear
+        const dialog = await dialogPromise;
+        expect(dialog.message()).toBe('Не удалось обновить категорию, попробуйте еще раз.');
+        await dialog.accept();
+
         await expect(page).toHaveURL(`/edit-cost?id=${mockCategory.id}`);
-        expect(dialogShown).toBeTruthy();
     });
 
     test('unauthorized access handling', async ({ page }) => {
