@@ -171,9 +171,10 @@ test.describe('Transaction list', () => {
         );
 
         // Act - Click 'All' filter
-        await page.getByRole('button', { name: 'Все', exact: true }).click();
-        await page.waitForResponse(res => res.url().includes('period=all'));
-        await page.waitForTimeout(200);
+        await Promise.all([
+            page.waitForResponse(res => res.url().includes('period=all')),
+            page.getByRole('button', { name: 'Все', exact: true }).click()
+        ]);
 
         // Assert - Check results
         const rows = await page.locator('tbody tr').all();
@@ -189,24 +190,30 @@ test.describe('Transaction list', () => {
             })
         );
 
-        // Act - Set initial date range
+        // Act - Initial interval setting (both dates are required)
         await page.getByRole('button', { name: 'Интервал', exact: true }).click();
+
+        // Enter the first date - filtering should not work yet
         await page.locator('[data-range="from"]').fill('01.01.2025');
         await page.locator('[data-range="from"]').press('Enter');
+
+        // Enter the second date - filtering should now occur
+        const firstFilterPromise = page.waitForResponse(res => res.url().includes('period=interval'));
         await page.locator('[data-range="to"]').fill('28.02.2025');
         await page.locator('[data-range="to"]').press('Enter');
+        await firstFilterPromise;
 
-        // Assert - Check initial filter results
-        await page.waitForTimeout(500);
+        // Assert after first filtration
         let rows = await page.locator('tbody tr').all();
         expect(rows.length).toBe(2);
 
-        // Act - Change start date
+        // Act - Change only the start date - the filter should work at once
+        const secondFilterPromise = page.waitForResponse(res => res.url().includes('period=interval'));
         await page.locator('[data-range="from"]').fill('15.01.2025');
         await page.locator('[data-range="from"]').press('Enter');
+        await secondFilterPromise;
 
-        // Assert - Check updated filter results
-        await page.waitForTimeout(500);
+        // Assert after second filtration
         rows = await page.locator('tbody tr').all();
         expect(rows.length).toBe(2);
     });
