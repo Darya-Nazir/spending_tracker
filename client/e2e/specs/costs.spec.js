@@ -116,13 +116,15 @@ test.describe('Costs Categories tests', () => {
             }
         });
 
-        // Act
+        // Act & Assert
         await page.click(`[data-id="1"] .btn-danger`);
-        await page.click('#confirmDeleteBtn');
-
-        // Assert
         await expect(page.locator('#deleteCategoryModal')).toBeVisible();
-        await expect(page.locator(`[data-id="1"]`)).not.toBeVisible();
+
+        await Promise.all([
+            page.waitForSelector('#deleteCategoryModal', { state: 'hidden' }),
+            page.waitForSelector(`[data-id="1"]`, { state: 'hidden' }),
+            page.click('#confirmDeleteBtn')
+        ]);
     });
 
     test('cancel delete cost category', async ({ page }) => {
@@ -130,10 +132,16 @@ test.describe('Costs Categories tests', () => {
 
         // Act
         await page.click(`[data-id="1"] .btn-danger`);
-        await page.click('button[data-bs-dismiss="modal"]');
+
+        const modal = page.locator('#deleteCategoryModal');
+        await expect(modal).toBeVisible();
+
+        await Promise.all([
+            page.waitForSelector('#deleteCategoryModal', { state: 'hidden' }),
+            page.click('button[data-bs-dismiss="modal"]')
+        ]);
 
         // Assert
-        await expect(page.locator('#deleteCategoryModal')).not.toBeVisible();
         await expect(page.locator(`[data-id="1"]`)).toBeVisible();
     });
 
