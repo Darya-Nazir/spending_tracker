@@ -5,6 +5,7 @@ import { mockTokens } from "../fixtures/test-data.js";
 import { createTestUser } from '../fixtures/users.js';
 
 test.describe('Create income transaction', () => {
+    // Global Arrange
     const validUser = createTestUser();
     const tokens = mockTokens;
 
@@ -42,23 +43,24 @@ test.describe('Create income transaction', () => {
             });
         });
 
-        // Login
+        // Arrange - perform login
         await page.goto('/login');
         await page.fill('#email', validUser.email);
         await page.fill('#password', validUser.password);
         await page.click('button[type="submit"]');
         await page.waitForURL('/');
 
-        // Go to the page of transaction creation with specifying the transaction type
+        // Arrange - navigate to create transaction page
         await page.goto('/create-transaction?type=income');
-        // Waiting for the form to load
         await page.waitForSelector('form', { state: 'visible' });
         await page.waitForLoadState('networkidle');
     });
 
     test('autocomplete transaction type', async ({ page }) => {
-        // Wait for the type field to appear and check it
+        // Arrange
         const typeInput = page.locator('.form-control[placeholder="Тип..."]');
+
+        // Act - wait for element to be visible
         await expect(typeInput).toBeVisible();
         await expect(typeInput).toHaveValue('Доход');
         await expect(typeInput).toHaveAttribute('readonly', '');
@@ -70,31 +72,37 @@ test.describe('Create income transaction', () => {
     });
 
     test('working with a drop-down list of categories', async ({ page }) => {
+        // Arrange
         const categoriesList = page.locator('#categoriesList');
         const categoryInput = page.locator('#categoryInput');
 
-        // Check initial state (list hidden)
+        // Assert - initial state
         await expect(categoriesList).toHaveCSS('display', 'none');
 
-        // Opening the list
+        // Act - open dropdown
         await categoryInput.click();
+
+        // Assert - check dropdown visibility
         await expect(categoriesList).toBeVisible();
 
-        // Checking the list of categories
+        // Act - get list items
         const items = await page.locator('#categoriesList .dropdown-item').all();
-        expect(items.length).toBe(2);
 
-        // Checking the category text
+        // Assert - check list content
+        expect(items.length).toBe(2);
         await expect(items[0]).toHaveText('Зарплата');
         await expect(items[1]).toHaveText('Фриланс');
 
-        // Choose a category
+        // Act - select category
         await items[0].click();
+
+        // Assert - check selection results
         await expect(categoryInput).toHaveValue('Зарплата');
         await expect(categoriesList).toHaveCSS('display', 'none');
     });
 
     test('amount field validation', async ({ page }) => {
+        // Arrange
         const amountInput = page.locator('input[placeholder="Сумма в $..."]');
 
         let dialogMessage = '';
@@ -103,6 +111,7 @@ test.describe('Create income transaction', () => {
             dialog.accept();
         });
 
+        // Act & Assert - test invalid inputs
         await amountInput.fill('abc');
         await page.click('#create');
         expect(dialogMessage).toBe('Введите корректную сумму');
@@ -117,18 +126,21 @@ test.describe('Create income transaction', () => {
     });
 
     test('datapicker operation', async ({ page }) => {
+        // Arrange
         const dateInput = page.locator('input[placeholder="Дата..."]');
 
+        // Act - open datepicker and select date
         await dateInput.click();
         await page.waitForSelector('.datepicker-dropdown', { state: 'visible' });
-
         await page.locator('.datepicker-days .day:not(.old):not(.new)').first().click();
 
+        // Assert - check date format
         const dateValue = await dateInput.inputValue();
         expect(dateValue).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
     });
 
     test('successful income creation', async ({ page }) => {
+        // Arrange - setup success response mock
         await page.route('**/api/operations', route => {
             if (route.request().method() === 'POST') {
                 return route.fulfill({
@@ -139,6 +151,7 @@ test.describe('Create income transaction', () => {
             }
         });
 
+        // Act
         await page.click('#categoryInput');
         await page.locator('.dropdown-item', { hasText: 'Зарплата' }).click();
         await page.fill('input[placeholder="Сумма в $..."]', '1000');
@@ -159,7 +172,10 @@ test.describe('Create income transaction', () => {
     });
 
     test('cancel income', async ({ page }) => {
+        // Act - click cancel button
         await page.click('#cancel');
+
+        // Assert - check navigation
         await page.waitForURL('/transactions');
     });
 });
