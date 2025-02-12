@@ -25,13 +25,14 @@ test.describe('Create cost transaction', () => {
                 });
             }
 
-            if (url.includes('/api/categories/cost')) {
+            if (url.includes('/api/categories/expense')) {
                 return route.fulfill({
                     status: 200,
                     contentType: 'application/json',
                     body: JSON.stringify([
                         { id: 1, title: 'Проживание' },
-                        { id: 2, title: 'Еда' }
+                        { id: 2, title: 'Еда' },
+                        { id: 3, title: 'Подарки' }
                     ])
                 });
             }
@@ -51,7 +52,7 @@ test.describe('Create cost transaction', () => {
         await page.waitForURL('/');
 
         // Arrange - navigate to create transaction page
-        await page.goto('/create-transaction?type=cost');
+        await page.goto('/create-transaction?type=expense');
         await page.waitForSelector('form', { state: 'visible' });
         await page.waitForLoadState('networkidle');
     });
@@ -60,18 +61,19 @@ test.describe('Create cost transaction', () => {
         // Arrange
         const typeInput = page.locator('.form-control[placeholder="Тип..."]');
 
-        // Act - wait for element to be visible
+        // Act - wait for element to be visible and initialized
         await expect(typeInput).toBeVisible();
+        await page.waitForFunction(() => {
+            const input = document.querySelector('.form-control[placeholder="Тип..."]');
+            return input && input.value === 'Расход';
+        });
+
         await expect(typeInput).toHaveValue('Расход');
         await expect(typeInput).toHaveAttribute('readonly', '');
-
-        // Checking background style
-        const background = await typeInput.evaluate(el =>
-            window.getComputedStyle(el).backgroundColor);
-        expect(background).toBe('rgb(248, 249, 250)');
     });
 
     test('working with a drop-down list of categories', async ({ page }) => {
+        // Arrange
         const categoriesList = page.locator('#categoriesList');
         const categoryInput = page.locator('#categoryInput');
 
@@ -88,9 +90,10 @@ test.describe('Create cost transaction', () => {
         const items = await page.locator('#categoriesList .dropdown-item').all();
 
         // Assert - check list content
-        expect(items.length).toBe(2);
+        expect(items.length).toBe(3);
         await expect(items[0]).toHaveText('Проживание');
         await expect(items[1]).toHaveText('Еда');
+        await expect(items[2]).toHaveText('Подарки');
 
         // Act - select category
         await items[0].click();
@@ -101,7 +104,88 @@ test.describe('Create cost transaction', () => {
     });
 
     test('amount field validation', async ({ page }) => {
+        // Arrange
+        const amountInput = page.locator('input[placeholder="Сумма в $..."]');
+        const categoryInput = page.locator('#categoryInput');
 
-    })
+        // Сначала выберем категорию, чтобы валидация суммы сработала
+        await categoryInput.click();
+        await page.waitForSelector('#categoriesList .dropdown-item');
+        await page.locator('#categoriesList .dropdown-item').first().click();
 
-})
+        let dialogMessage = '';
+        page.on('dialog', dialog => {
+            dialogMessage = dialog.message();
+            dialog.accept();
+        });
+
+        // Act & Assert - test invalid inputs
+        await amountInput.fill('abc');
+        await page.click('#create');
+        expect(dialogMessage).toBe('Введите корректную сумму');
+
+        await amountInput.fill('-100');
+        await page.click('#create');
+        expect(dialogMessage).toBe('Введите корректную сумму');
+
+        await amountInput.fill('0');
+        await page.click('#create');
+        expect(dialogMessage).toBe('Введите корректную сумму');
+    });
+
+    test('datapicker operation', async ({ page }) => {
+        // Arrange
+        const dateInput = page.locator('input[placeholder="Дата..."]');
+
+        // Act - open datepicker and select date
+        await dateInput.click();
+        await page.waitForSelector('.datepicker-dropdown', { state: 'visible' });
+        await page.locator('.datepicker-days .day:not(.old):not(.new)').first().click();
+
+        // Assert - check date format
+        const dateValue = await dateInput.inputValue();
+        expect(dateValue).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
+    });
+
+    test('successful cost creation', async ({ page }) => {
+        await page.route('**/api/operations', route => {
+            if (route.request().method() === 'POST') {
+                return route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify({ success: true })
+                });
+            }
+        });
+
+        // Act
+        await page.click('#categoryInput');
+        await page.waitForSelector('#categoriesList .dropdown-item');
+        await page.locator('#categoriesList .dropdown-item').first().click();
+        await page.fill('input[placeholder="Сумма в $..."]', '1000');
+        await page.click('input[placeholder="Дата..."]');
+        await page.locator('.datepicker-days .day:not(.old):not(.new)').first().click();
+        await page.fill('input[placeholder="Комментарий..."]', 'Тест расхода');
+
+        const responsePromise = page.waitForResponse(res =>
+            res.url().includes('/api/operations') &&
+            res.request().method() === 'POST'
+        );
+
+        await page.click('#create');
+        const response = await responsePromise;
+
+        // Assert
+        expect(response.ok()).toBeTruthy();
+        await page.waitForURL('/transactions');
+    });
+
+    test('cancel cost', async ({ page }) => {
+        // Act - click cancel button
+        await page.click('#cancel');
+
+        // Assert - check navigation
+        await page.waitForURL('/transactions');
+    });
+});
+

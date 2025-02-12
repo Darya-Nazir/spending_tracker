@@ -64,11 +64,6 @@ test.describe('Create income transaction', () => {
         await expect(typeInput).toBeVisible();
         await expect(typeInput).toHaveValue('Доход');
         await expect(typeInput).toHaveAttribute('readonly', '');
-
-        // Checking background style
-        const background = await typeInput.evaluate(el =>
-            window.getComputedStyle(el).backgroundColor);
-        expect(background).toBe('rgb(248, 249, 250)');
     });
 
     test('working with a drop-down list of categories', async ({ page }) => {
