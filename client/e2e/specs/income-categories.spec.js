@@ -127,19 +127,36 @@ test.describe('Income Categories tests', () => {
         ]);
     });
 
-    test('cancel delete income category', async ({ page }) => {
-        // Arrange - not needed, done in beforeEach
+    // test('cancel delete income category', async ({ page }) => {
+    //     // Arrange - not needed, done in beforeEach
+    //
+    //     // Act
+    //     await page.click(`[data-id="1"] .btn-danger`);
+    //
+    //     const modal = page.locator('#deleteCategoryModal');
+    //     await expect(modal).toBeVisible();
+    //
+    //     await Promise.all([
+    //         page.waitForSelector('#deleteCategoryModal', { state: 'hidden' }),
+    //         page.click('button[data-bs-dismiss="modal"]')
+    //     ]);
+    //
+    //     // Assert
+    //     await expect(page.locator(`[data-id="1"]`)).toBeVisible();
+    // });
 
-        // Act
+
+    test('cancel delete income category', async ({ page }) => {
+        // Act: trigger delete action to open the confirmation modal
         await page.click(`[data-id="1"] .btn-danger`);
 
+        // Assert: the delete modal should appear
         const modal = page.locator('#deleteCategoryModal');
         await expect(modal).toBeVisible();
 
-        await Promise.all([
-            page.waitForSelector('#deleteCategoryModal', { state: 'hidden' }),
-            page.click('button[data-bs-dismiss="modal"]')
-        ]);
+        // Act: click the cancel button and wait for the modal to be hidden
+        await page.click('button[data-bs-dismiss="modal"]');
+        await expect(modal).toBeHidden();
 
         // Assert
         await expect(page.locator(`[data-id="1"]`)).toBeVisible();
