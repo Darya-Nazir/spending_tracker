@@ -71,6 +71,7 @@ test.describe('Редактирование транзакции', () => {
     });
 
     test('successful transaction editing', async ({ page }) => {
+        // Мок ответа для PUT запроса
         await page.route(`**/api/operations/${mockTransaction.id}`, route => {
             if (route.request().method() === 'PUT') {
                 return route.fulfill({
@@ -78,24 +79,48 @@ test.describe('Редактирование транзакции', () => {
                     body: JSON.stringify({ success: true })
                 });
             }
+
+            // GET запрос для получения данных транзакции
+            if (route.request().method() === 'GET') {
+                return route.fulfill({
+                    status: 200,
+                    body: JSON.stringify(mockTransaction)
+                });
+            }
+        });
+
+        // Мок для получения категорий
+        await page.route('**/api/categories/expense', route => {
+            return route.fulfill({
+                status: 200,
+                body: JSON.stringify([
+                    { id: 1, title: 'Жильё' },
+                    { id: 2, title: 'Еда' },
+                    { id: 3, title: 'Транспорт' }
+                ])
+            });
         });
 
         await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
-        await page.waitForSelector('form');
+        await page.waitForSelector('.edit-transaction-form');
 
+        // Кликаем по инпуту категории
         await page.click('#categoryInput');
-        await page.waitForSelector('.categories-list', { state: 'visible' });
-        await expect(page.locator('.categories-list')).toBeVisible();
-        const categoryOption = page.locator('.categories-list .dropdown-item:text("Еда")');
-        await categoryOption.waitFor();
-        await categoryOption.click();
 
+        // Ждем появления списка после загрузки категорий
+        await page.waitForSelector('.categories-list li');
+
+        // Выбираем категорию "Еда"
+        await page.click('.categories-list button:has-text("Еда")');
+
+        // Обновляем остальные поля
         await page.fill('input[name="amount"]', '1000');
         await page.fill('input[name="comment"]', 'Обновленный комментарий');
 
+        // Отправляем форму
         await Promise.all([
             page.waitForURL('/transactions'),
-            page.click('button[type="submit"]')
+            page.click('#create')
         ]);
     });
 
@@ -118,6 +143,7 @@ test.describe('Редактирование транзакции', () => {
         const testCases = ['abc', '-100', '0'];
         let dialogCount = 0;
 
+        // Обработчик диалогов
         page.on('dialog', async dialog => {
             dialogCount++;
             expect(dialog.message()).toBe('Введите корректную сумму');
@@ -126,11 +152,19 @@ test.describe('Редактирование транзакции', () => {
 
         await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
 
+        // Проверяем каждый тест-кейс отдельно
         for (const testCase of testCases) {
+            // Заполняем поле
             await page.fill('input[name="amount"]', testCase);
-            await page.click('button[type="submit"]');
+
+            // Ожидаем диалог и кликаем одновременно
+            await Promise.all([
+                page.waitForEvent('dialog'),
+                page.click('button[type="submit"]')
+            ]);
         }
 
+        // Финальная проверка общего количества
         expect(dialogCount).toBe(testCases.length);
     });
 
