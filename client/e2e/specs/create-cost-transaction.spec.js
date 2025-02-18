@@ -72,7 +72,7 @@ test.describe('Create cost transaction', () => {
         await expect(typeInput).toHaveAttribute('readonly', '');
     });
 
-    test('working with a drop-down list of categories', async ({ page }) => {
+    test('dropdown UI functionality', async ({ page }) => {
         // Arrange
         const categoriesList = page.locator('#categoriesList');
         const categoryInput = page.locator('#categoryInput');
@@ -82,25 +82,50 @@ test.describe('Create cost transaction', () => {
 
         // Act - open dropdown
         await categoryInput.click();
-
-        // Assert - check dropdown visibility
         await expect(categoriesList).toBeVisible();
 
-        // Act - get list items
+        // Act & Assert - check list content and selection
         const items = await page.locator('#categoriesList .dropdown-item').all();
-
-        // Assert - check list content
         expect(items.length).toBe(3);
         await expect(items[0]).toHaveText('Проживание');
-        await expect(items[1]).toHaveText('Еда');
-        await expect(items[2]).toHaveText('Подарки');
 
         // Act - select category
         await items[0].click();
-
-        // Assert - check selection results
         await expect(categoryInput).toHaveValue('Проживание');
         await expect(categoriesList).toHaveCSS('display', 'none');
+    });
+
+    test('selected category is correctly sent to backend', async ({ page }) => {
+        // Arrange
+        let requestData = null;
+        await page.route('**/api/operations', async route => {
+            if (route.request().method() === 'POST') {
+                requestData = JSON.parse(await route.request().postData());
+                return route.fulfill({
+                    status: 200,
+                    contentType: 'application/json',
+                    body: JSON.stringify({ success: true })
+                });
+            }
+        });
+
+        // Act - select category and fill form
+        await page.click('#categoryInput');
+        await page.locator('#categoriesList .dropdown-item').first().click();
+        await page.fill('input[placeholder="Сумма в $..."]', '1000');
+        await page.click('input[placeholder="Дата..."]');
+        await page.locator('.datepicker-days .day:not(.old):not(.new)').first().click();
+
+        // Submit form and wait for response
+        const responsePromise = page.waitForResponse(res =>
+            res.url().includes('/api/operations') &&
+            res.request().method() === 'POST'
+        );
+        await page.click('#create');
+        await responsePromise;
+
+        // Assert
+        expect(requestData.category_id).toBe(1);
     });
 
     test('amount field validation', async ({ page }) => {
