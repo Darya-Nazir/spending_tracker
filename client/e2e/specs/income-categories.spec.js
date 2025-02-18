@@ -116,15 +116,18 @@ test.describe('Income Categories tests', () => {
             }
         });
 
-        // Act & Assert
+        // Act
         await page.click(`[data-id="1"] .btn-danger`);
+
+        // Assert: Check if confirmation modal is shown
         await expect(page.locator('#deleteCategoryModal')).toBeVisible();
 
-        await Promise.all([
-            page.waitForSelector('#deleteCategoryModal', { state: 'hidden' }),
-            page.waitForSelector(`[data-id="1"]`, { state: 'hidden' }),
-            page.click('#confirmDeleteBtn')
-        ]);
+        // Act: Confirm deletion
+        await page.click('#confirmDeleteBtn');
+
+        // Assert: Verify modal and category are removed
+        await expect(page.locator('#deleteCategoryModal')).toBeHidden();
+        await expect(page.locator(`[data-id="1"]`)).toBeHidden();
     });
 
     test('cancel delete income category', async ({ page }) => {
