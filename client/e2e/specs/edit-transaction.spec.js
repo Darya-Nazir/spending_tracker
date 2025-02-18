@@ -12,7 +12,7 @@ test.describe('Transaction editing', () => {
         category: 'Жильё',
         amount: 789,
         date: '2025-02-13',
-        comment: 'bbjlggu',
+        comment: 'hehe',
         category_id: 1
     };
 
@@ -69,7 +69,7 @@ test.describe('Transaction editing', () => {
         await expect(page.locator('input[name="category"]')).toHaveValue('Жильё');
         await expect(page.locator('input[name="amount"]')).toHaveValue('789');
         await expect(page.locator('input[name="date"]')).toHaveValue('13.02.2025');
-        await expect(page.locator('input[name="comment"]')).toHaveValue('bbjlggu');
+        await expect(page.locator('input[name="comment"]')).toHaveValue('hehe');
     });
 
     test('successful transaction editing', async ({ page }) => {
