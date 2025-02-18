@@ -1,9 +1,56 @@
 import { expect } from '@playwright/test';
 
 import { test } from './auth.setup.js';
-import { setupAuthAndDefaultApiMocks, setupCategoryMocks } from '../fixtures/api-mocks.js';
-import { mockCategories } from '../fixtures/test-data.js';
+import { mockCategories, mockTokens } from '../fixtures/test-data.js';
 import { createTestUser } from '../fixtures/users.js';
+
+const tokens = mockTokens;
+
+const setupAuthAndDefaultApiMocks = async (page, user) => {
+    await page.route('**/api/**', route => {
+        const url = route.request().url();
+
+        if (url.includes('/api/login')) {
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    tokens: tokens,
+                    user: { id: 1, name: user.fullName }
+                })
+            });
+        }
+
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([])
+        });
+    });
+};
+
+const setupCategoryMocks = async (page, categories) => {
+    await page.route('**/api/categories/**', route => {
+        const url = route.request().url();
+        const method = route.request().method();
+
+        if (url.includes('/income') && method === 'GET') {
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify(categories.income)
+            });
+        }
+
+        if (url.includes('/expense') && method === 'GET') {
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify(categories.expense)
+            });
+        }
+    });
+};
 
 const CHART_COLORS = [
     '#dc3545', // red
@@ -184,7 +231,7 @@ test.describe('Analytics charts', () => {
     });
 
     test('charts update when filter period changes', async ({ page }) => {
-       // Arrange
+        // Arrange
         await mockOperationsAPI(page, 'all', mockedTransactions.multiple);
         await mockOperationsAPI(page, 'today', mockedTransactions.today);
 
