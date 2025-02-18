@@ -127,25 +127,6 @@ test.describe('Income Categories tests', () => {
         ]);
     });
 
-    // test('cancel delete income category', async ({ page }) => {
-    //     // Arrange - not needed, done in beforeEach
-    //
-    //     // Act
-    //     await page.click(`[data-id="1"] .btn-danger`);
-    //
-    //     const modal = page.locator('#deleteCategoryModal');
-    //     await expect(modal).toBeVisible();
-    //
-    //     await Promise.all([
-    //         page.waitForSelector('#deleteCategoryModal', { state: 'hidden' }),
-    //         page.click('button[data-bs-dismiss="modal"]')
-    //     ]);
-    //
-    //     // Assert
-    //     await expect(page.locator(`[data-id="1"]`)).toBeVisible();
-    // });
-
-
     test('cancel delete income category', async ({ page }) => {
         // Act: trigger delete action to open the confirmation modal
         await page.click(`[data-id="1"] .btn-danger`);
