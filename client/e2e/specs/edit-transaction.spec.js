@@ -6,7 +6,7 @@ import { createTestUser } from '../fixtures/users.js';
 
 test.describe('Transaction editing', () => {
     const validUser = createTestUser();
-    const mockTransaction = {
+    const expectedTransaction = {
         id: 8,
         type: 'expense',
         category: 'Жильё',
@@ -43,11 +43,11 @@ test.describe('Transaction editing', () => {
                 });
             }
 
-            if (url.includes(`/api/operations/${mockTransaction.id}`)) {
+            if (url.includes(`/api/operations/${expectedTransaction.id}`)) {
                 if (method === 'GET') {
                     return route.fulfill({
                         status: 200,
-                        body: JSON.stringify(mockTransaction)
+                        body: JSON.stringify(expectedTransaction)
                     });
                 }
             }
@@ -62,30 +62,77 @@ test.describe('Transaction editing', () => {
 
     test('transaction data loading', async ({ page }) => {
         // Arrange: Navigate to edit transaction page
-        await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
+        await page.goto(`/edit-transaction?id=${expectedTransaction.id}`);
+
+        await page.waitForSelector('.edit-transaction-form');
+
+        const typeMapping = {
+            'expense': 'Расход',
+            'income': 'Доход'
+        };
+
+        const formatDate = (dateString) => {
+            const [year, month, day] = dateString.split('-');
+            return `${day}.${month}.${year}`;
+        };
 
         // Assert: Verify all transaction fields are loaded correctly
-        await expect(page.locator('input[name="type"]')).toHaveValue('Расход');
-        await expect(page.locator('input[name="category"]')).toHaveValue('Жильё');
-        await expect(page.locator('input[name="amount"]')).toHaveValue('789');
-        await expect(page.locator('input[name="date"]')).toHaveValue('13.02.2025');
-        await expect(page.locator('input[name="comment"]')).toHaveValue('hehe');
+        await expect(page.locator('input[name="type"]')).toHaveValue(typeMapping[expectedTransaction.type]);
+        await expect(page.locator('input[name="category"]')).toHaveValue(expectedTransaction.category);
+        await expect(page.locator('input[name="amount"]')).toHaveValue(expectedTransaction.amount.toString());
+        await expect(page.locator('input[name="date"]')).toHaveValue(formatDate(expectedTransaction.date));
+        await expect(page.locator('input[name="comment"]')).toHaveValue(expectedTransaction.comment);
     });
 
-    test('successful transaction editing', async ({ page }) => {
-        // Arrange: Setup API routes for editing
-        await page.route(`**/api/operations/${mockTransaction.id}`, route => {
+    test('should correctly load and display transaction data', async ({ page }) => {
+        // Arrange: Setup API routes
+        await page.route(`**/api/operations/${expectedTransaction.id}`, route => {
+            if (route.request().method() === 'GET') {
+                return route.fulfill({
+                    status: 200,
+                    body: JSON.stringify(expectedTransaction)
+                });
+            }
+        });
+
+        await page.route('**/api/categories/expense', route => {
+            return route.fulfill({
+                status: 200,
+                body: JSON.stringify([
+                    { id: 1, title: 'Жильё' },
+                    { id: 2, title: 'Еда' },
+                    { id: 3, title: 'Транспорт' }
+                ])
+            });
+        });
+
+        // Act: Navigate to edit page
+        await page.goto(`/edit-transaction?id=${expectedTransaction.id}`);
+        await page.waitForSelector('.edit-transaction-form');
+
+        // Assert: Verify initial form state
+        await expect(page.locator('input[name="type"]')).toHaveValue('Расход');
+        await expect(page.locator('input[name="category"]')).toHaveValue('Жильё');
+        await expect(page.locator('input[name="amount"]')).toHaveValue(expectedTransaction.amount.toString());
+        await expect(page.locator('input[name="comment"]')).toHaveValue(expectedTransaction.comment);
+    });
+
+    test('should successfully update transaction with new data', async ({ page }) => {
+        // Arrange: Setup API routes and capture PUT request data
+        let capturedPutRequest = null;
+
+        await page.route(`**/api/operations/${expectedTransaction.id}`, async route => {
             if (route.request().method() === 'PUT') {
+                capturedPutRequest = await route.request().postData();
                 return route.fulfill({
                     status: 200,
                     body: JSON.stringify({ success: true })
                 });
             }
-
             if (route.request().method() === 'GET') {
                 return route.fulfill({
                     status: 200,
-                    body: JSON.stringify(mockTransaction)
+                    body: JSON.stringify(expectedTransaction)
                 });
             }
         });
@@ -102,19 +149,35 @@ test.describe('Transaction editing', () => {
         });
 
         // Act: Navigate and modify transaction
-        await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
+        await page.goto(`/edit-transaction?id=${expectedTransaction.id}`);
         await page.waitForSelector('.edit-transaction-form');
+
+        // Modify transaction fields
         await page.click('#categoryInput');
         await page.waitForSelector('.categories-list li');
         await page.click('.categories-list button:has-text("Еда")');
-        await page.fill('input[name="amount"]', '1000');
-        await page.fill('input[name="comment"]', 'Обновленный комментарий');
+        await expect(page.locator('input[name="category"]')).toHaveValue('Еда');
 
-        // Assert: Verify redirect after successful edit
+        const newAmount = '1000';
+        const newComment = 'Обновленный комментарий';
+        await page.fill('input[name="amount"]', newAmount);
+        await page.fill('input[name="comment"]', newComment);
+
+        // Submit form and wait for navigation
         await Promise.all([
             page.waitForURL('/transactions'),
             page.click('#create')
         ]);
+
+        // Assert: Verify the PUT request data
+        const putRequestData = JSON.parse(capturedPutRequest);
+        expect(putRequestData).toMatchObject({
+            type: 'expense',
+            amount: 1000,
+            category_id: 2,
+            comment: newComment
+        });
+        expect(putRequestData.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
 
     test('validation of empty amount field', async ({ page }) => {
@@ -125,7 +188,7 @@ test.describe('Transaction editing', () => {
             expect(dialog.message()).toBe('Введите корректную сумму');
             await dialog.accept();
         });
-        await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
+        await page.goto(`/edit-transaction?id=${expectedTransaction.id}`);
 
         // Act: Submit form with empty amount
         await page.fill('input[name="amount"]', '');
@@ -136,32 +199,29 @@ test.describe('Transaction editing', () => {
     });
 
     test('invalid amount validation', async ({ page }) => {
-        // Arrange: Setup test cases and dialog handler
+        // Arrange: Setup test cases
         const testCases = ['abc', '-100', '0'];
-        let dialogCount = 0;
+        await page.goto(`/edit-transaction?id=${expectedTransaction.id}`);
+
         page.on('dialog', async dialog => {
-            dialogCount++;
             expect(dialog.message()).toBe('Введите корректную сумму');
             await dialog.accept();
         });
-        await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
 
-        // Act: Test each invalid amount case
         for (const testCase of testCases) {
+            await page.fill('input[name="amount"]', ''); // Очистка перед вводом
             await page.fill('input[name="amount"]', testCase);
-            await Promise.all([
-                page.waitForEvent('dialog'),
-                page.click('button[type="submit"]')
-            ]);
-        }
 
-        // Assert: Verify all validation dialogs were shown
-        expect(dialogCount).toBe(testCases.length);
+            // Act: Ожидание появления диалога перед кликом
+            const dialogPromise = page.waitForEvent('dialog');
+            await page.click('button[type="submit"]');
+            await dialogPromise;
+        }
     });
 
     test('cancel editing', async ({ page }) => {
         // Arrange: Navigate to edit page
-        await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
+        await page.goto(`/edit-transaction?id=${expectedTransaction.id}`);
 
         // Act & Assert: Click cancel and verify redirect
         await Promise.all([
@@ -179,7 +239,7 @@ test.describe('Transaction editing', () => {
             await dialog.accept();
         });
 
-        await page.route(`**/api/operations/${mockTransaction.id}`, route => {
+        await page.route(`**/api/operations/${expectedTransaction.id}`, route => {
             if (route.request().method() === 'PUT') {
                 return route.fulfill({
                     status: 500,
@@ -189,7 +249,7 @@ test.describe('Transaction editing', () => {
         });
 
         // Act: Attempt to save transaction
-        await page.goto(`/edit-transaction?id=${mockTransaction.id}`);
+        await page.goto(`/edit-transaction?id=${expectedTransaction.id}`);
         await page.fill('input[name="amount"]', '1000');
         await page.click('button[type="submit"]');
 
