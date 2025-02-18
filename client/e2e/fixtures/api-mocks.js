@@ -1,6 +1,6 @@
 import { mockTokens } from './test-data';
 
-export const setupLoginApiMocks = async (page, user) => {
+export const setupAuthAndDefaultApiMocks = async (page, user) => {
     await page.route('**/api/**', route => {
         const url = route.request().url();
 

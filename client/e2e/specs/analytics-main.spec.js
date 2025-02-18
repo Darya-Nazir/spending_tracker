@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 
 import { test } from './auth.setup.js';
-import { setupLoginApiMocks, setupCategoryMocks } from '../fixtures/api-mocks.js';
+import { setupAuthAndDefaultApiMocks, setupCategoryMocks } from '../fixtures/api-mocks.js';
 import { mockCategories } from '../fixtures/test-data.js';
 import { createTestUser } from '../fixtures/users.js';
 
@@ -94,7 +94,7 @@ const mockOperationsAPI = async (page, period, data) => {
 test.describe('Analytics charts', () => {
     test.beforeEach(async ({ page }) => {
         const user = createTestUser();
-        await setupLoginApiMocks(page, user);
+        await setupAuthAndDefaultApiMocks(page, user);
         await setupCategoryMocks(page, mockCategories);
 
         await page.goto('/');
