@@ -116,9 +116,18 @@ test.describe('Transaction list', () => {
             })
         );
 
-        // Act - Click week filter
-        await page.getByRole('button', { name: 'Неделя', exact: true }).click();
+        // Wait for the initial page load to complete
+        await expect(page.locator('#transactionsTable')).toBeVisible();
+        await expect(page.locator('tbody tr')).toHaveCount(mockTransactions.length);
+
+        // Act - Click week filter and wait for specific response
+        const weekButton = page.getByRole('button', { name: 'Неделя', exact: true });
+        await expect(weekButton).toBeEnabled();
+        await weekButton.click();
+
+        // Wait for the specific response and table update
         await page.waitForResponse(res => res.url().includes('period=week'));
+        await expect(page.locator('tbody tr')).toHaveCount(2);
 
         // Assert - Check filtered results
         const rows = await page.locator('tbody tr').all();
