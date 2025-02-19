@@ -98,36 +98,111 @@ test.describe('Analytics charts', () => {
 
     test('charts update when filter period changes', async ({ page }) => {
         // Arrange
-        await mockOperationsAPI(page, 'all', mockedTransactions.multiple);
-        await mockOperationsAPI(page, 'today', mockedTransactions.today);
+        const allTransactions = mockedTransactions.multiple;
+        const todayTransactions = mockedTransactions.today;
+
+        await mockOperationsAPI(page, 'all', allTransactions);
+        await mockOperationsAPI(page, 'today', todayTransactions);
 
         await page.goto('/');
         await page.waitForLoadState('networkidle');
         await page.waitForFunction(() => typeof Chart !== 'undefined');
 
-        await expect(page.locator('canvas#incomeChart')).toBeVisible();
-        await expect(page.locator('canvas#expensesChart')).toBeVisible();
+        // Получаем начальное состояние (all)
+        const initialChartData = await page.evaluate(() => {
+            const incomeChart = Chart.getChart('incomeChart');
+            const expensesChart = Chart.getChart('expensesChart');
 
+            return {
+                income: {
+                    labels: incomeChart.data.labels,
+                    data: incomeChart.data.datasets[0].data,
+                    colors: incomeChart.data.datasets[0].backgroundColor
+                },
+                expenses: {
+                    labels: expensesChart.data.labels,
+                    data: expensesChart.data.datasets[0].data,
+                    colors: expensesChart.data.datasets[0].backgroundColor
+                }
+            };
+        });
+
+        // Проверяем корректность начального состояния
+        expect(initialChartData.income).toEqual({
+            labels: ['зарплата', 'инвестиции'],
+            data: [1000, 500],
+            colors: [TEST_CHART_COLORS[0], TEST_CHART_COLORS[1]] // Первые два цвета из палитры
+        });
+
+        expect(initialChartData.expenses).toEqual({
+            labels: ['продукты', 'транспорт'],
+            data: [300, 200],
+            colors: [TEST_CHART_COLORS[0], TEST_CHART_COLORS[1]]
+        });
+
+        // Act - меняем период на "сегодня"
         await page.getByRole('button', { name: 'Сегодня', exact: true }).click();
-
         await page.waitForResponse(res => res.url().includes('period=today'));
         await page.waitForLoadState('networkidle');
 
-        await expect(page.locator('canvas#incomeChart')).toBeVisible();
-        await expect(page.locator('canvas#expensesChart')).toBeVisible();
+        // Получаем обновленное состояние
+        const updatedChartData = await page.evaluate(() => {
+            const incomeChart = Chart.getChart('incomeChart');
+            const expensesChart = Chart.getChart('expensesChart');
 
-        // Act
-        const canvasesValid = await page.evaluate(() => {
-            const incomeCanvas = document.querySelector('canvas#incomeChart');
-            const expensesCanvas = document.querySelector('canvas#expensesChart');
-            return incomeCanvas !== null &&
-                expensesCanvas !== null &&
-                incomeCanvas.width > 0 &&
-                expensesCanvas.width > 0;
+            return {
+                income: {
+                    labels: incomeChart.data.labels,
+                    data: incomeChart.data.datasets[0].data,
+                    colors: incomeChart.data.datasets[0].backgroundColor
+                },
+                expenses: {
+                    labels: expensesChart.data.labels,
+                    data: expensesChart.data.datasets[0].data,
+                    colors: expensesChart.data.datasets[0].backgroundColor
+                }
+            };
         });
 
         // Assert
-        expect(canvasesValid).toBeTruthy();
+
+        // 1. Проверяем, что данные изменились
+        expect(updatedChartData).not.toEqual(initialChartData);
+
+        // 2. Проверяем корректность данных для периода "сегодня"
+        // Группируем транзакции за сегодня по категориям
+        const todayIncomeData = todayTransactions.reduce((acc, tr) => {
+            if (tr.type === 'income') {
+                acc.labels.push(tr.category);
+                acc.data.push(tr.amount);
+                acc.colors.push(TEST_CHART_COLORS[acc.labels.length - 1]);
+            }
+            return acc;
+        }, { labels: [], data: [], colors: [] });
+
+        // Проверяем доходы
+        expect(updatedChartData.income).toEqual({
+            labels: todayIncomeData.labels,
+            data: todayIncomeData.data,
+            colors: todayIncomeData.colors
+        });
+
+        // 3. Проверяем расходы (их нет в периоде "сегодня")
+        expect(updatedChartData.expenses).toEqual({
+            labels: [],
+            data: [],
+            colors: []
+        });
+
+        // 4. Проверяем сохранение порядка категорий и цветов
+        if (updatedChartData.income.labels.length > 0) {
+            updatedChartData.income.labels.forEach((label, index) => {
+                const initialIndex = initialChartData.income.labels.indexOf(label);
+                if (initialIndex !== -1) {
+                    expect(updatedChartData.income.colors[index]).toBe(initialChartData.income.colors[initialIndex]);
+                }
+            });
+        }
     });
 });
 
