@@ -98,6 +98,8 @@ test.describe('Create cost transaction', () => {
     test('selected category is correctly sent to backend', async ({ page }) => {
         // Arrange
         let requestData = null;
+        let selectedCategoryText = '';
+
         await page.route('**/api/operations', async route => {
             if (route.request().method() === 'POST') {
                 requestData = JSON.parse(await route.request().postData());
@@ -111,7 +113,12 @@ test.describe('Create cost transaction', () => {
 
         // Act - select category and fill form
         await page.click('#categoryInput');
-        await page.locator('#categoriesList .dropdown-item').first().click();
+        const categoryElement = page.locator('#categoriesList .dropdown-item').first();
+
+        // Get the category text before clicking
+        selectedCategoryText = (await categoryElement.textContent()).trim();
+        await categoryElement.click();
+
         await page.fill('input[placeholder="Сумма в $..."]', '1000');
         await page.click('input[placeholder="Дата..."]');
         await page.locator('.datepicker-days .day:not(.old):not(.new)').first().click();
@@ -126,6 +133,11 @@ test.describe('Create cost transaction', () => {
 
         // Assert
         expect(requestData.category_id).toBe(1);
+        expect(selectedCategoryText).toBe('Проживание'); // Verify that ID 1 corresponds to "Проживание"
+
+        // Double check that the input field shows the correct category
+        const categoryInputValue = await page.locator('#categoryInput').inputValue();
+        expect(categoryInputValue).toBe('Проживание');
     });
 
     test('amount field validation', async ({ page }) => {

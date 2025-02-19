@@ -108,7 +108,6 @@ test.describe('Analytics charts', () => {
         await page.waitForLoadState('networkidle');
         await page.waitForFunction(() => typeof Chart !== 'undefined');
 
-        // Получаем начальное состояние (all)
         const initialChartData = await page.evaluate(() => {
             const incomeChart = Chart.getChart('incomeChart');
             const expensesChart = Chart.getChart('expensesChart');
@@ -127,7 +126,6 @@ test.describe('Analytics charts', () => {
             };
         });
 
-        // Проверяем корректность начального состояния
         expect(initialChartData.income).toEqual({
             labels: ['зарплата', 'инвестиции'],
             data: [1000, 500],
@@ -140,12 +138,10 @@ test.describe('Analytics charts', () => {
             colors: [TEST_CHART_COLORS[0], TEST_CHART_COLORS[1]]
         });
 
-        // Act - меняем период на "сегодня"
         await page.getByRole('button', { name: 'Сегодня', exact: true }).click();
         await page.waitForResponse(res => res.url().includes('period=today'));
         await page.waitForLoadState('networkidle');
 
-        // Получаем обновленное состояние
         const updatedChartData = await page.evaluate(() => {
             const incomeChart = Chart.getChart('incomeChart');
             const expensesChart = Chart.getChart('expensesChart');
@@ -166,12 +162,9 @@ test.describe('Analytics charts', () => {
 
         // Assert
 
-        // 1. Проверяем, что данные изменились
         expect(updatedChartData).not.toEqual(initialChartData);
 
-        // 2. Проверяем корректность данных для периода "сегодня"
-        // Группируем транзакции за сегодня по категориям
-        const todayIncomeData = todayTransactions.reduce((acc, tr) => {
+            const todayIncomeData = todayTransactions.reduce((acc, tr) => {
             if (tr.type === 'income') {
                 acc.labels.push(tr.category);
                 acc.data.push(tr.amount);
@@ -180,21 +173,19 @@ test.describe('Analytics charts', () => {
             return acc;
         }, { labels: [], data: [], colors: [] });
 
-        // Проверяем доходы
         expect(updatedChartData.income).toEqual({
             labels: todayIncomeData.labels,
             data: todayIncomeData.data,
             colors: todayIncomeData.colors
         });
 
-        // 3. Проверяем расходы (их нет в периоде "сегодня")
+        //Check expenses (they are not in the period “today”)
         expect(updatedChartData.expenses).toEqual({
             labels: [],
             data: [],
             colors: []
         });
 
-        // 4. Проверяем сохранение порядка категорий и цветов
         if (updatedChartData.income.labels.length > 0) {
             updatedChartData.income.labels.forEach((label, index) => {
                 const initialIndex = initialChartData.income.labels.indexOf(label);
