@@ -6,14 +6,14 @@ export default defineConfig({
         command: 'npm run dev',
         port: 9000,
         timeout: 120 * 1000,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: true,
     },
     use: {
         baseURL: 'http://localhost:9000',
-        screenshot: 'only-on-failure'
+        screenshot: 'only-on-failure',
+        // headless: false
     },
     fullyParallel: false,
     retries: 0,
-    reporter: 'list'
 });
 

@@ -25,7 +25,6 @@ export class EditTransaction extends EditCard {
     async init() {
         const transactionId = this.getCategoryIdFromUrl();
         if (!transactionId) {
-            alert('Идентификатор транзакции не найден!');
             this.navigateToPath(this.redirectPath);
             return;
         }
