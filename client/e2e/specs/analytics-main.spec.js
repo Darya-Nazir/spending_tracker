@@ -159,12 +159,10 @@ test.describe('Analytics charts', () => {
                 }
             };
         });
-
         // Assert
-
         expect(updatedChartData).not.toEqual(initialChartData);
 
-            const todayIncomeData = todayTransactions.reduce((acc, tr) => {
+        const todayIncomeData = todayTransactions.reduce((acc, tr) => {
             if (tr.type === 'income') {
                 acc.labels.push(tr.category);
                 acc.data.push(tr.amount);
@@ -179,7 +177,7 @@ test.describe('Analytics charts', () => {
             colors: todayIncomeData.colors
         });
 
-        //Check expenses (they are not in the period “today”)
+        // Check expenses (they are not in the period “today”)
         expect(updatedChartData.expenses).toEqual({
             labels: [],
             data: [],
