@@ -92,12 +92,12 @@ test.describe('Create income transaction', () => {
 
     test('selected income category is correctly sent to backend', async ({ page }) => {
         // Arrange
-        let requestData = null;
+        let requestSent = null;
         let selectedCategoryText = '';
 
         await page.route('**/api/operations', async route => {
             if (route.request().method() === 'POST') {
-                requestData = JSON.parse(await route.request().postData());
+                requestSent = JSON.parse(route.request().postData());
                 return route.fulfill({
                     status: 200,
                     contentType: 'application/json',
@@ -127,7 +127,7 @@ test.describe('Create income transaction', () => {
         await responsePromise;
 
         // Assert
-        expect(requestData.category_id).toBe(1);
+        expect(requestSent.category_id).toBe(1);
         expect(selectedCategoryText).toBe('Зарплата'); // Verify that ID 1 corresponds to "Зарплата"
 
         // Double check that the input field shows the correct category
