@@ -1,26 +1,31 @@
-import { Analytics } from "./components/analytics.js";
-import { Costs } from "./components/costs.js";
-import { NewCost } from "./components/create-cost.js";
-import { NewIncome } from "./components/create-income.js";
-import { NewTransaction } from "./components/create-transaction.js";
-import { EditCost } from "./components/edit-cost.js";
-import { EditIncome } from "./components/edit-income.js";
-import { EditTransaction } from "./components/edit-transaction.js";
-import { Incomes } from "./components/incomes.js";
-import { Login } from "./components/login.js";
-import { Signup } from "./components/signup.js";
-import { Transaction } from "./components/transaction.js";
-import { User } from "./components/user.js";
-import { Auth } from "./services/auth.js";
+import {Analytics} from "./components/analytics";
+import {Costs} from "./components/costs";
+import {NewCost} from "./components/create-cost";
+import {NewIncome} from "./components/create-income";
+import {NewTransaction} from "./components/create-transaction";
+import {EditCost} from "./components/edit-cost";
+import {EditIncome} from "./components/edit-income";
+import {EditTransaction} from "./components/edit-transaction";
+import {Incomes} from "./components/incomes";
+import {Login} from "./components/login";
+import {Signup} from "./components/signup";
+import {Transaction} from "./components/transaction";
+import {User} from "./components/user";
+import {Auth} from "./services/auth";
+import {Route, Routes, RoutePath} from "./types/route-type";
+import {states} from "./constants/states";
+
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
-const states = {
-    STATE_UNAUTHORIZED: 'unauthorized',
-    STATE_AUTHORIZED: 'authorized',
-}
 
 export class Router {
+    routes: Routes;
+    private navbarElement: HTMLElement | null;
+    private appElement: HTMLElement | null;
+    private path;
+    private page: Route | null;
+
     constructor() {
         this.routes = routes;
 
@@ -28,25 +33,25 @@ export class Router {
         Auth.processUnauthorizedResponse.bind(this);
 
         this.appElement = document.getElementById('app');
-        this.loadedStyles = new Set(); // Отслеживаем загруженные стили
         this.navbarElement = document.getElementById('navbar');
 
         this.path = window.location.pathname || '/';
         this.page = this.routes[this.path];
     }
 
-    isAuthenticated() {
+    private isAuthenticated(): boolean {
         return localStorage.getItem(Auth.accessTokenKey) !== null;
     }
 
-    initEvents() {
+    private initEvents(): void {
         window.addEventListener('DOMContentLoaded', this.handleNavigation.bind(this));
         window.addEventListener('popstate', this.handleNavigation.bind(this));
         document.body.addEventListener('click', this.openNewRoute.bind(this));
     }
 
-    openNewRoute(event) {
-        const link = event.target.closest('a');
+    private openNewRoute(event: MouseEvent): void {
+        const target = event.target as HTMLElement;
+        const link = event.target.closest('a') as HTMLAnchorElement | null;
 
         if (link) {
             event.preventDefault(); // Предотвращает стандартный переход
@@ -55,7 +60,7 @@ export class Router {
         }
     }
 
-    navigateTo(route) {
+    public navigateTo(route: string): void {
         const normalizedCurrentPath = this.path.startsWith('/') ? this.path : `/${this.path}`;
         const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
 
@@ -69,7 +74,7 @@ export class Router {
         this.handleNavigation(); // Загружаем новую страницу
     }
 
-    startLoad() {
+    private startLoad(): void {
         if (this.page && typeof this.page.component) {
             const componentInstance = new this.page.component(this.navigateTo.bind(this));
             componentInstance.init();
@@ -80,7 +85,7 @@ export class Router {
         document.title = this.page.title ? this.page.title : DEFAULT_PAGE_TITLE;
     }
 
-    async handleNavigation() {
+    private async handleNavigation() {
         const handlePage = this.page ?? null;
 
         if (handlePage?.state === states.STATE_AUTHORIZED && !this.isAuthenticated()) {
@@ -121,6 +126,8 @@ export class Router {
     }
 
     toggleNav() {
+        if (!this.navbarElement) return;
+
         const showNavbar = this.page?.state === states.STATE_AUTHORIZED;
 
         if (showNavbar) {
@@ -138,7 +145,7 @@ export class Router {
     }
 }
 
-const routes = {
+const routes: Routes = {
     '/login': {
         html: 'templates/login.html',
         title: 'Lumincoin Finance - Вход',
