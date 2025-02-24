@@ -1,9 +1,13 @@
-import { Http } from "../services/http.js";
-import { Validation } from "./base-class/validation.js";
-import { DefaultCategoriesManager } from "../services/default-categories.js";
+import { Http } from "../services/http";
+import { Validation } from "./base-class/validation";
+import { DefaultCategoriesManager } from "../services/default-categories";
+import {RoutePath} from "../types/route-type";
 
 export class Signup extends Validation {
-    constructor(navigateTo) {
+    fullNameInput: HTMLElement | null;
+    confirmPasswordInput: HTMLElement | null;
+
+    constructor(navigateTo: RoutePath) {
         super(navigateTo);
         this.fullNameInput = document.getElementById('fullName');
         this.confirmPasswordInput = document.getElementById('confirmPassword');

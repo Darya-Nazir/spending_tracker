@@ -1,8 +1,16 @@
 import { DatePickerManager } from "../../services/date-picker.js";
 import { User } from "../user.js";
+import {RoutePath} from "../../types/route-type";
+import {Operation} from "../../types/operations-type";
 
 export class BaseOperations {
-    constructor(navigateTo) {
+    apiUrl: string;
+    container: HTMLElement | null;
+    datePickerManager: DatePickerManager;
+    balanceManager : User;
+    navigateTo: (path: RoutePath) => void;
+
+    constructor(navigateTo: (path: RoutePath) => void) {
         this.apiUrl = 'http://localhost:3000/api/operations';
         this.container = document.querySelector('.table tbody');
         this.datePickerManager = new DatePickerManager();
@@ -10,13 +18,13 @@ export class BaseOperations {
         this.navigateTo = navigateTo;
     }
 
-    navigateToPath(path) {
+    protected navigateToPath(path: RoutePath): void {
         this.navigateTo(path);
     }
 
-    createTableRow(operation) {
-        const row = document.createElement('tr');
-        row.dataset.id = operation.id;
+    private createTableRow(operation: Operation): HTMLElement {
+        const row: HTMLTableRowElement = document.createElement('tr');
+        row.dataset.id = operation.id.toString();
 
         const typeClass = operation.type === 'income' ? 'text-success' : 'text-danger';
         const typeText = operation.type === 'income' ? 'доход' : 'расход';
@@ -51,7 +59,7 @@ export class BaseOperations {
         await this.balanceManager.showBalance();
     }
 
-    renderOperations(operations) {
+    renderOperations(operations: Operation[]) {
         if (!this.container) {
             if (typeof this.navigateTo === 'function') {
                 this.navigateTo(operations);
