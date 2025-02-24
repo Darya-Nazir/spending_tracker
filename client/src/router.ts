@@ -36,7 +36,7 @@ export class Router {
         this.navbarElement = document.getElementById('navbar');
 
         this.path = window.location.pathname || '/';
-        this.page = this.routes[this.path];
+        this.page = this.routes[this.path as RoutePath];
     }
 
     private isAuthenticated(): boolean {
@@ -51,12 +51,14 @@ export class Router {
 
     private openNewRoute(event: MouseEvent): void {
         const target = event.target as HTMLElement;
-        const link = event.target.closest('a') as HTMLAnchorElement | null;
+        const link = target.closest('a') as HTMLAnchorElement | null;
 
         if (link) {
-            event.preventDefault(); // Предотвращает стандартный переход
+            event.preventDefault();
             const path = link.getAttribute('href');
-            this.navigateTo(path); // Вызов вашего метода для изменения маршрута
+            if (path) {
+                this.navigateTo(path);
+            }
         }
     }
 
@@ -70,7 +72,7 @@ export class Router {
 
         history.pushState(null, '', route); // Изменяем историю
         this.path = window.location.pathname; // Обновляем текущий путь
-        this.page = this.routes[this.path]; // Обновляем текущую страницу
+        this.page = this.routes[this.path as RoutePath]; // Обновляем текущую страницу
         this.handleNavigation(); // Загружаем новую страницу
     }
 
@@ -82,10 +84,12 @@ export class Router {
     }
 
     addTitle() {
+        if (this.page) {
         document.title = this.page.title ? this.page.title : DEFAULT_PAGE_TITLE;
+        }
     }
 
-    private async handleNavigation() {
+    private async handleNavigation(): Promise<void> {
         const handlePage = this.page ?? null;
 
         if (handlePage?.state === states.STATE_AUTHORIZED && !this.isAuthenticated()) {
@@ -95,7 +99,9 @@ export class Router {
 
         if (!handlePage) {
             console.error('Маршрут не найден:', this.path);
-            this.appElement.innerHTML = '<h1>Маршрут не найден</h1>';
+            if (this.appElement) {
+                this.appElement.innerHTML = '<h1>Маршрут не найден</h1>';
+            }
             return;
         }
 
@@ -105,7 +111,7 @@ export class Router {
             // Создаем промис, который разрешится, когда DOM будет готов
             const domReadyPromise = new Promise(resolve => {
                 requestAnimationFrame(() => {
-                    this.appElement.innerHTML = html;
+                    this.appElement!.innerHTML = html;
                     // Даем браузеру время на обработку DOM
                     setTimeout(resolve, 0);
                 });
@@ -121,7 +127,9 @@ export class Router {
 
         } catch (error) {
             console.error('Ошибка при загрузке страницы:', error);
-            this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
+            if (this.appElement) {
+                this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
+            }
         }
     }
 
