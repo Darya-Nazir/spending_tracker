@@ -14,7 +14,7 @@ export type Route = {
     }
 };
 
-export type RoutePath =
+export type RoutePathBase =
     | '/login'
     | '/signup'
     | '/costs'
@@ -27,3 +27,5 @@ export type RoutePath =
     | '/edit-income'
     | '/create-transaction'
     | '/edit-transaction';
+
+export type RoutePath = RoutePathBase | `${RoutePathBase}?id=${string}`;

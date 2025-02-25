@@ -1,8 +1,20 @@
-import { Http } from "../../services/http.js";
-import { Unselect } from "../../services/unselect.js";
+import {Http} from "../../services/http";
+import {Unselect} from "../../services/unselect";
+import {RoutePath} from "../../types/route-type";
+import {Category} from "../../types/category-type";
 
 export class CardPage {
-    constructor(navigateTo, containerId, apiUrl, addCategoryPath, editCategoryPath) {
+    private navigateToPath: (path: RoutePath) => void;
+    private container: HTMLElement | null;
+    private apiUrl: string;
+    private addCategoryPath: RoutePath;
+    private editCategoryPath: RoutePath;
+
+    constructor(navigateTo: (path: RoutePath) => void,
+                containerId: string,
+                apiUrl: string,
+                addCategoryPath: RoutePath,
+                editCategoryPath: RoutePath) {
         this.navigateToPath = navigateTo;
         this.container = document.getElementById(containerId);
         this.apiUrl = apiUrl;
@@ -10,7 +22,7 @@ export class CardPage {
         this.editCategoryPath = editCategoryPath;
     }
 
-    async init() {
+    protected async init(): Promise<void> {
         new Unselect().init();
         this.highlightPage();
         await this.renderCategories();
@@ -18,36 +30,39 @@ export class CardPage {
         this.deleteCategoryButtonListener();
     }
 
-    highlightPage() {
+    protected highlightPage(): void {
         throw new Error("Метод 'highlightPage' должен быть переопределён в производном классе.");
     }
 
-    addCategoryButtonListener() {
-        const addCategoryButton = document.getElementById('addCategoryBtn');
+    protected addCategoryButtonListener(): void {
+        const addCategoryButton: HTMLElement | null = document.getElementById('addCategoryBtn');
         if (!addCategoryButton) {
             console.error('Элемент addCategoryBtn не найден в DOM!');
             return;
         }
-        addCategoryButton.addEventListener('click', () => {
+        addCategoryButton.addEventListener('click', (): void => {
             this.navigateToPath(this.addCategoryPath);
         });
     }
 
-    deleteCategoryButtonListener() {
-        let cardToDelete = null;
-        let categoryIdToDelete = null;
+    protected deleteCategoryButtonListener(): void {
+        let cardToDelete: HTMLElement | null = null;
+        let categoryIdToDelete: string | null | undefined = null;
 
-        document.querySelector('.row.g-4').addEventListener('click', (event) => {
-            if (event.target.classList.contains('btn-danger')) {
-                cardToDelete = event.target.closest('.col-md-4');
-                categoryIdToDelete = cardToDelete.dataset.id;
+        (document.querySelector('.row.g-4') as HTMLElement).addEventListener('click', (event) => {
+            const target = event.target as HTMLElement;
+            if (target.classList.contains('btn-danger')) {
+                cardToDelete = target.closest('.col-md-4');
+                if (cardToDelete) {
+                    categoryIdToDelete = cardToDelete.dataset.id;
+                }
 
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
                 deleteModal.show();
             }
         });
 
-        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        (document.getElementById('confirmDeleteBtn') as HTMLElement).addEventListener('click', async () => {
             if (!cardToDelete || !categoryIdToDelete) {
                 return;
             }
@@ -60,19 +75,21 @@ export class CardPage {
                 categoryIdToDelete = null;
 
                 const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
-                deleteModal.hide();
+                if (deleteModal) {
+                    deleteModal.hide();
+                }
             } catch (error) {
                 console.error('Error deleting category:', error);
             }
         });
     }
 
-    async fetchCategories() {
+    protected async fetchCategories(): Promise<any> {
         return await Http.request(this.apiUrl, 'GET');
     }
 
-    createCard(category) {
-        const card = document.createElement('div');
+    protected createCard(category: Category): HTMLElement {
+        const card: HTMLElement = document.createElement('div');
         card.className = 'col-md-4';
         card.dataset.id = category.id;
 
@@ -87,30 +104,34 @@ export class CardPage {
                 </div>
             </div>
         `;
-        const editButton = card.querySelector('.edit-category-btn');
-        editButton.addEventListener('click', () => {
+        const editButton: HTMLElement | null = card.querySelector('.edit-category-btn');
+        (editButton as HTMLElement).addEventListener('click', () => {
             this.navigateToPath(`${this.editCategoryPath}?id=${category.id}`);
         });
 
         return card;
     }
 
-    async renderCategories() {
-        const categories = await this.fetchCategories();
-        const addCategoryCard = document.getElementById('addCategoryCard');
+    protected async renderCategories(): Promise<void> {
+        const categories: Category[] = await this.fetchCategories();
+        const addCategoryCard: HTMLElement | null = document.getElementById('addCategoryCard');
 
-        Array.from(this.container.children).forEach(child => {
-            if (child !== addCategoryCard) {
-                this.container.removeChild(child);
+        if (this.container) {
+            Array.from(this.container.children).forEach(child => {
+                if (child !== addCategoryCard) {
+                    this.container!.removeChild(child);
+                }
+            });
+
+            categories.forEach(category => {
+                const card = this.createCard(category);
+                this.container!.appendChild(card);
+            });
+
+            if (addCategoryCard) {
+            this.container.appendChild(addCategoryCard);
             }
-        });
-
-        categories.forEach(category => {
-            const card = this.createCard(category);
-            this.container.appendChild(card);
-        });
-
-        this.container.appendChild(addCategoryCard);
+        }
     }
 }
 
