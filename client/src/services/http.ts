@@ -1,9 +1,15 @@
-import { Auth } from "./auth.js";
+import { Auth } from "./auth";
+import {HttpMethod, RequestParams} from "../types/http-type";
 
 export class Http {
-    static async request(url, method = 'GET', body = null, requiresAuth = true) {
-        const params = await this.createRequestParams(method, body, requiresAuth);
-        const response = await fetch(url, params);
+    public static async request<T = any>(
+        url: string,
+        method: HttpMethod = 'GET',
+        body: any = null,
+        requiresAuth: boolean = true
+    ): Promise<T> {
+        const params: RequestInit = await this.createRequestParams(method, body, requiresAuth);
+        const response: Response = await fetch(url, params);
 
         if (response.status < 200 || response.status >= 300) {
             return await this.handleError(response, url, method, body, requiresAuth);
@@ -12,8 +18,8 @@ export class Http {
         return await response.json();
     }
 
-    static async createRequestParams(method, body, requiresAuth = true) {
-        const params = {
+    public static async createRequestParams(method: HttpMethod, body: string, requiresAuth = true): Promise<RequestParams> {
+        const params: RequestParams = {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
@@ -32,14 +38,14 @@ export class Http {
         return params;
     }
 
-    static addAuthTokenToHeaders(params) {
+    public static addAuthTokenToHeaders(params: RequestParams): void {
         const token = localStorage.getItem(Auth.accessTokenKey);
         if (token) {
             params.headers['Authorization'] = `Bearer ${token}`;
         }
     }
 
-    static async handleError(response, url, method, body, requiresAuth) {
+    public static async handleError<T = any>(response: Response, url: string, method: HttpMethod, body: any, requiresAuth: boolean): Promise<T> {
         if (response.status === 401 && requiresAuth) {
             const result = await this.handleUnauthorizedAccess();
             if (result) {
@@ -58,7 +64,4 @@ export class Http {
         return await Auth.processUnauthorizedResponse();
     }
 }
-
-// const errorData = await response.json();
-// throw new Error(errorData.message || `HTTP Error: ${response.status} ${response.statusText}`);
 
