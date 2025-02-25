@@ -1,14 +1,24 @@
-import { Http } from "../../services/http.js";
+import {Http} from "../../services/http";
+import {RoutePath} from "../../types/route-type";
+import {Category} from "../../types/category-type";
 
 export class EditCard {
-    constructor(navigateTo, apiUrl, redirectPath) {
+    private navigateToPath: (path: RoutePath) => void;
+    private apiUrl: string;
+    private redirectPath: RoutePath;
+    private categoryId: string | null;
+
+    constructor(navigateTo: (path: RoutePath) => void,
+                apiUrl: string,
+                redirectPath: RoutePath) {
         this.navigateToPath = navigateTo;
         this.apiUrl = apiUrl; // Базовый URL API
         this.redirectPath = redirectPath; // Путь перенаправления после действий
+        this.categoryId = null;
     }
 
-    async init() {
-        const categoryId = this.getCategoryIdFromUrl();
+    protected async init(): Promise<void> {
+        const categoryId: string | null = this.getCategoryIdFromUrl();
         if (!categoryId) {
             alert('Идентификатор категории не найден!');
             this.navigateToPath(this.redirectPath);
@@ -21,12 +31,12 @@ export class EditCard {
         this.cancelCategoryButtonListener();
     }
 
-    getCategoryIdFromUrl() {
+    protected getCategoryIdFromUrl(): string | null {
         const params = new URLSearchParams(window.location.search);
         return params.get('id'); // Извлекаем ID из URL
     }
 
-    async loadCategoryData(categoryId) {
+    protected async loadCategoryData(categoryId: string): Promise<void> {
         try {
             const category = await Http.request(`${this.apiUrl}/${categoryId}`, 'GET');
             this.fillFormWithCategoryData(category);
@@ -37,21 +47,23 @@ export class EditCard {
         }
     }
 
-    fillFormWithCategoryData(category) {
-        const input = document.querySelector('.form-control');
-        input.value = category.title; // Заполняем поле ввода текущим названием категории
+    protected fillFormWithCategoryData(category: Category): void {
+        const input: HTMLInputElement | null = document.querySelector('.form-control');
+        if (input) {
+            input.value = category.title; // Заполняем поле ввода текущим названием категории
+        }
     }
 
-    saveCategoryButtonListener() {
-        document.getElementById('save').addEventListener('click', (event) => {
+    protected saveCategoryButtonListener(): void {
+        (document.getElementById('save') as HTMLElement).addEventListener('click', (event: MouseEvent): void => {
             this.handleCategoryEdit(event);
         });
     }
 
-    async handleCategoryEdit(event) {
+    protected async handleCategoryEdit(event: MouseEvent): Promise<void> {
         event.preventDefault(); // Предотвращаем отправку формы
 
-        const updatedName = this.getCategoryName();
+        const updatedName: string | undefined = this.getCategoryName();
         if (!updatedName) {
             alert('Введите название категории!');
             return;
@@ -61,7 +73,7 @@ export class EditCard {
             await Http.request(
                 `${this.apiUrl}/${this.categoryId}`,
                 'PUT',
-                { title: updatedName }
+                {title: updatedName}
             );
 
             this.navigateToPath(this.redirectPath); // Успешное редактирование
@@ -70,18 +82,20 @@ export class EditCard {
         }
     }
 
-    getCategoryName() {
-        const input = document.querySelector('.form-control');
-        return input.value.trim();
+    protected getCategoryName(): string | undefined {
+        const input: HTMLInputElement | null = document.querySelector('.form-control');
+        if (input) {
+            return input.value.trim();
+        }
     }
 
-    handleCategoryEditError(error) {
+    protected handleCategoryEditError(error: unknown): void {
         console.error('Category editing: ', error);
         alert('Не удалось обновить категорию, попробуйте еще раз.');
     }
 
-    cancelCategoryButtonListener() {
-        document.getElementById('cancel').addEventListener('click', (event) => {
+    protected cancelCategoryButtonListener(): void {
+        (document.getElementById('cancel') as HTMLElement).addEventListener('click', (event: MouseEvent): void => {
             event.preventDefault();
             this.navigateToPath(this.redirectPath);
         });
