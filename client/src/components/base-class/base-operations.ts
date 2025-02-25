@@ -55,25 +55,24 @@ export class BaseOperations {
         return row;
     }
 
-    async updateBalance() {
+    public async updateBalance(): Promise<void> {
         await this.balanceManager.showBalance();
     }
 
-    renderOperations(operations: Operation[]) {
+    public renderOperations(operations: Operation[]): void {
         if (!this.container) {
-            if (typeof this.navigateTo === 'function') {
-                this.navigateTo(operations);
-            }
+            console.warn('Контейнер для операций не найден');
             return;
         }
 
         this.container.innerHTML = '';
-        operations.forEach((operation, index) => {
+        operations.forEach((operation: Operation, index: number) => {
             operation.number = index + 1;
-            const row = this.createTableRow(operation);
-            this.container.appendChild(row);
+            const row: HTMLElement = this.createTableRow(operation);
 
-            const dateInput = row.querySelector('.datepicker');
+            this.container!.appendChild(row);
+
+            const dateInput: HTMLInputElement | null = row.querySelector('.datepicker');
             if (dateInput) {
                 this.datePickerManager.init(dateInput);
             }
