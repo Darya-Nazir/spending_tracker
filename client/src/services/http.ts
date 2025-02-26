@@ -52,8 +52,8 @@ export class Http {
                 return await this.request(url, method, body, requiresAuth);
             }
         }
-        const responseBody = await response.json();
-        let errorMsg = `HTTP: ${response.status} ${response.statusText}`;
+        const responseBody: any = await response.json();
+        let errorMsg: string = `HTTP: ${response.status} ${response.statusText}`;
         if (responseBody.message) {
             errorMsg += '. ' + responseBody.message;
         }

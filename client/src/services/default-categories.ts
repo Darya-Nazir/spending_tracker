@@ -1,8 +1,11 @@
-import { Auth } from "./auth.js";
-import { Http } from "./http.js";
+import { Auth } from "./auth";
+import { Http } from "./http";
+import {UserInfo} from "../types/user-info-type";
+import {LoginData, LoginResponse} from "../types/login-type";
+import {Category} from "../types/category-type";
 
 export class DefaultCategoriesManager {
-    static expenseCategories = [
+    static expenseCategories: string[] = [
         'Еда',
         'Жильё',
         'Здоровье',
@@ -14,23 +17,23 @@ export class DefaultCategoriesManager {
         'Спорт'
     ];
 
-    static incomeCategories = [
+    static incomeCategories: string[] = [
         'Депозиты',
         'Зарплата',
         'Сбережения',
         'Инвестиции'
     ];
 
-    static async processLogin(loginData) {
+    public static async processLogin(loginData: LoginData): Promise<boolean> {
         try {
-            const loginPath = 'http://localhost:3000/api/login';
-            const loginResult = await Http.request(loginPath, 'POST', loginData, false);
+            const loginPath: string = 'http://localhost:3000/api/login';
+            const loginResult = await Http.request<LoginResponse>(loginPath, 'POST', loginData, false);
 
             if (!loginResult || !loginResult.tokens) {
                 return false;
             }
 
-            const userInfo = {
+            const userInfo: UserInfo = {
                 id: loginResult.user.id,
                 name: loginResult.user.name,
             };
@@ -46,7 +49,7 @@ export class DefaultCategoriesManager {
         }
     }
 
-    static async setupDefaultCategories() {
+    public static async setupDefaultCategories(): Promise<boolean> {
         try {
             await Promise.all([
                 this.createIfEmpty(
@@ -65,13 +68,13 @@ export class DefaultCategoriesManager {
         }
     }
 
-    static async createIfEmpty(apiUrl, categories) {
+    public static async createIfEmpty(apiUrl: string, categories: string[]): Promise<void> {
         try {
-            const existingCategories = await Http.request(apiUrl, 'GET');
+            const existingCategories = await Http.request<Category[]>(apiUrl, 'GET');
 
             if (existingCategories.length === 0) {
                 for (const title of categories) {
-                    await Http.request(apiUrl, 'POST', { title });
+                    await Http.request<Category[]>(apiUrl, 'POST', { title });
                 }
             }
         } catch (error) {
