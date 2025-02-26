@@ -1,5 +1,10 @@
+import {DateFormatOptions, DatePickerElement, DatePickerOptions} from "../types/date-picker-type";
+
 export class DatePickerManager {
-    constructor(options = {}) {
+    private options: DatePickerOptions;
+    private dateFormatOptions: DateFormatOptions;
+
+    constructor(options: DatePickerOptions = {}) {
         this.options = {
             format: 'dd.mm.yyyy',
             language: 'ru',
@@ -15,7 +20,7 @@ export class DatePickerManager {
         };
     }
 
-    init(element) {
+    public init(element: DatePickerElement): void {
         if (!(typeof element === 'string' || element instanceof HTMLElement)) {
             console.error('Элемент для датапикера не определен');
             return;
@@ -24,31 +29,23 @@ export class DatePickerManager {
         $(element).datepicker(this.options);
     }
 
-    formatDate(dateString) {
+    public formatDate(dateString: string): string {
         const date = new Date(dateString);
         return date.toLocaleDateString('ru-RU', this.dateFormatOptions);
     }
 
-    formatDateForAPI(dateString) {
+    public formatDateForAPI(dateString: string): string {
         if (!dateString) return '';
         const parts = dateString.split('.');
         if (parts.length !== 3) return '';
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
 
-    getValue(element) {
-        return $(element).datepicker('getDate');
-    }
-
-    setValue(element, date) {
+    public setValue(element: DatePickerElement, date: Date | string | null): void {
         $(element).datepicker('setDate', date);
     }
 
-    destroy(element) {
-        $(element).datepicker('destroy');
-    }
-
-    update(element, newOptions) {
+    public update(element: DatePickerElement, newOptions: DatePickerOptions): void {
         $(element).datepicker('update', newOptions);
     }
 }
