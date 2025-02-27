@@ -4,30 +4,38 @@ import { DefaultCategoriesManager } from "../services/default-categories";
 import {RoutePath} from "../types/route-type";
 
 export class Signup extends Validation {
-    fullNameInput: HTMLElement | null;
-    confirmPasswordInput: HTMLElement | null;
+    private fullNameInput: HTMLInputElement | null;
+    private confirmPasswordInput: HTMLInputElement | null;
 
-    constructor(navigateTo: RoutePath) {
+    constructor(navigateTo: (path: RoutePath) => void) {
         super(navigateTo);
-        this.fullNameInput = document.getElementById('fullName');
-        this.confirmPasswordInput = document.getElementById('confirmPassword');
+        this.fullNameInput = document.getElementById('fullName') as HTMLInputElement;
+        this.confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
     }
 
-    initializeEventListeners() {
+    public initializeEventListeners(): void {
+        if (!this.form) return;
         this.form.addEventListener('submit', this.handleSubmit.bind(this));
     }
 
-    handleSubmit(event) {
+    private handleSubmit(event: SubmitEvent): void {
         event.preventDefault();
-        this.form.classList.remove('was-validated');
+        this.form!.classList.remove('was-validated');
+        if (!this.passwordInput) return;
 
-        let isValid = true;
-        isValid = this.validateField(this.fullNameInput, value => value.trim() !== '', 'Пожалуйста, введите полное имя') && isValid;
+        let isValid: boolean = true;
+        isValid = this.validateField(this.fullNameInput, (value: string): boolean =>
+            value.trim() !== '', 'Пожалуйста, введите полное имя') && isValid;
         isValid = this.validateEmail() && isValid;
         isValid = this.validatePassword() && isValid;
-        isValid = this.validateField(this.confirmPasswordInput, value => value === this.passwordInput.value, 'Пароли не совпадают') && isValid;
+        isValid = this.validateField(this.confirmPasswordInput, (value: string): boolean =>
+            value === this.passwordInput!.value, 'Пароли не совпадают') && isValid;
 
-        this.form.classList.add('was-validated');
+        this.form!.classList.add('was-validated');
+
+        if (!this.fullNameInput) return;
+        if (!this.emailInput) return;
+        if (!this.confirmPasswordInput) return;
 
         if (isValid) {
             this.submitForm({
@@ -39,7 +47,7 @@ export class Signup extends Validation {
         }
     }
 
-    validateField(field, validationFn, errorMessage) {
+    private validateField(field, validationFn, errorMessage): boolean {
         if (!validationFn(field.value)) {
             field.classList.add('is-invalid');
             field.setCustomValidity(errorMessage);
