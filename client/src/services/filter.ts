@@ -1,14 +1,19 @@
-import { DatePickerManager } from "./date-picker.js";
-import { Http } from './http.js';
-import { BaseOperations } from "../components/base-class/base-operations.js";
+import {DatePickerManager} from "./date-picker";
+import {Http} from './http';
+import {BaseOperations} from "../components/base-class/base-operations";
+import {RoutePath} from "../types/route-type";
+import {DateInputKey, DateInputsState, DateInputStateItem, periodMap} from "../types/filter-type";
 
 export class Filter extends BaseOperations {
-    dateInputsState = {
+    private datePicker: DatePickerManager;
+
+    private dateInputsState: DateInputsState = {
         from: null,
         to: null,
         hadInitialSelection: false
     };
-    periodMap = {
+
+    private periodMap: periodMap = {
         'today': 'Сегодня',
         'week': 'Неделя',
         'month': 'Месяц',
@@ -17,7 +22,7 @@ export class Filter extends BaseOperations {
         'interval': 'Интервал'
     };
 
-    constructor(navigateTo) {
+    constructor(navigateTo: (path: RoutePath) => void) {
         super(navigateTo);
         this.datePicker = new DatePickerManager();
         this.bindFilterButtons();
@@ -25,13 +30,17 @@ export class Filter extends BaseOperations {
         this.setActiveFilter('all');
     }
 
-    findButtonByText(text) {
+    public findButtonByText(text: string): Element | undefined {
         const buttons = document.querySelectorAll('.filter-button');
-        return Array.from(buttons).find(button => button.textContent.trim() === text);
+        if (buttons) {
+        return Array.from(buttons).find((button: Element) =>
+            button.textContent !== null && button.textContent.trim() === text);
+
+        }
     }
 
-    bindFilterButtons() {
-        const filterButtons = {
+    public bindFilterButtons(): void {
+        const filterButtons: Record<(keyof periodMap), Element | undefined> = {
             'today': this.findButtonByText(this.periodMap.today),
             'week': this.findButtonByText(this.periodMap.week),
             'month': this.findButtonByText(this.periodMap.month),
@@ -40,16 +49,16 @@ export class Filter extends BaseOperations {
             'interval': this.findButtonByText(this.periodMap.interval)
         };
 
-        Object.entries(filterButtons).forEach(([period, button]) => {
+        Object.entries(filterButtons).forEach(([period, button]: [string, Element | undefined]): void => {
             if (button) {
-                button.addEventListener('click', () => this.handleFilterClick(period));
+                button.addEventListener('click', (): void => this.handleFilterClick(period));
             }
         });
     }
 
-    initDatePickers() {
-        const dateFromInput = document.querySelector('.datepicker:first-of-type');
-        const dateToInput = document.querySelector('.datepicker:last-of-type');
+    public initDatePickers(): void {
+        const dateFromInput = document.querySelector('.datepicker:first-of-type') as HTMLInputElement;
+        const dateToInput = document.querySelector('.datepicker:last-of-type') as HTMLInputElement;
 
         if (dateFromInput && dateToInput) {
             this.datePicker.init('.datepicker');
@@ -67,7 +76,7 @@ export class Filter extends BaseOperations {
         }
     }
 
-    handleDateSelect(date, inputType) {
+    public handleDateSelect(date: string, inputType: DateInputKey): void {
         const formattedDate = this.datePicker.formatDateForAPI(date);
 
         this.dateInputsState[inputType] = {
@@ -85,15 +94,15 @@ export class Filter extends BaseOperations {
         }
     }
 
-    processDateRange() {
+    public processDateRange(): void {
         if (!this.dateInputsState.from?.value || !this.dateInputsState.to?.value) return;
 
-        const fromDate = this.parseDate(this.dateInputsState.from.value);
-        const toDate = this.parseDate(this.dateInputsState.to.value);
+        const fromDate: Date | null = this.parseDate(this.dateInputsState.from.value);
+        const toDate: Date | null = this.parseDate(this.dateInputsState.to.value);
 
         if (!fromDate || !toDate) return;
 
-        let dateFrom, dateTo;
+        let dateFrom: string, dateTo: string;
 
         if (fromDate.getTime() <= toDate.getTime()) {
             dateFrom = this.dateInputsState.from.formatted;
@@ -170,7 +179,7 @@ export class Filter extends BaseOperations {
             let url = `${this.apiUrl}?period=${period}`;
 
             if (period === 'interval' && dateRange) {
-                const { dateFrom, dateTo } = dateRange;
+                const {dateFrom, dateTo} = dateRange;
                 url += `&dateFrom=${dateFrom}T00:00:00&dateTo=${dateTo}T23:59:59`;
             }
 
