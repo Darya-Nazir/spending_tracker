@@ -1,5 +1,5 @@
 import { DatePickerManager } from "../../services/date-picker.js";
-import { User } from "../user.js";
+import { User } from "../user";
 import {RoutePath} from "../../types/route-type";
 import {Operation} from "../../types/operations-type";
 
@@ -29,7 +29,7 @@ export class BaseOperations {
         const typeClass = operation.type === 'income' ? 'text-success' : 'text-danger';
         const typeText = operation.type === 'income' ? 'доход' : 'расход';
 
-        const formattedDate = this.datePickerManager.formatDate(operation.date);
+        const formattedDate = this.datePickerManager.formatDate(operation.date as string);
 
         row.innerHTML = `
     <td class="align-middle">${operation.number}</td>
