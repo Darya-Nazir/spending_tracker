@@ -95,7 +95,11 @@ export class Filter extends BaseOperations {
     }
 
     public processDateRange(): void {
-        if (!this.dateInputsState.from?.value || !this.dateInputsState.to?.value) return;
+        if (!this.dateInputsState.from || !this.dateInputsState.to ||
+            !this.dateInputsState.from.value || !this.dateInputsState.to.value ||
+            !this.dateInputsState.from.formatted || !this.dateInputsState.to.formatted) {
+            return;
+        }
 
         const fromDate: Date | null = this.parseDate(this.dateInputsState.from.value);
         const toDate: Date | null = this.parseDate(this.dateInputsState.to.value);
@@ -112,21 +116,19 @@ export class Filter extends BaseOperations {
             dateTo = this.dateInputsState.from.formatted;
         }
 
-        this.fetchFilteredOperations('interval', {
-            dateFrom,
-            dateTo
-        });
+        let url: string = `${this.apiUrl}?period=interval&dateFrom=${dateFrom}T00:00:00&dateTo=${dateTo}T23:59:59`;
+        this.fetchFilteredOperations('interval', null, url);
     }
 
-    parseDate(dateString) {
+    public parseDate(dateString: string) : Date | null {
         if (!dateString) return null;
         const [day, month, year] = dateString.split('.');
-        const date = new Date(year, month - 1, day);
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         date.setHours(0, 0, 0, 0);
         return date;
     }
 
-    handleFilterClick(period) {
+    public handleFilterClick(period: string): void {
         if (period !== 'interval') {
             this.dateInputsState = {
                 from: {
@@ -140,29 +142,29 @@ export class Filter extends BaseOperations {
                 hadInitialSelection: false
             };
 
-            const dateInputs = document.querySelectorAll('.datepicker');
+            const dateInputs: NodeListOf<Element> = document.querySelectorAll('.datepicker');
             dateInputs.forEach(input => {
-                input.value = '';
+                (input as HTMLInputElement).value = '';
             });
         }
         this.setActiveFilter(period);
         this.fetchFilteredOperations(period);
     }
 
-    activateRangeFilter() {
-        const rangeButton = this.findButtonByText(this.periodMap.interval);
+    public activateRangeFilter(): void {
+        const rangeButton: Element | undefined = this.findButtonByText(this.periodMap.interval);
         if (rangeButton) {
             this.setActiveFilter('interval');
         }
     }
 
-    setActiveFilter(period) {
-        document.querySelectorAll('.filter-button').forEach(btn => {
+    public setActiveFilter(period: string): void {
+        document.querySelectorAll('.filter-button').forEach((btn: Element) => {
             btn.classList.remove('btn-secondary');
             btn.classList.add('btn-light');
         });
 
-        const periodText = this.getPeriodText(period);
+        const periodText: string = this.getPeriodText(period);
         const activeButton = this.findButtonByText(periodText);
         if (activeButton) {
             activeButton.classList.remove('btn-light');
@@ -170,17 +172,23 @@ export class Filter extends BaseOperations {
         }
     }
 
-    getPeriodText(period) {
-        return this.periodMap[period] || period;
+    public getPeriodText(period: string): string {
+        return this.periodMap[period as keyof periodMap] || period;
     }
 
-    async fetchFilteredOperations(period, dateRange = null) {
+    public async fetchFilteredOperations(period: string, dateRange: null = null, customUrl?: string): Promise<void> {
         try {
-            let url = `${this.apiUrl}?period=${period}`;
+            let url: string;
 
-            if (period === 'interval' && dateRange) {
-                const {dateFrom, dateTo} = dateRange;
-                url += `&dateFrom=${dateFrom}T00:00:00&dateTo=${dateTo}T23:59:59`;
+            if (customUrl) {
+                url = customUrl;
+            } else {
+                url = `${this.apiUrl}?period=${period}`;
+
+                if (period === 'interval' && dateRange) {
+                    const {dateFrom, dateTo} = dateRange;
+                    url += `&dateFrom=${dateFrom}T00:00:00&dateTo=${dateTo}T23:59:59`;
+                }
             }
 
             const operations = await Http.request(url);
