@@ -2,6 +2,7 @@ import { Http } from "../services/http";
 import { Validation } from "./base-class/validation";
 import { DefaultCategoriesManager } from "../services/default-categories";
 import {RoutePath} from "../types/route-type";
+import {SignupFormData} from "../types/signup-type";
 
 export class Signup extends Validation {
     private fullNameInput: HTMLInputElement | null;
@@ -21,33 +22,30 @@ export class Signup extends Validation {
     private handleSubmit(event: SubmitEvent): void {
         event.preventDefault();
         this.form!.classList.remove('was-validated');
-        if (!this.passwordInput) return;
+
+        this.ifArentInputs();
 
         let isValid: boolean = true;
-        isValid = this.validateField(this.fullNameInput, (value: string): boolean =>
+        isValid = this.validateField(this.fullNameInput!, (value: string): boolean =>
             value.trim() !== '', 'Пожалуйста, введите полное имя') && isValid;
         isValid = this.validateEmail() && isValid;
         isValid = this.validatePassword() && isValid;
-        isValid = this.validateField(this.confirmPasswordInput, (value: string): boolean =>
+        isValid = this.validateField(this.confirmPasswordInput!, (value: string): boolean =>
             value === this.passwordInput!.value, 'Пароли не совпадают') && isValid;
 
         this.form!.classList.add('was-validated');
 
-        if (!this.fullNameInput) return;
-        if (!this.emailInput) return;
-        if (!this.confirmPasswordInput) return;
-
         if (isValid) {
             this.submitForm({
-                name: this.fullNameInput.value.trim(),
-                email: this.emailInput.value.trim(),
-                password: this.passwordInput.value,
-                passwordRepeat: this.confirmPasswordInput.value
+                name: this.fullNameInput!.value.trim(),
+                email: this.emailInput!.value.trim(),
+                password: this.passwordInput!.value,
+                passwordRepeat: this.confirmPasswordInput!.value
             });
         }
     }
 
-    private validateField(field, validationFn, errorMessage): boolean {
+    private validateField(field: HTMLInputElement, validationFn: (value: string) => boolean, errorMessage: string): boolean {
         if (!validationFn(field.value)) {
             field.classList.add('is-invalid');
             field.setCustomValidity(errorMessage);
@@ -59,7 +57,7 @@ export class Signup extends Validation {
         return true;
     }
 
-    async submitForm(data) {
+    async submitForm(data: SignupFormData) {
         try {
             const signupPath = 'http://localhost:3000/api/signup';
             const signupResult = await Http.request(signupPath, 'POST', data, false);
@@ -82,6 +80,12 @@ export class Signup extends Validation {
             console.error('Ошибка при отправке:', error);
             alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.');
         }
+    }
+    private ifArentInputs(): void {
+        if (!this.fullNameInput) return;
+        if (!this.emailInput) return;
+        if (!this.passwordInput) return;
+        if (!this.confirmPasswordInput) return;
     }
 }
 
