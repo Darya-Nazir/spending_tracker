@@ -1,6 +1,6 @@
-import { Http } from "../services/http";
-import { Validation } from "./base-class/validation";
-import { DefaultCategoriesManager } from "../services/default-categories";
+import {Http} from "../services/http";
+import {Validation} from "./base-class/validation";
+import {DefaultCategoriesManager} from "../services/default-categories";
 import {RoutePath} from "../types/route-type";
 import {SignupFormData} from "../types/signup-type";
 
@@ -23,7 +23,12 @@ export class Signup extends Validation {
         event.preventDefault();
         this.form!.classList.remove('was-validated');
 
-        this.ifArentInputs();
+        if (this.areInputsMissing(
+            this.fullNameInput,
+            this.emailInput,
+            this.passwordInput,
+            this.confirmPasswordInput
+        )) return;
 
         let isValid: boolean = true;
         isValid = this.validateField(this.fullNameInput!, (value: string): boolean =>
@@ -80,13 +85,6 @@ export class Signup extends Validation {
             console.error('Ошибка при отправке:', error);
             alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.');
         }
-    }
-
-    private ifArentInputs(): void {
-        if (!this.fullNameInput) return;
-        if (!this.emailInput) return;
-        if (!this.passwordInput) return;
-        if (!this.confirmPasswordInput) return;
     }
 }
 

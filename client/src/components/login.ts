@@ -34,10 +34,14 @@ export class Login extends Validation {
     }
 
     private async submitForm(): Promise<void> {
-        if (this.areInputsMissing()) return;
+        if (this.areInputsMissing(
+            this.emailInput,
+            this.passwordInput,
+            this.rememberMeElement
+        )) return;
 
-        const emailValue = this.emailInput!.value.trim();
-        const passwordValue = this.passwordInput!.value;
+        const emailValue: string = this.emailInput!.value.trim();
+        const passwordValue: string = this.passwordInput!.value;
 
         try {
             const dataObject = {
@@ -75,13 +79,6 @@ export class Login extends Validation {
             }
             alert('Произошла ошибка при входе. Пожалуйста, попробуйте позже.');
         }
-    }
-
-    areInputsMissing(): boolean {
-        if (!this.emailInput) return true;
-        if (!this.passwordInput) return true;
-        if (!this.rememberMeElement) return true;
-        return false;
     }
 }
 

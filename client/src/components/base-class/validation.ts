@@ -56,5 +56,9 @@ export class Validation {
         inputElement.classList.remove('is-invalid');
         inputElement.classList.add('is-valid');
     }
+
+    protected areInputsMissing(...inputs: (HTMLElement | null)[]): boolean {
+        return inputs.some((input: HTMLElement | null): input is null => !input);
+    }
 }
 
