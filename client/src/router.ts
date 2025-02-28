@@ -1,34 +1,21 @@
-import {Analytics} from "./components/analytics";
-import {Costs} from "./components/costs";
-import {NewCost} from "./components/create-cost";
-import {NewIncome} from "./components/create-income";
-import {NewTransaction} from "./components/create-transaction";
-import {EditCost} from "./components/edit-cost";
-import {EditIncome} from "./components/edit-income";
-import {EditTransaction} from "./components/edit-transaction";
-import {Incomes} from "./components/incomes";
-import {Login} from "./components/login";
-import {Signup} from "./components/signup";
-import {Transaction} from "./components/transaction";
 import {User} from "./components/user";
 import {Auth} from "./services/auth";
 import {Route, Routes, RoutePath} from "./types/route-type";
 import {states} from "./constants/states";
+import {routes} from "./constants/routes";
 
 
 const DEFAULT_PAGE_TITLE = 'Lumincoin Finance';
 
 
 export class Router {
-    routes: Routes;
-    private navbarElement: HTMLElement | null;
-    private appElement: HTMLElement | null;
-    private path;
+    public routes: Routes  = routes;
+    readonly navbarElement: HTMLElement | null;
+    readonly appElement: HTMLElement | null;
+    private path: string;
     private page: Route | null;
 
     constructor() {
-        this.routes = routes;
-
         this.initEvents();
         Auth.processUnauthorizedResponse.bind(this);
 
@@ -83,7 +70,7 @@ export class Router {
         }
     }
 
-    addTitle() {
+    private addTitle(): void {
         if (this.page) {
         document.title = this.page.title ? this.page.title : DEFAULT_PAGE_TITLE;
         }
@@ -133,7 +120,7 @@ export class Router {
         }
     }
 
-    toggleNav() {
+    private toggleNav(): void {
         if (!this.navbarElement) return;
 
         const showNavbar = this.page?.state === states.STATE_AUTHORIZED;
@@ -148,83 +135,8 @@ export class Router {
         }
     }
 
-    turnOnLogoutButton() {
+    private turnOnLogoutButton(): void {
         new User(this.navigateTo.bind(this)).init();
     }
 }
-
-const routes: Routes = {
-    '/login': {
-        html: 'templates/login.html',
-        title: 'Lumincoin Finance - Вход',
-        state: states.STATE_UNAUTHORIZED,
-        component: Login,
-    },
-    '/signup': {
-        html: 'templates/signup.html',
-        title: 'Lumincoin Finance - Регистрация',
-        state: states.STATE_UNAUTHORIZED,
-        component: Signup,
-    },
-    '/costs': {
-        html: 'templates/costs.html',
-        title: 'Категории расходов',
-        state: states.STATE_AUTHORIZED,
-        component: Costs
-    },
-    '/incomes': {
-        html: 'templates/incomes.html',
-        title: 'Категории доходов',
-        state: states.STATE_AUTHORIZED,
-        component: Incomes
-    },
-    '/transactions': {
-        html: 'templates/transactions.html',
-        title: 'Доходы и расходы',
-        state: states.STATE_AUTHORIZED,
-        component: Transaction
-    },
-    '/': {
-        html: 'templates/analytics.html',
-        title: 'Главная',
-        state: states.STATE_AUTHORIZED,
-        component: Analytics
-    },
-    '/create-cost': {
-        html: 'templates/create-cost.html',
-        title: 'Создание категории расходов',
-        state: states.STATE_AUTHORIZED,
-        component: NewCost
-    },
-    '/create-income': {
-        html: 'templates/create-income.html',
-        title: 'Создание категории доходов',
-        state: states.STATE_AUTHORIZED,
-        component: NewIncome
-    },
-    '/edit-cost': {
-        html: 'templates/edit-cost.html',
-        title: 'Редактирование категории расходов',
-        state: states.STATE_AUTHORIZED,
-        component: EditCost
-    },
-    '/edit-income': {
-        html: 'templates/edit-income.html',
-        title: 'Редактирование категории доходов',
-        state: states.STATE_AUTHORIZED,
-        component: EditIncome
-    },
-    '/create-transaction': {
-        html: 'templates/create-transaction.html',
-        title: 'Создание дохода/расхода',
-        state: states.STATE_AUTHORIZED,
-        component: NewTransaction
-    },
-    '/edit-transaction': {
-        html: 'templates/edit-transaction.html',
-        title: 'Редактирование дохода/расхода',
-        state: states.STATE_AUTHORIZED,
-        component: EditTransaction
-    },
-};
 

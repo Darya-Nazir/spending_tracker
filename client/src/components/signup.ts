@@ -5,8 +5,8 @@ import {RoutePath} from "../types/route-type";
 import {SignupFormData} from "../types/signup-type";
 
 export class Signup extends Validation {
-    private fullNameInput: HTMLInputElement | null;
-    private confirmPasswordInput: HTMLInputElement | null;
+    readonly fullNameInput: HTMLInputElement | null;
+    readonly confirmPasswordInput: HTMLInputElement | null;
 
     constructor(navigateTo: (path: RoutePath) => void) {
         super(navigateTo);
@@ -57,7 +57,7 @@ export class Signup extends Validation {
         return true;
     }
 
-    async submitForm(data: SignupFormData) {
+    private async submitForm(data: SignupFormData) {
         try {
             const signupPath = 'http://localhost:3000/api/signup';
             const signupResult = await Http.request(signupPath, 'POST', data, false);
@@ -81,6 +81,7 @@ export class Signup extends Validation {
             alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.');
         }
     }
+
     private ifArentInputs(): void {
         if (!this.fullNameInput) return;
         if (!this.emailInput) return;
