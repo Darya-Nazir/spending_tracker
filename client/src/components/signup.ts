@@ -1,10 +1,11 @@
 import {Http} from "../services/http";
-import {Validation} from "./base-class/validation";
+import {UserManager} from "./base-class/user-manager";
 import {DefaultCategoriesManager} from "../services/default-categories";
 import {RoutePath} from "../types/route-type";
 import {SignupFormData} from "../types/signup-type";
+import {Validator} from "../services/validator";
 
-export class Signup extends Validation {
+export class Signup extends UserManager {
     readonly fullNameInput: HTMLInputElement | null;
     readonly confirmPasswordInput: HTMLInputElement | null;
 
@@ -23,7 +24,7 @@ export class Signup extends Validation {
         event.preventDefault();
         this.form!.classList.remove('was-validated');
 
-        if (this.areInputsMissing(
+        if (Validator.areInputsMissing(
             this.fullNameInput,
             this.emailInput,
             this.passwordInput,

@@ -1,9 +1,10 @@
-import { Validation } from "./base-class/validation";
-import { Auth } from "../services/auth";
-import { Http } from "../services/http";
+import {UserManager} from "./base-class/user-manager";
+import {Auth} from "../services/auth";
+import {Http} from "../services/http";
 import {RoutePath} from "../types/route-type";
+import {Validator} from "../services/validator";
 
-export class Login extends Validation {
+export class Login extends UserManager {
     private rememberMeElement: HTMLInputElement | null = null;
 
     constructor(navigateTo: (path: RoutePath) => void) {
@@ -34,7 +35,7 @@ export class Login extends Validation {
     }
 
     private async submitForm(): Promise<void> {
-        if (this.areInputsMissing(
+        if (Validator.areInputsMissing(
             this.emailInput,
             this.passwordInput,
             this.rememberMeElement

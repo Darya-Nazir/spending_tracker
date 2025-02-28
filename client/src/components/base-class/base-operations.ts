@@ -1,5 +1,5 @@
 import { DatePickerManager } from "../../services/date-picker.js";
-import { User } from "../user";
+import { ProfileManager } from "../profileManager";
 import {RoutePath} from "../../types/route-type";
 import {Operation} from "../../types/operations-type";
 
@@ -7,14 +7,14 @@ export class BaseOperations {
     apiUrl: string;
     container: HTMLElement | null;
     datePickerManager: DatePickerManager;
-    balanceManager : User;
+    balanceManager : ProfileManager;
     navigateTo: (path: RoutePath) => void;
 
     constructor(navigateTo: (path: RoutePath) => void) {
         this.apiUrl = 'http://localhost:3000/api/operations';
         this.container = document.querySelector('.table tbody');
         this.datePickerManager = new DatePickerManager();
-        this.balanceManager = new User(navigateTo);
+        this.balanceManager = new ProfileManager(navigateTo);
         this.navigateTo = navigateTo;
     }
 

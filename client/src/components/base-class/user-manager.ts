@@ -1,6 +1,6 @@
 import {RoutePath} from "../../types/route-type";
 
-export class Validation {
+export class UserManager {
     protected form: HTMLFormElement | null;
     protected emailInput: HTMLInputElement | null;
     protected passwordInput: HTMLInputElement | null;
@@ -8,8 +8,8 @@ export class Validation {
     protected navigateToPath: (path: RoutePath) => void;
 
     constructor(navigateTo: (path: RoutePath) => void) {
-        if (this.constructor === Validation) {
-            throw new Error('Validation is an abstract class and cannot be instantiated directly');
+        if (this.constructor === UserManager) {
+            throw new Error('User is an abstract class and cannot be instantiated directly');
         }
 
         this.form = document.getElementById('registrationForm') as HTMLFormElement;
@@ -55,10 +55,6 @@ export class Validation {
     protected markInputAsValid(inputElement: HTMLInputElement) {
         inputElement.classList.remove('is-invalid');
         inputElement.classList.add('is-valid');
-    }
-
-    protected areInputsMissing(...inputs: (HTMLElement | null)[]): boolean {
-        return inputs.some((input: HTMLElement | null): input is null => !input);
     }
 }
 

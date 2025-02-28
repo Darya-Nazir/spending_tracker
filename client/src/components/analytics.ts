@@ -1,6 +1,6 @@
-import { DatePickerManager } from "../services/date-picker.js";
-import { Filter } from "../services/filter.js";
-import { Unselect } from "../services/unselect.js";
+import { DatePickerManager } from "../services/date-picker";
+import { Filter } from "../services/filter";
+import { Unselect } from "../services/unselect";
 
 export class Analytics {
     // Определяем статическое свойство с цветами и делаем его неизменяемым
@@ -16,6 +16,7 @@ export class Analytics {
         '#20c997', // teal
         '#0dcaf0'  // cyan
     ]);
+    
 
     constructor() {
         this.charts = {

@@ -1,4 +1,4 @@
-import {User} from "./components/user";
+import {ProfileManager} from "./components/profileManager";
 import {Auth} from "./services/auth";
 import {Route, Routes, RoutePath} from "./types/route-type";
 import {states} from "./constants/states";
@@ -136,7 +136,7 @@ export class Router {
     }
 
     private turnOnLogoutButton(): void {
-        new User(this.navigateTo.bind(this)).init();
+        new ProfileManager(this.navigateTo.bind(this)).init();
     }
 }
 
