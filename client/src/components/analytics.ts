@@ -1,9 +1,19 @@
 import { DatePickerManager } from "../services/date-picker";
 import { Filter } from "../services/filter";
 import { Unselect } from "../services/unselect";
+import {ChartInstance} from "../types/analytics-type";
+import {Chart} from "chart.js";
+import {Operation} from "../types/operations-type";
 
 export class Analytics {
-    // Определяем статическое свойство с цветами и делаем его неизменяемым
+    private charts: {
+        income: ChartInstance;
+        expenses: ChartInstance;
+    };
+
+    private filter: Filter;
+    private datePickerManager: DatePickerManager;
+
     static CHART_COLORS = Object.freeze([
         '#dc3545', // red
         '#fd7e14', // orange
@@ -16,7 +26,6 @@ export class Analytics {
         '#20c997', // teal
         '#0dcaf0'  // cyan
     ]);
-    
 
     constructor() {
         this.charts = {
@@ -27,9 +36,11 @@ export class Analytics {
         this.filter = new Filter((operations) => {
             this.updateCharts(operations);
         });
+
+        this.datePickerManager = new DatePickerManager();
     }
 
-    async init() {
+    public async init(): Promise<void> {
         // Сначала инициализируем фильтры, так как они не зависят от графиков
         this.initFilters();
 
@@ -37,7 +48,7 @@ export class Analytics {
         await this.loadChartLibrary();
     }
 
-    initFilters() {
+    private initFilters(): void {
         const filterButtons = document.querySelectorAll('.btn-light, .btn-secondary');
         filterButtons.forEach(button => {
             if (!button.classList.contains('filter-button')) {
