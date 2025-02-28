@@ -1,43 +1,49 @@
-import { Validation } from "./base-class/validation.js";
-import { Auth } from "../services/auth.js";
-import { Http } from "../services/http.js";
+import { Validation } from "./base-class/validation";
+import { Auth } from "../services/auth";
+import { Http } from "../services/http";
+import {RoutePath} from "../types/route-type";
 
 export class Login extends Validation {
-    constructor(navigateTo) {
+    private rememberMeElement: HTMLInputElement | null = null;
+
+    constructor(navigateTo: (path: RoutePath) => void) {
         super(navigateTo);
-        this.rememberMeElement = document.getElementById('rememberMe');
+        this.rememberMeElement = document.getElementById('rememberMe') as HTMLInputElement;
         Auth.initialize(navigateTo);
     }
 
-    initializeEventListeners() {
+    public initializeEventListeners(): void {
+        if (!this.form) return;
         this.form.addEventListener('submit', this.handleSubmit.bind(this));
     }
 
-    handleSubmit(event) {
+    private handleSubmit(event: SubmitEvent): void {
         event.preventDefault();
-        this.form.classList.remove('was-validated');
+        this.form!.classList.remove('was-validated');
 
         const isValid = this.validateEmail() && this.validatePassword();
-        this.form.classList.add('was-validated');
+        this.form!.classList.add('was-validated');
 
         if (isValid) {
             this.submitForm();
         }
     }
 
-    jumpIntoApp() {
+    private jumpIntoApp(): void {
         this.navigateToPath('/');
     }
 
-    async submitForm() {
-        const emailValue = this.emailInput.value.trim();
-        const passwordValue = this.passwordInput.value;
+    private async submitForm(): Promise<void> {
+        if (this.areInputsMissing()) return;
+
+        const emailValue = this.emailInput!.value.trim();
+        const passwordValue = this.passwordInput!.value;
 
         try {
             const dataObject = {
                 email: emailValue,
                 password: passwordValue,
-                rememberMe: this.rememberMeElement.checked,
+                rememberMe: this.rememberMeElement!.checked,
             };
 
             const path = 'http://localhost:3000/api/login';
@@ -52,22 +58,30 @@ export class Login extends Validation {
             Auth.setTokens(result.tokens.accessToken, result.tokens.refreshToken);
             Auth.setUserInfo(userInfo);
             this.jumpIntoApp();
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Ошибка при отправке:', error);
-            
-            const statusMatch = error.message.match(/HTTP: (\d+)/);
-            if (statusMatch.length !== 0 && parseInt(statusMatch[1]) === 401) {
-                alert('Пользователь с такими данными не зарегистрирован');
-                return;
-            }
 
-            if (error.toString().includes('email or password')) {
-                alert('Неверная электронная почта или пароль');
-                return;
-            }
+            if (error instanceof Error) {
+                const statusMatch: RegExpMatchArray | null = error.message.match(/HTTP: (\d+)/);
+                if (statusMatch && statusMatch.length > 0 && parseInt(statusMatch[1]) === 401) {
+                    alert('Пользователь с такими данными не зарегистрирован');
+                    return;
+                }
 
+                if (error.message.includes('email or password')) {
+                    alert('Неверная электронная почта или пароль');
+                    return;
+                }
+            }
             alert('Произошла ошибка при входе. Пожалуйста, попробуйте позже.');
         }
+    }
+
+    areInputsMissing(): boolean {
+        if (!this.emailInput) return true;
+        if (!this.passwordInput) return true;
+        if (!this.rememberMeElement) return true;
+        return false;
     }
 }
 
