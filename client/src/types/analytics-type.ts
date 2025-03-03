@@ -5,17 +5,17 @@ export type Chart = {
 
 export type ChartData = {
     labels: string[];
-    datasets: {
+    datasets: Array<{
         data: number[];
         backgroundColor: string[];
-    }[];
-}
+    }>;
+};
 
-// Создаем тип для диаграммы
-export type ChartInstance = Chart | null;
-
-// Тип для категорий данных
-export type CategoryData = Record<string, number>;
+export type ChartConfiguration = {
+    type: 'pie' | 'bar' | 'line' | 'doughnut' | 'radar' | 'polarArea' | 'bubble' | 'scatter';
+    data: ChartData;
+    options: ChartOptions;
+};
 
 // Тип для опций графика
 export type ChartOptions = {
@@ -58,8 +58,8 @@ export type ChartTooltipContext = {
 }
 
 export type CanvasElements = {
-    incomeCanvas: HTMLElement | null,
-    expensesCanvas: HTMLElement | null
+    incomeCanvas: HTMLCanvasElement,
+    expensesCanvas: HTMLCanvasElement
 }
 
 export type EmptyChartData = {
@@ -69,3 +69,17 @@ export type EmptyChartData = {
         backgroundColor: string[];
     }]
 }
+
+export type ChartDataset = {
+    labels: string[];
+    datasets: [{
+        data: number[];
+        backgroundColor: string[];
+    }]
+};
+
+export type ProcessedOperationsData = {
+    incomeData: ChartDataset;
+    expensesData: ChartDataset;
+};
+

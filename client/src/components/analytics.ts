@@ -2,20 +2,21 @@ import { DatePickerManager } from "../services/date-picker";
 import { Filter } from "../services/filter";
 import { Unselect } from "../services/unselect";
 import {
-    CanvasElements,
-    ChartInstance,
+    CanvasElements, ChartDataset,
     ChartOptions,
     ChartTooltipContext,
-    EmptyChartData
+    EmptyChartData, ProcessedOperationsData
 } from "../types/analytics-type";
 import {Chart} from "chart.js";
 import {Operation} from "../types/operations-type";
 import {DatePickerElement} from "../types/date-picker-type";
+import {Category} from "../types/category-type";
+import {RoutePath} from "../types/route-type";
 
 export class Analytics {
     private charts: {
-        income: ChartInstance;
-        expenses: ChartInstance;
+        income: null;
+        expenses: null;
     };
 
     private filter: Filter;
@@ -34,13 +35,16 @@ export class Analytics {
         '#0dcaf0'  // cyan
     ]);
 
-    constructor() {
+    constructor(navigateTo: (path: RoutePath) => void) {
+
         this.charts = {
             income: null,
             expenses: null
         };
         // Создаем экземпляр Filter и передаем метод обновления графиков как callback
-        this.filter = new Filter((operations) => {
+        this.filter = new Filter(
+            navigateTo,
+                (operations: Operation[]) => {
             this.updateCharts(operations);
         });
 
@@ -120,8 +124,8 @@ export class Analytics {
     }
 
     private validateCanvasElements(): CanvasElements | null {
-        const incomeCanvas: HTMLElement | null = document.getElementById('incomeChart');
-        const expensesCanvas: HTMLElement | null = document.getElementById('expensesChart');
+        const incomeCanvas: HTMLCanvasElement | null = document.getElementById('incomeChart') as HTMLCanvasElement;
+        const expensesCanvas: HTMLCanvasElement | null = document.getElementById('expensesChart') as HTMLCanvasElement;
 
         if (!incomeCanvas || !expensesCanvas) {
             console.error('Canvas элементы не найдены');
@@ -172,7 +176,7 @@ export class Analytics {
         };
     }
 
-    updateCharts(operations) {
+    private updateCharts(operations: Operation[]): void {
         if (!operations || !Array.isArray(operations)) {
             console.error('Получены некорректные данные операций:', operations);
             return;
@@ -184,18 +188,19 @@ export class Analytics {
         this.updateChart(this.charts.expenses, expensesData);
     }
 
-    processOperationsData(operations) {
-        const incomeCategories = {};
-        const expensesCategories = {};
+    private processOperationsData(operations: Operation[]): ProcessedOperationsData {
+        const incomeCategories: Record<string, number> = {};
+        const expensesCategories: Record<string, number> = {};
 
-        operations.forEach(operation => {
-            const categories = operation.type === 'income' ? incomeCategories : expensesCategories;
-            const amount = parseFloat(operation.amount) || 0;
+        operations.forEach((operation: Operation) => {
+            const categories: Record<string, number> = operation.type === 'income' ? incomeCategories : expensesCategories;
+            const amount: number = operation.amount || 0;
+            const categoryName: string = operation.category || 'Без категории';
 
-            if (!categories[operation.category]) {
-                categories[operation.category] = 0;
+            if (!categories[categoryName]) {
+                categories[categoryName] = 0;
             }
-            categories[operation.category] += amount;
+            categories[categoryName] += amount;
         });
 
         return {
@@ -203,11 +208,10 @@ export class Analytics {
             expensesData: this.prepareChartData(expensesCategories)
         };
     }
-
-    prepareChartData(categories) {
-        const labels = Object.keys(categories);
-        const data = Object.values(categories);
-        const backgroundColors = labels.map((_, index) =>
+    private prepareChartData(categories: Record<string, number> ): ChartDataset {
+        const labels: string[] = Object.keys(categories);
+        const data: number[] = Object.values(categories);
+        const backgroundColors: string[] = labels.map((_: string, index: number): string =>
             // Используем остаток от деления для циклического повторения цветов
             Analytics.CHART_COLORS[index % Analytics.CHART_COLORS.length]
         );
@@ -221,7 +225,7 @@ export class Analytics {
         };
     }
 
-    updateChart(chart, newData) {
+    updateChart(chart: Chart | null, newData: ChartDataset): void {
         if (!chart) return;
 
         chart.data.labels = newData.labels;
