@@ -1,9 +1,16 @@
 import { DatePickerManager } from "../services/date-picker";
 import { Filter } from "../services/filter";
 import { Unselect } from "../services/unselect";
-import {ChartInstance} from "../types/analytics-type";
+import {
+    CanvasElements,
+    ChartInstance,
+    ChartOptions,
+    ChartTooltipContext,
+    EmptyChartData
+} from "../types/analytics-type";
 import {Chart} from "chart.js";
 import {Operation} from "../types/operations-type";
+import {DatePickerElement} from "../types/date-picker-type";
 
 export class Analytics {
     private charts: {
@@ -49,22 +56,22 @@ export class Analytics {
     }
 
     private initFilters(): void {
-        const filterButtons = document.querySelectorAll('.btn-light, .btn-secondary');
-        filterButtons.forEach(button => {
+        const filterButtons: NodeListOf<Element> = document.querySelectorAll('.btn-light, .btn-secondary');
+        filterButtons.forEach((button: Element): void => {
             if (!button.classList.contains('filter-button')) {
                 button.classList.add('filter-button');
             }
         });
 
-        document.querySelectorAll('.datepicker').forEach((input) => {
+        document.querySelectorAll('.datepicker').forEach((input: Element) => {
             this.datePickerManager = new DatePickerManager();
-            this.datePickerManager.init(input);
+            this.datePickerManager.init(input as DatePickerElement);
         });
     }
 
-    loadChartLibrary() {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
+    private loadChartLibrary(): Promise<void> {
+        return new Promise<void>((resolve, reject): void => {
+            const script: HTMLScriptElement = document.createElement('script');
             script.src = './scripts/lib/chart.js';
             script.async = true;
 
@@ -92,18 +99,18 @@ export class Analytics {
         });
     }
 
-    createChartOptions() {
+    private createChartOptions(): ChartOptions {
         return {
             responsive: true,
             plugins: {
                 legend: { position: 'top' },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.parsed || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        label: function(context: ChartTooltipContext): string {
+                            const label: string = context.label || '';
+                            const value: number = context.parsed || 0;
+                            const total: number = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage: string | null = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
                             return `${label}: ${percentage}%`;
                         }
                     }
@@ -112,9 +119,9 @@ export class Analytics {
         };
     }
 
-    validateCanvasElements() {
-        const incomeCanvas = document.getElementById('incomeChart');
-        const expensesCanvas = document.getElementById('expensesChart');
+    private validateCanvasElements(): CanvasElements | null {
+        const incomeCanvas: HTMLElement | null = document.getElementById('incomeChart');
+        const expensesCanvas: HTMLElement | null = document.getElementById('expensesChart');
 
         if (!incomeCanvas || !expensesCanvas) {
             console.error('Canvas элементы не найдены');
@@ -124,7 +131,7 @@ export class Analytics {
         return { incomeCanvas, expensesCanvas };
     }
 
-    createCharts(canvasElements) {
+    private createCharts(canvasElements: CanvasElements): boolean {
         const { incomeCanvas, expensesCanvas } = canvasElements;
         const options = this.createChartOptions();
 
@@ -155,7 +162,7 @@ export class Analytics {
         return this.createCharts(canvasElements);
     }
 
-    createEmptyChartData() {
+    createEmptyChartData(): EmptyChartData {
         return {
             labels: [],
             datasets: [{
