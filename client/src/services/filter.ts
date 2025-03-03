@@ -3,9 +3,11 @@ import {Http} from './http';
 import {BaseOperations} from "../components/base-class/base-operations";
 import {RoutePath} from "../types/route-type";
 import {DateInputKey, DateInputsState, DateInputStateItem, periodMap} from "../types/filter-type";
+import {Operation} from "../types/operations-type";
 
 export class Filter extends BaseOperations {
     private datePicker: DatePickerManager;
+    private onUpdateCallback?: (operations: Operation[]) => void;
 
     private dateInputsState: DateInputsState = {
         from: null,
@@ -22,8 +24,9 @@ export class Filter extends BaseOperations {
         'interval': 'Интервал'
     };
 
-    constructor(navigateTo: (path: RoutePath) => void) {
+    constructor(navigateTo: (path: RoutePath) => void, updateCallback?: (operations: Operation[]) => void) {
         super(navigateTo);
+        this.onUpdateCallback = updateCallback;
         this.datePicker = new DatePickerManager();
         this.bindFilterButtons();
         this.initDatePickers();
@@ -176,7 +179,7 @@ export class Filter extends BaseOperations {
         return this.periodMap[period as keyof periodMap] || period;
     }
 
-    public async fetchFilteredOperations(period: string, dateRange: null = null, customUrl?: string): Promise<void> {
+    public async fetchFilteredOperations(period: string, dateRange: any = null, customUrl?: string): Promise<void> {
         try {
             let url: string;
 
@@ -191,10 +194,15 @@ export class Filter extends BaseOperations {
                 }
             }
 
-            const operations = await Http.request(url);
+            const operations = await Http.request<Operation[]>(url);
 
             if (operations) {
                 this.renderOperations(operations);
+
+                // Вызываем функцию обратного вызова, если она определена
+                if (this.onUpdateCallback) {
+                    this.onUpdateCallback(operations);
+                }
             }
         } catch (error) {
             console.error('Ошибка при получении операций:', error);
