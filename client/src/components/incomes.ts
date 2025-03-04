@@ -1,7 +1,9 @@
 import { CardPage } from "./base-class/card-page.js";
+import {RoutePath} from "../types/route-type";
+import {Validator} from "../services/validator";
 
 export class Incomes extends CardPage {
-    constructor(navigateTo) {
+    constructor(navigateTo: (path: RoutePath) => void) {
         super(
             navigateTo,
             'incomesContainer',
@@ -11,12 +13,14 @@ export class Incomes extends CardPage {
         );
     }
 
-    highlightPage() {
-        const categoriesElement = document.getElementById('dropdownMenuButton1');
-        const revenuesElement = document.getElementById('revenuesPage');
+    public highlightPage(): void {
+        const categoriesElement: HTMLElement | null = document.getElementById('dropdownMenuButton1');
+        const revenuesElement: HTMLElement | null = document.getElementById('revenuesPage');
 
-        categoriesElement.classList.add('btn-primary', 'text-white');
-        revenuesElement.classList.add('bg-primary', 'text-white');
+        if (Validator.areElementsMissing(categoriesElement, revenuesElement)) return;
+
+        categoriesElement!.classList.add('btn-primary', 'text-white');
+        revenuesElement!.classList.add('bg-primary', 'text-white');
     }
 }
 

@@ -24,7 +24,7 @@ export class Signup extends UserManager {
         event.preventDefault();
         this.form!.classList.remove('was-validated');
 
-        if (Validator.areInputsMissing(
+        if (Validator.areElementsMissing(
             this.fullNameInput,
             this.emailInput,
             this.passwordInput,

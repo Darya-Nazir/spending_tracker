@@ -35,7 +35,7 @@ export class Login extends UserManager {
     }
 
     private async submitForm(): Promise<void> {
-        if (Validator.areInputsMissing(
+        if (Validator.areElementsMissing(
             this.emailInput,
             this.passwordInput,
             this.rememberMeElement
