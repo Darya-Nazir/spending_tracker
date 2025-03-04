@@ -3,9 +3,10 @@ import { BaseOperations } from "./base-class/base-operations.js";
 import { DefaultCategoriesManager } from "../services/default-categories.js";
 import { Filter } from "../services/filter.js";
 import { Unselect } from "../services/unselect.js";
+import {RoutePath} from "../types/route-type";
 
 export class Transaction extends BaseOperations {
-    constructor(navigateTo) {
+    constructor(navigateTo: (path: RoutePath) => void) {
         super(navigateTo);
         document.querySelectorAll('.datepicker').forEach((input) => {
             this.datePickerManager.init(input);

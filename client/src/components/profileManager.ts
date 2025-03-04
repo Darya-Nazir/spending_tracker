@@ -1,8 +1,9 @@
 import { Auth } from "../services/auth.js";
 import { Http } from "../services/http.js";
+import {RoutePath} from "../types/route-type";
 
 export class ProfileManager {
-    constructor(navigateTo) {
+    constructor(navigateTo: (path: RoutePath) => void) {
         this.navigateToPath = navigateTo;
     }
 

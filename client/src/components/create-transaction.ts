@@ -1,9 +1,10 @@
 import { NewCard } from "./base-class/new-card.js";
 import { DatePickerManager } from "../services/date-picker.js";
 import { Http } from "../services/http.js";
+import {RoutePath} from "../types/route-type";
 
 export class NewTransaction extends NewCard {
-    constructor(navigateTo) {
+    constructor(navigateTo: (path: RoutePath) => void) {
         super(
             navigateTo,
             'http://localhost:3000/api/operations',
