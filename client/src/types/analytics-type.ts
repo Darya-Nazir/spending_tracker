@@ -1,7 +1,7 @@
-export type Chart = {
-    data: ChartData;
-    update(): void;
-}
+import { Chart as ChartJS } from 'chart.js';
+
+// Используем тип из библиотеки Chart.js
+export type ChartInstance = ChartJS;
 
 export type ChartData = {
     labels: string[];
@@ -26,13 +26,7 @@ export type ChartOptions = {
         };
         tooltip: {
             callbacks: {
-                label: (context: {
-                    label?: string;
-                    parsed?: number;
-                    dataset: {
-                        data: number[];
-                    }
-                }) => string;
+                label: (context: ChartTooltipContext) => string;
             }
         }
     }
@@ -50,12 +44,11 @@ export type ChartTooltipContext = {
         // Массив всех значений в наборе данных
         data: number[];
 
-        // Можно добавить другие свойства датасета при необходимости
+        // Другие свойства датасета
         backgroundColor?: string[];
         borderColor?: string[];
-        // и т.д.
     };
-}
+};
 
 export type CanvasElements = {
     incomeCanvas: HTMLCanvasElement,

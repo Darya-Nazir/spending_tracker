@@ -3,20 +3,18 @@ import { Filter } from "../services/filter";
 import { Unselect } from "../services/unselect";
 import {
     CanvasElements, ChartDataset,
-    ChartOptions,
-    ChartTooltipContext,
+    ChartInstance,
     EmptyChartData, ProcessedOperationsData
 } from "../types/analytics-type";
-import {Chart} from "chart.js";
-import {Operation} from "../types/operations-type";
-import {DatePickerElement} from "../types/date-picker-type";
-import {Category} from "../types/category-type";
-import {RoutePath} from "../types/route-type";
+import { Chart, ChartConfiguration, TooltipItem } from "chart.js";
+import { Operation } from "../types/operations-type";
+import { DatePickerElement } from "../types/date-picker-type";
+import { RoutePath } from "../types/route-type";
 
 export class Analytics {
     private charts: {
-        income: null;
-        expenses: null;
+        income: ChartInstance | null;
+        expenses: ChartInstance | null;
     };
 
     private filter: Filter;
@@ -36,17 +34,18 @@ export class Analytics {
     ]);
 
     constructor(navigateTo: (path: RoutePath) => void) {
-
         this.charts = {
             income: null,
             expenses: null
         };
+
         // Создаем экземпляр Filter и передаем метод обновления графиков как callback
         this.filter = new Filter(
             navigateTo,
-                (operations: Operation[]) => {
-            this.updateCharts(operations);
-        });
+            (operations: Operation[]) => {
+                this.updateCharts(operations);
+            }
+        );
 
         this.datePickerManager = new DatePickerManager();
     }
@@ -103,18 +102,18 @@ export class Analytics {
         });
     }
 
-    private createChartOptions(): ChartOptions {
+    private createChartOptions() {
         return {
             responsive: true,
             plugins: {
-                legend: { position: 'top' },
+                legend: { position: 'top' as const },
                 tooltip: {
                     callbacks: {
-                        label: function(context: ChartTooltipContext): string {
+                        label: function(context: TooltipItem<'pie'>): string {
                             const label: string = context.label || '';
                             const value: number = context.parsed || 0;
                             const total: number = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage: string | null = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
+                            const percentage: string = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
                             return `${label}: ${percentage}%`;
                         }
                     }
@@ -140,17 +139,20 @@ export class Analytics {
         const options = this.createChartOptions();
 
         try {
-            this.charts.income = new Chart(incomeCanvas, {
+            const incomeConfig: ChartConfiguration<'pie', number[], string> = {
                 type: 'pie',
                 data: this.createEmptyChartData(),
                 options: options
-            });
+            };
 
-            this.charts.expenses = new Chart(expensesCanvas, {
+            const expensesConfig: ChartConfiguration<'pie', number[], string> = {
                 type: 'pie',
                 data: this.createEmptyChartData(),
                 options: options
-            });
+            };
+
+            this.charts.income = new Chart(incomeCanvas, incomeConfig);
+            this.charts.expenses = new Chart(expensesCanvas, expensesConfig);
 
             return true;
         } catch (error) {
@@ -159,7 +161,7 @@ export class Analytics {
         }
     }
 
-    tryInitializeCharts() {
+    tryInitializeCharts(): boolean {
         const canvasElements = this.validateCanvasElements();
         if (!canvasElements) return false;
 
@@ -208,7 +210,8 @@ export class Analytics {
             expensesData: this.prepareChartData(expensesCategories)
         };
     }
-    private prepareChartData(categories: Record<string, number> ): ChartDataset {
+
+    private prepareChartData(categories: Record<string, number>): ChartDataset {
         const labels: string[] = Object.keys(categories);
         const data: number[] = Object.values(categories);
         const backgroundColors: string[] = labels.map((_: string, index: number): string =>
@@ -225,7 +228,7 @@ export class Analytics {
         };
     }
 
-    updateChart(chart: Chart | null, newData: ChartDataset): void {
+    updateChart(chart: ChartInstance | null, newData: ChartDataset): void {
         if (!chart) return;
 
         chart.data.labels = newData.labels;
@@ -234,11 +237,10 @@ export class Analytics {
         chart.update();
     }
 
-    selectMain() {
+    selectMain(): void {
         const mainPage = document.getElementById('mainPage');
         if (mainPage) {
             mainPage.classList.add('bg-primary', 'text-white');
         }
     }
 }
-
