@@ -1,8 +1,8 @@
-import { Http } from "../services/http.js";
-import { BaseOperations } from "./base-class/base-operations.js";
-import { DefaultCategoriesManager } from "../services/default-categories.js";
-import { Filter } from "../services/filter.js";
-import { Unselect } from "../services/unselect.js";
+import { Http } from "../services/http";
+import { BaseOperations } from "./base-class/base-operations";
+import { DefaultCategoriesManager } from "../services/default-categories";
+import { Filter } from "../services/filter";
+import { Unselect } from "../services/unselect";
 import {RoutePath} from "../types/route-type";
 
 export class Transaction extends BaseOperations {
@@ -13,7 +13,7 @@ export class Transaction extends BaseOperations {
         });
     }
 
-    init() {
+    public init(): void {
         new Unselect().init();
         this.highlightPage();
         this.renderTransactions();
@@ -24,16 +24,16 @@ export class Transaction extends BaseOperations {
         this.filterOperations();
     }
 
-    highlightPage() {
+    private highlightPage(): void {
         document.getElementById('transactionsPage')
             .classList.add('bg-primary', 'text-white');
     }
 
-    async fetchTransactions() {
+    private async fetchTransactions(): Promise<> {
         return await Http.request(this.apiUrl + '?period=all&type=income', 'GET');
     }
 
-    async renderTransactions() {
+    private async renderTransactions(): Promise<void> {
         try {
             const transactions = await this.fetchTransactions();
 
@@ -49,7 +49,7 @@ export class Transaction extends BaseOperations {
         }
     }
 
-    setupDeleteListener() {
+    private setupDeleteListener(): void {
         let rowToDelete = null;
         let transactionIdToDelete = null;
 
@@ -81,7 +81,7 @@ export class Transaction extends BaseOperations {
         });
     }
 
-    async deleteTransaction(transactionId) {
+    private async deleteTransaction(transactionId): Promise<void> {
         const url = `${this.apiUrl}/${transactionId}`;
         try {
             await Http.request(url, 'DELETE');
@@ -91,7 +91,7 @@ export class Transaction extends BaseOperations {
         }
     }
 
-    redirectToCreateOperation() {
+    private redirectToCreateOperation(): void {
         const createIncomeButton = document.getElementById('createIncome');
         const createExpenseButton = document.getElementById('createExpense');
 
@@ -112,7 +112,7 @@ export class Transaction extends BaseOperations {
         });
     }
 
-    setupEditListener() {
+    private setupEditListener(): void {
         this.container.addEventListener('click', (event) => {
             const editButton = event.target.closest('.edit-transaction');
             if (!editButton) return;
@@ -126,7 +126,7 @@ export class Transaction extends BaseOperations {
         });
     }
 
-    filterOperations() {
+    private filterOperations(): void {
         new Filter(this.navigateTo);
     }
 }

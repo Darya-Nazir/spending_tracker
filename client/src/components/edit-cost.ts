@@ -1,4 +1,4 @@
-import { EditCard } from "./base-class/edit-card.js";
+import { EditCard } from "./base-class/edit-card";
 import {RoutePath} from "../types/route-type";
 
 export class EditCost extends EditCard {
