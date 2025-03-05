@@ -4,6 +4,7 @@ import { Http } from "../services/http";
 import {RoutePath} from "../types/route-type";
 import {Validator} from "../services/validator";
 import {TransactionData} from "../types/transaction-type";
+import {Category} from "../types/category-type";
 
 export class NewTransaction extends NewCard {
     private typeInput: HTMLInputElement | null;
@@ -15,6 +16,7 @@ export class NewTransaction extends NewCard {
     private cancelButton: HTMLElement | null;
     private categoriesList: HTMLElement | null;
     private datePickerManager: DatePickerManager = new DatePickerManager();
+    private selectedCategoryId: string | null = null;
 
 
     constructor(navigateTo: (path: RoutePath) => void) {
@@ -65,7 +67,9 @@ export class NewTransaction extends NewCard {
     private async handleTransactionCreation(event: MouseEvent): Promise<void> {
         event.preventDefault();
 
-        const transactionData: TransactionData = this.getTransactionData();
+        const transactionData: TransactionData | undefined = this.getTransactionData();
+
+        if (!transactionData) return;
         if (!this.validateTransactionData(transactionData)) {
             return;
         }
@@ -80,8 +84,8 @@ export class NewTransaction extends NewCard {
     }
 
     // Сбор данных из формы
-    private getTransactionData(): TransactionData | undefined{
-        const typeMapping = {
+    private getTransactionData(): TransactionData | undefined {
+        const typeMapping: Record<string, 'income' | 'expense'> = {
             'Доход': 'income',
             'Расход': 'expense'
         };
@@ -94,16 +98,16 @@ export class NewTransaction extends NewCard {
         )) return;
 
         return {
-            type: typeMapping[this.typeInput.value] || this.typeInput.value.toLowerCase(),
-            amount: parseFloat(this.amountInput.value) || 0, // Указываем 0, если значение некорректное
-            date: this.datePickerManager.formatDateForAPI(this.dateInput.value), // Форматируем дату для сервера
-            comment: this.commentInput.value.trim() || '', // Указываем пустую строку, если комментарий не указан
+            type: typeMapping[this.typeInput!.value] || this.typeInput!.value.toLowerCase(),
+            amount: parseFloat(this.amountInput!.value) || 0, // Указываем 0, если значение некорректное
+            date: this.datePickerManager.formatDateForAPI(this.dateInput!.value), // Форматируем дату для сервера
+            comment: this.commentInput!.value.trim() || '', // Указываем пустую строку, если комментарий не указан
             category_id: this.selectedCategoryId ? parseInt(this.selectedCategoryId, 10) : null // Приводим ID категории к числу
         };
     }
 
     // Валидация данных формы
-    private validateTransactionData(data): boolean {
+    private validateTransactionData(data: TransactionData): boolean {
         if (!['income', 'expense'].includes(data.type)) {
             alert('Тип должен быть "income" или "expense"');
             return false;
@@ -114,7 +118,7 @@ export class NewTransaction extends NewCard {
             return false;
         }
 
-        if (!this.dateInput.value) {
+        if (!(this.dateInput as HTMLInputElement).value) {
             alert('Выберите дату');
             return false;
         }
@@ -129,7 +133,9 @@ export class NewTransaction extends NewCard {
 
     // Загрузка категорий с сервера
     private async loadCategories(): Promise<void> {
-        const type = this.typeInput.value === 'Доход' ? 'income' : 'expense';
+        if (!this.typeInput) return;
+
+        const type: 'income' | 'expense' = this.typeInput.value === 'Доход' ? 'income' : 'expense';
         const apiUrl = `http://localhost:3000/api/categories/${type}`;
         try {
             const categories = await Http.request(apiUrl, 'GET');
@@ -140,8 +146,10 @@ export class NewTransaction extends NewCard {
     }
 
     // Отрисовка списка категорий
-    private renderCategories(categories): void {
-        this.categoriesList.innerHTML = categories.map(category => `
+    private renderCategories(categories: Category[]): void {
+        if (!this.categoriesList) return;
+
+        this.categoriesList.innerHTML = categories.map((category: Category) => `
             <li>
                 <button
                     type="button"
@@ -153,38 +161,51 @@ export class NewTransaction extends NewCard {
         `).join('');
 
         this.categoriesList.querySelectorAll('.dropdown-item')
-            .forEach(item => {
-                item.addEventListener('click', (event) => this.handleCategorySelect(event));
+            .forEach((item: Element) => {
+                (item as HTMLButtonElement).addEventListener('click', (event: MouseEvent): void =>
+                    this.handleCategorySelect(event));
             });
     }
 
     // Обработка выбора категории
-    private handleCategorySelect(event): void {
-        const button = event.target;
+    private handleCategorySelect(event: MouseEvent): void {
+        const button = event.target as HTMLButtonElement;
         this.selectedCategoryId = button.getAttribute('data-id');
-        this.categoryInput.value = button.textContent.trim();
+        if (Validator.areElementsMissing(
+            this.categoryInput,
+            this.categoriesList,
+            button
+        )) return;
+
+        this.categoryInput!.value = button.textContent!.trim();
         this.hideCategories();
     }
 
     // Показать список категорий
     private showCategories(): void {
-        this.categoriesList.style.display = 'block';
+        if (this.categoriesList) {
+            this.categoriesList.style.display = 'block';
+        }
     }
 
     // Скрыть список категорий
     private hideCategories(): void {
-        this.categoriesList.style.display = 'none';
+        if (this.categoriesList) {
+            this.categoriesList.style.display = 'none';
+        }
     }
 
     // Установка начального типа транзакции из URL
     private setInitialType(): void {
+        if (this.typeInput) return;
+
         const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type');
+        const type: string | null = urlParams.get('type');
 
         if (type === 'income' || type === 'expense') {
-            this.typeInput.value = type === 'income' ? 'Доход' : 'Расход';
-            this.typeInput.readOnly = true;
-            this.typeInput.style.backgroundColor = '#f8f9fa';
+            this.typeInput!.value = type === 'income' ? 'Доход' : 'Расход';
+            this.typeInput!.readOnly = true;
+            this.typeInput!.style.backgroundColor = '#f8f9fa';
         }
     }
 }
