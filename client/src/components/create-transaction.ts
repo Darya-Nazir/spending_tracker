@@ -1,14 +1,25 @@
-import { NewCard } from "./base-class/new-card.js";
-import { DatePickerManager } from "../services/date-picker.js";
-import { Http } from "../services/http.js";
+import { NewCard } from "./base-class/new-card";
+import { DatePickerManager } from "../services/date-picker";
+import { Http } from "../services/http";
 import {RoutePath} from "../types/route-type";
 
 export class NewTransaction extends NewCard {
+    private typeInput: HTMLInputElement | null;
+    private categoryInput: HTMLInputElement | null;
+    private amountInput: HTMLInputElement | null;
+    private dateInput: HTMLInputElement | null;
+    private commentInput: HTMLInputElement | null;
+    private createButton: HTMLElement | null;
+    private cancelButton: HTMLElement | null;
+    private categoriesList: HTMLElement | null;
+    private datePickerManager: DatePickerManager = new DatePickerManager();
+
+
     constructor(navigateTo: (path: RoutePath) => void) {
         super(
             navigateTo,
             'http://localhost:3000/api/operations',
-            'transactions'
+            'transactions' as RoutePath
         );
 
         // Инициализация всех элементов формы
@@ -24,7 +35,7 @@ export class NewTransaction extends NewCard {
         this.datePickerManager = new DatePickerManager();
     }
 
-    async init() {
+    public async init(): Promise<void> {
         this.setInitialType();
         this.datePickerManager.init(this.dateInput);
         await this.loadCategories();
@@ -37,12 +48,12 @@ export class NewTransaction extends NewCard {
     }
 
     // Обработка нажатия кнопки отмены
-    handleCancel() {
+    private handleCancel(): void {
         this.navigateToPath('transactions');
     }
 
     // Обработка создания новой транзакции
-    async handleTransactionCreation(event) {
+    private async handleTransactionCreation(event): Promise<void> {
         event.preventDefault();
 
         const transactionData = this.getTransactionData();
@@ -60,7 +71,7 @@ export class NewTransaction extends NewCard {
     }
 
     // Сбор данных из формы
-    getTransactionData() {
+    private getTransactionData() {
         const typeMapping = {
             'Доход': 'income',
             'Расход': 'expense'
@@ -76,7 +87,7 @@ export class NewTransaction extends NewCard {
     }
 
     // Валидация данных формы
-    validateTransactionData(data) {
+    private validateTransactionData(data): boolean {
         if (!['income', 'expense'].includes(data.type)) {
             alert('Тип должен быть "income" или "expense"');
             return false;
@@ -101,7 +112,7 @@ export class NewTransaction extends NewCard {
     }
 
     // Загрузка категорий с сервера
-    async loadCategories() {
+    private async loadCategories(): Promise<void> {
         const type = this.typeInput.value === 'Доход' ? 'income' : 'expense';
         const apiUrl = `http://localhost:3000/api/categories/${type}`;
         try {
@@ -113,7 +124,7 @@ export class NewTransaction extends NewCard {
     }
 
     // Отрисовка списка категорий
-    renderCategories(categories) {
+    private renderCategories(categories): void {
         this.categoriesList.innerHTML = categories.map(category => `
             <li>
                 <button
@@ -132,7 +143,7 @@ export class NewTransaction extends NewCard {
     }
 
     // Обработка выбора категории
-    handleCategorySelect(event) {
+    private handleCategorySelect(event): void {
         const button = event.target;
         this.selectedCategoryId = button.getAttribute('data-id');
         this.categoryInput.value = button.textContent.trim();
@@ -140,17 +151,17 @@ export class NewTransaction extends NewCard {
     }
 
     // Показать список категорий
-    showCategories() {
+    private showCategories(): void {
         this.categoriesList.style.display = 'block';
     }
 
     // Скрыть список категорий
-    hideCategories() {
+    private hideCategories(): void {
         this.categoriesList.style.display = 'none';
     }
 
     // Установка начального типа транзакции из URL
-    setInitialType() {
+    private setInitialType(): void {
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get('type');
 
