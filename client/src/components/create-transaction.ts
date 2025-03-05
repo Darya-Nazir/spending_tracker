@@ -2,6 +2,8 @@ import { NewCard } from "./base-class/new-card";
 import { DatePickerManager } from "../services/date-picker";
 import { Http } from "../services/http";
 import {RoutePath} from "../types/route-type";
+import {Validator} from "../services/validator";
+import {TransactionData} from "../types/transaction-type";
 
 export class NewTransaction extends NewCard {
     private typeInput: HTMLInputElement | null;
@@ -24,7 +26,7 @@ export class NewTransaction extends NewCard {
 
         // Инициализация всех элементов формы
         this.typeInput = document.querySelector('input[placeholder="Тип..."]');
-        this.categoryInput = document.getElementById('categoryInput');
+        this.categoryInput = document.getElementById('categoryInput') as HTMLInputElement;
         this.amountInput = document.querySelector('input[placeholder="Сумма в $..."]');
         this.dateInput = document.querySelector('input[placeholder="Дата..."]');
         this.commentInput = document.querySelector('input[placeholder="Комментарий..."]');
@@ -37,33 +39,40 @@ export class NewTransaction extends NewCard {
 
     public async init(): Promise<void> {
         this.setInitialType();
-        this.datePickerManager.init(this.dateInput);
+        if (this.dateInput) {
+            this.datePickerManager.init(this.dateInput);
+        }
         await this.loadCategories();
 
         // Установка обработчиков событий
-        this.createButton.addEventListener('click', (event) => this.handleTransactionCreation(event));
-        this.cancelButton.addEventListener('click', () => this.handleCancel());
-        this.categoryInput.addEventListener('focus', () => this.showCategories());
-        this.categoryInput.addEventListener('blur', () => setTimeout(() => this.hideCategories(), 150));
+        if (Validator.areElementsMissing(
+            this.createButton,
+            this.cancelButton,
+            this.categoryInput
+        )) return;
+        this.createButton!.addEventListener('click', (event) => this.handleTransactionCreation(event));
+        this.cancelButton!.addEventListener('click', () => this.handleCancel());
+        this.categoryInput!.addEventListener('focus', () => this.showCategories());
+        this.categoryInput!.addEventListener('blur', () => setTimeout(() => this.hideCategories(), 150));
     }
 
     // Обработка нажатия кнопки отмены
     private handleCancel(): void {
-        this.navigateToPath('transactions');
+        this.navigateToPath('transactions' as RoutePath);
     }
 
     // Обработка создания новой транзакции
-    private async handleTransactionCreation(event): Promise<void> {
+    private async handleTransactionCreation(event: MouseEvent): Promise<void> {
         event.preventDefault();
 
-        const transactionData = this.getTransactionData();
+        const transactionData: TransactionData = this.getTransactionData();
         if (!this.validateTransactionData(transactionData)) {
             return;
         }
 
         try {
             await Http.request(this.apiUrl, 'POST', transactionData);
-            this.navigateToPath('transactions');
+            this.navigateToPath('transactions' as RoutePath);
         } catch (error) {
             console.error('Ошибка создания транзакции:', error);
             alert('Не удалось создать операцию. Пожалуйста, проверьте введенные данные и попробуйте снова.');
@@ -71,11 +80,18 @@ export class NewTransaction extends NewCard {
     }
 
     // Сбор данных из формы
-    private getTransactionData() {
+    private getTransactionData(): TransactionData | undefined{
         const typeMapping = {
             'Доход': 'income',
             'Расход': 'expense'
         };
+
+        if (Validator.areElementsMissing(
+            this.typeInput,
+            this.amountInput,
+            this.dateInput,
+            this.commentInput
+        )) return;
 
         return {
             type: typeMapping[this.typeInput.value] || this.typeInput.value.toLowerCase(),

@@ -3,9 +3,9 @@ import {RoutePath} from "../../types/route-type";
 import {Category} from "../../types/category-type";
 
 export class NewCard {
-    private navigateToPath: (path: RoutePath) => void;
-    private apiUrl: string;
-    private redirectPath: RoutePath;
+    protected navigateToPath: (path: RoutePath) => void;
+    readonly apiUrl: string;
+    readonly redirectPath: RoutePath;
 
     constructor(navigateTo: (path: RoutePath) => void, apiUrl: string, redirectPath: RoutePath) {
         this.navigateToPath = navigateTo;
