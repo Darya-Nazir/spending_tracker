@@ -3,10 +3,10 @@ import {RoutePath} from "../../types/route-type";
 import {Category} from "../../types/category-type";
 
 export class EditCard {
-    private navigateToPath: (path: RoutePath) => void;
-    private apiUrl: string;
-    private redirectPath: RoutePath;
-    private categoryId: string | null;
+    protected navigateToPath: (path: RoutePath) => void;
+    protected apiUrl: string;
+    protected redirectPath: RoutePath;
+    protected categoryId: string | null;
 
     constructor(navigateTo: (path: RoutePath) => void,
                 apiUrl: string,

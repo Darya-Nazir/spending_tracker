@@ -1,30 +1,38 @@
-import { EditCard } from "./base-class/edit-card.js";
-import { DatePickerManager } from "../services/date-picker.js";
-import { Http } from "../services/http.js";
+import {EditCard} from "./base-class/edit-card";
+import {DatePickerManager} from "../services/date-picker";
+import {Http} from "../services/http";
 import {RoutePath} from "../types/route-type";
+import {Operation} from "../types/operations-type";
+import {Category} from "../types/category-type";
+import {TransactionData} from "../types/transaction-type";
+import {Validator} from "../services/validator";
 
 export class EditTransaction extends EditCard {
+    private typeInput: HTMLInputElement | null = null;
+    private categoryInput: HTMLInputElement | null = null;
+    private amountInput: HTMLInputElement | null = null;
+    private dateInput: HTMLInputElement | null = null;
+    private commentInput: HTMLInputElement | null = null;
+    private categoriesList: HTMLElement | null = null;
+    private selectedCategoryId: string | null = null;
+    private datePickerManager: DatePickerManager;
+    private transactionId: string | null = null;
+    private saveButton: HTMLElement | null = document.querySelector('button[type="submit"]');
+    private cancelButton: HTMLElement | null = document.getElementById('cancel');
+    private typesList: HTMLElement | null = document.querySelector('.type-list');
+
     constructor(navigateTo: (path: RoutePath) => void) {
         super(
             navigateTo,
             'http://localhost:3000/api/operations',
-            'transactions'
+            'transactions' as RoutePath,
         );
-
-        // Инициализируем элементы как null
-        this.typeInput = null;
-        this.categoryInput = null;
-        this.amountInput = null;
-        this.dateInput = null;
-        this.commentInput = null;
-        this.categoriesList = null;
-        this.selectedCategoryId = null;
 
         this.datePickerManager = new DatePickerManager();
     }
 
-    async init() {
-        const transactionId = this.getCategoryIdFromUrl();
+    public async init(): Promise<void> {
+        const transactionId: string | null = this.getCategoryIdFromUrl();
         if (!transactionId) {
             this.navigateToPath(this.redirectPath);
             return;
@@ -38,14 +46,15 @@ export class EditTransaction extends EditCard {
             this.navigateToPath(this.redirectPath);
             return;
         }
-
-        this.datePickerManager.init(this.dateInput);
+        if (this.dateInput) {
+            this.datePickerManager.init(this.dateInput);
+        }
         await this.loadTransactionData(transactionId);
         this.setupEventListeners();
         this.renderTypes(['income', 'expense']);
     }
 
-    initializeFormElements() {
+    private initializeFormElements() {
         try {
             this.typeInput = document.querySelector('input[name="type"]');
             this.categoryInput = document.querySelector('input[name="category"]');
@@ -67,7 +76,7 @@ export class EditTransaction extends EditCard {
         }
     }
 
-    setupEventListeners() {
+    private setupEventListeners() {
         if (this.saveButton) {
             this.saveButton.addEventListener('click', (event) => this.handleTransactionEdit(event));
         }
@@ -87,9 +96,9 @@ export class EditTransaction extends EditCard {
         }
     }
 
-    async loadTransactionData(transactionId) {
+    private async loadTransactionData(transactionId: string): Promise<void> {
         try {
-            const transaction = await Http.request(`${this.apiUrl}/${transactionId}`, 'GET');
+            const transaction: Operation = await Http.request<Operation>(`${this.apiUrl}/${transactionId}`, 'GET');
             await this.loadCategories(transaction.type);
             this.fillFormWithTransactionData(transaction);
         } catch (error) {
@@ -99,23 +108,23 @@ export class EditTransaction extends EditCard {
         }
     }
 
-    async loadCategories(type) {
+    private async loadCategories(type: 'income' | 'expense'): Promise<void> {
         if (!this.categoriesList) return;
 
         try {
             const apiUrl = `http://localhost:3000/api/categories/${type}`;
-            const categories = await Http.request(apiUrl, 'GET');
+            const categories = await Http.request<Category[]>(apiUrl, 'GET');
             this.renderCategories(categories);
         } catch (error) {
             console.error('Ошибка загрузки категорий:', error);
         }
     }
 
-    renderCategories(categories) {
+    private renderCategories(categories: Category[]): void {
         if (!this.categoriesList) return;
 
         try {
-            this.categoriesList.innerHTML = categories.map(category => `
+            this.categoriesList.innerHTML = categories.map((category: Category): string => `
                 <li>
                     <button
                         type="button"
@@ -127,7 +136,7 @@ export class EditTransaction extends EditCard {
             `).join('');
 
             this.categoriesList.querySelectorAll('.dropdown-item')
-                .forEach(item => {
+                .forEach((item: Element) => {
                     item.addEventListener('click', (event) => this.handleCategorySelect(event));
                 });
         } catch (error) {
@@ -135,7 +144,7 @@ export class EditTransaction extends EditCard {
         }
     }
 
-    fillFormWithTransactionData(transaction) {
+    private fillFormWithTransactionData(transaction: Operation): void {
         if (!this.typeInput || !this.amountInput || !this.dateInput ||
             !this.commentInput || !this.categoryInput) return;
 
@@ -144,17 +153,19 @@ export class EditTransaction extends EditCard {
             this.typeInput.readOnly = true;
             this.typeInput.style.backgroundColor = '#f8f9fa';
 
-            this.amountInput.value = transaction.amount;
+            this.amountInput.value = transaction.amount.toString();
             this.datePickerManager.setValue(this.dateInput, new Date(transaction.date));
             this.commentInput.value = transaction.comment || '';
 
             if (this.categoriesList) {
-                const categoryButton = Array.from(this.categoriesList.querySelectorAll('.dropdown-item'))
-                    .find(item => item.textContent.trim() === transaction.category);
+                const categoryButton: Element | undefined =
+                    Array.from(this.categoriesList.querySelectorAll('.dropdown-item'))
+                    .find((item: Element): boolean =>
+                        item.textContent ? item.textContent.trim() === transaction.category : false);
 
                 if (categoryButton) {
                     this.selectedCategoryId = categoryButton.getAttribute('data-id');
-                    this.categoryInput.value = categoryButton.textContent.trim();
+                    this.categoryInput.value = categoryButton.textContent!.trim();
                 }
             }
         } catch (error) {
@@ -162,50 +173,35 @@ export class EditTransaction extends EditCard {
         }
     }
 
-    formatDateForDisplay(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('ru-RU', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        }).split('.').join('.');
-    }
+    private handleCategorySelect(event: MouseEvent): void {
+        const button: HTMLElement | null = event.target as HTMLElement;
 
-    formatDateForAPI(dateString) {
-        if (!dateString) return '';
-        const parts = dateString.split('.');
-        if (parts.length !== 3) return '';
-        return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
+        if (Validator.areElementsMissing(
+            button,
+            this.categoryInput
+        )) return;
 
-    setupDatePicker() {
-        $(this.dateInput).datepicker({
-            format: 'dd.mm.yyyy',
-            language: 'ru',
-            autoclose: true,
-            todayHighlight: true
-        });
-    }
-
-    handleCategorySelect(event) {
-        const button = event.target;
         this.selectedCategoryId = button.getAttribute('data-id');
-        this.categoryInput.value = button.textContent.trim();
+        this.categoryInput!.value = button.textContent!.trim();
         this.hideCategories();
     }
 
-    showCategories() {
+    private showCategories(): void {
+        if (this.categoriesList) {
         this.categoriesList.style.display = 'block';
+        }
     }
 
-    hideCategories() {
+    private hideCategories(): void {
+        if (this.categoriesList) {
         this.categoriesList.style.display = 'none';
+        }
     }
 
-    async handleTransactionEdit(event) {
+    private async handleTransactionEdit(event: MouseEvent): Promise<void> {
         event.preventDefault();
 
-        const transactionData = this.getTransactionData();
+        const transactionData: TransactionData = this.getTransactionData();
         if (!this.validateTransactionData(transactionData)) {
             return;
         }
@@ -261,6 +257,7 @@ export class EditTransaction extends EditCard {
 
         return true;
     }
+
     renderTypes(types) {
         if (!this.typesList) return;
 
