@@ -4,12 +4,13 @@ import { DefaultCategoriesManager } from "../services/default-categories";
 import { Filter } from "../services/filter";
 import { Unselect } from "../services/unselect";
 import {RoutePath} from "../types/route-type";
+import {Operation} from "../types/operations-type";
 
 export class Transaction extends BaseOperations {
     constructor(navigateTo: (path: RoutePath) => void) {
         super(navigateTo);
         document.querySelectorAll('.datepicker').forEach((input) => {
-            this.datePickerManager.init(input);
+            this.datePickerManager.init(input as HTMLElement);
         });
     }
 
@@ -25,11 +26,11 @@ export class Transaction extends BaseOperations {
     }
 
     private highlightPage(): void {
-        document.getElementById('transactionsPage')
+        (document.getElementById('transactionsPage') as HTMLDivElement)
             .classList.add('bg-primary', 'text-white');
     }
 
-    private async fetchTransactions(): Promise<> {
+    private async fetchTransactions(): Promise<Operation[]> {
         return await Http.request(this.apiUrl + '?period=all&type=income', 'GET');
     }
 
@@ -37,10 +38,10 @@ export class Transaction extends BaseOperations {
         try {
             const transactions = await this.fetchTransactions();
 
-            transactions.sort((a, b) => {
+            transactions.sort((a: Operation, b: Operation): number => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
-                return dateA - dateB;
+                return dateA.getTime() - dateB.getTime();
             });
 
             this.renderOperations(transactions);
@@ -50,15 +51,18 @@ export class Transaction extends BaseOperations {
     }
 
     private setupDeleteListener(): void {
-        let rowToDelete = null;
-        let transactionIdToDelete = null;
+        let rowToDelete: HTMLTableRowElement | null = null;
+        let transactionIdToDelete: string | null | undefined = null;
 
-        this.container.addEventListener('click', (event) => {
-            const deleteButton = event.target.closest('.delete-transaction');
+        if (!this.container) return;
+        this.container.addEventListener('click', (event: MouseEvent) => {
+
+            const target = event.target as HTMLElement;
+            const deleteButton = target.closest('.delete-transaction') as HTMLButtonElement;
             if (!deleteButton) return;
 
             rowToDelete = deleteButton.closest('tr');
-            transactionIdToDelete = rowToDelete.dataset.id;
+            transactionIdToDelete = rowToDelete?.dataset?.id;
 
             if (transactionIdToDelete) {
                 const deleteModal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
@@ -66,8 +70,8 @@ export class Transaction extends BaseOperations {
             }
         });
 
-        const confirmButton = document.getElementById('confirmDeleteBtn');
-        confirmButton.addEventListener('click', async () => {
+        const confirmButton: HTMLElement | null = document.getElementById('confirmDeleteBtn');
+        (confirmButton as HTMLElement).addEventListener('click', async () => {
             if (rowToDelete && transactionIdToDelete) {
                 try {
                     await this.deleteTransaction(transactionIdToDelete);
@@ -81,7 +85,7 @@ export class Transaction extends BaseOperations {
         });
     }
 
-    private async deleteTransaction(transactionId): Promise<void> {
+    private async deleteTransaction(transactionId: string): Promise<void> {
         const url = `${this.apiUrl}/${transactionId}`;
         try {
             await Http.request(url, 'DELETE');
@@ -92,36 +96,41 @@ export class Transaction extends BaseOperations {
     }
 
     private redirectToCreateOperation(): void {
-        const createIncomeButton = document.getElementById('createIncome');
-        const createExpenseButton = document.getElementById('createExpense');
+        const createIncomeButton: HTMLElement | null = document.getElementById('createIncome');
+        const createExpenseButton: HTMLElement | null = document.getElementById('createExpense');
 
+        if (!createIncomeButton) return;
         createIncomeButton.addEventListener("click", async () => {
             await DefaultCategoriesManager.createIfEmpty(
                 'http://localhost:3000/api/categories/income',
                 DefaultCategoriesManager.incomeCategories
             );
-            this.navigateToPath('create-transaction?type=income');
+            this.navigateToPath('create-transaction?type=income' as RoutePath);
         });
 
+        if (!createExpenseButton) return;
         createExpenseButton.addEventListener("click", async () => {
             await DefaultCategoriesManager.createIfEmpty(
                 'http://localhost:3000/api/categories/expense',
                 DefaultCategoriesManager.expenseCategories
             );
-            this.navigateToPath('create-transaction?type=expense');
+            this.navigateToPath('create-transaction?type=expense' as RoutePath);
         });
     }
 
     private setupEditListener(): void {
+        if (!this.container) return;
         this.container.addEventListener('click', (event) => {
-            const editButton = event.target.closest('.edit-transaction');
+            const target = event.target as HTMLElement;
+            const editButton: Element | null = target.closest('.edit-transaction');
             if (!editButton) return;
 
-            const row = editButton.closest('tr');
-            const transactionId = row.dataset.id;
+            const row: HTMLTableRowElement | null = editButton.closest('tr');
+            if (!row) return;
+            const transactionId: string | undefined = row.dataset.id;
 
             if (transactionId) {
-                this.navigateToPath(`edit-transaction?id=${transactionId}`);
+                this.navigateToPath(`edit-transaction?id=${transactionId}` as RoutePath);
             }
         });
     }
