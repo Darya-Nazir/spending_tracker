@@ -3,15 +3,27 @@ import {states} from "../constants/states";
 
 export type Routes = Record<RoutePath, Route>;
 
-type NavigateFunction = (route: RoutePath) => void;
+export type NavigateFunction = (route: RoutePath) => void;
+
+export type ComponentWithInit = {
+    new (navigateTo: NavigateFunction): {
+        init(): void;
+    };
+};
+
+// Тип для компонентов, наследующих init от родительского класса
+export type ComponentWithInheritedInit = {
+    new ( navigateTo: (path: RoutePath) => void): any;
+};
+
+// Объединённый тип для любого компонента
+export type ComponentConstructor = ComponentWithInit | ComponentWithInheritedInit;
 
 export type Route = {
     html: string,
     title: string,
     state: typeof states[keyof typeof states],
-    component: new (navigateTo: NavigateFunction) => {
-        init(): void;
-    }
+    component: ComponentConstructor
 };
 
 export type RoutePathBase =
@@ -29,3 +41,4 @@ export type RoutePathBase =
     | '/edit-transaction';
 
 export type RoutePath = RoutePathBase | `${RoutePathBase}?id=${string}`;
+
