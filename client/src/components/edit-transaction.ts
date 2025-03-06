@@ -136,8 +136,9 @@ export class EditTransaction extends EditCard {
             `).join('');
 
             this.categoriesList.querySelectorAll('.dropdown-item')
-                .forEach((item: Element) => {
-                    item.addEventListener('click', (event) => this.handleCategorySelect(event));
+                .forEach((item: Element): void => {
+                    (item as HTMLButtonElement).addEventListener('click', (event: MouseEvent): void =>
+                        this.handleCategorySelect(event));
                 });
         } catch (error) {
             console.error('Ошибка рендеринга категорий:', error);
@@ -201,7 +202,7 @@ export class EditTransaction extends EditCard {
     private async handleTransactionEdit(event: MouseEvent): Promise<void> {
         event.preventDefault();
 
-        const transactionData: TransactionData = this.getTransactionData();
+        const transactionData: TransactionData | undefined = this.getTransactionData() as TransactionData;
         if (!this.validateTransactionData(transactionData)) {
             return;
         }
@@ -219,22 +220,29 @@ export class EditTransaction extends EditCard {
         }
     }
 
-    getTransactionData() {
-        const typeMapping = {
+    private getTransactionData(): TransactionData | undefined {
+        const typeMapping: Record<string, 'income' | 'expense'> = {
             'Доход': 'income',
             'Расход': 'expense'
         };
 
+        if (Validator.areElementsMissing(
+            this.typeInput,
+            this.amountInput,
+            this.dateInput,
+            this.commentInput
+        )) return;
+
         return {
-            type: typeMapping[this.typeInput.value] || this.typeInput.value.toLowerCase(),
-            amount: parseFloat(this.amountInput.value) || 0,
-            date: this.datePickerManager.formatDateForAPI(this.dateInput.value),
-            comment: this.commentInput.value.trim() || '',
+            type: typeMapping[this.typeInput!.value] || this.typeInput!.value.toLowerCase(),
+            amount: parseFloat(this.amountInput!.value) || 0,
+            date: this.datePickerManager.formatDateForAPI(this.dateInput!.value),
+            comment: this.commentInput!.value.trim() || '',
             category_id: this.selectedCategoryId ? parseInt(this.selectedCategoryId, 10) : null
         };
     }
 
-    validateTransactionData(data) {
+    private validateTransactionData(data: TransactionData): boolean {
         if (!['income', 'expense'].includes(data.type)) {
             alert('Тип должен быть "доход" или "расход"');
             return false;
@@ -245,7 +253,7 @@ export class EditTransaction extends EditCard {
             return false;
         }
 
-        if (!this.dateInput.value) {
+        if (!(this.dateInput as HTMLInputElement).value) {
             alert('Выберите дату');
             return false;
         }
@@ -258,11 +266,11 @@ export class EditTransaction extends EditCard {
         return true;
     }
 
-    renderTypes(types) {
+    private renderTypes(types: ('income' | 'expense')[]): void {
         if (!this.typesList) return;
 
         try {
-            this.typesList.innerHTML = types.map(type => `
+            this.typesList.innerHTML = types.map((type: 'income' | 'expense') => `
             <li>
                 <button
                     type="button"
@@ -273,32 +281,45 @@ export class EditTransaction extends EditCard {
             </li>
         `).join('');
 
-            this.typesList.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', (event) => this.handleTypeSelect(event));
+            this.typesList.querySelectorAll('.dropdown-item').forEach((item: Element): void => {
+                (item as HTMLButtonElement).addEventListener('click', (event: MouseEvent): void =>
+                    this.handleTypeSelect(event));
             });
         } catch (error) {
             console.error('Ошибка рендеринга типов:', error);
         }
     }
 
-    handleTypeSelect(event) {
-        const button = event.target;
-        const selectedType = button.getAttribute('data-type');
-        this.typeInput.value = selectedType === 'income' ? 'Доход' : 'Расход';
-        this.typeInput.setAttribute('data-type', selectedType); // Сохраняем текущий тип
+    private handleTypeSelect(event: MouseEvent): void {
+        const button = event.target as HTMLButtonElement;
+        const selectedType: string | null = button.getAttribute('data-type');
+        if (Validator.areElementsMissing(
+            this.typeInput,
+            this.categoriesList,
+        )) return;
+
+        if (selectedType !== 'income' && selectedType !== 'expense') return;
+
+        this.typeInput!.value = selectedType === 'income' ? 'Доход' : 'Расход';
+        this.typeInput!.setAttribute('data-type', selectedType); // Сохраняем текущий тип
 
         this.selectedCategoryId = null; // Сбрасываем выбранную категорию
-        this.categoryInput.value = ''; // Очищаем поле категории
+        this.categoryInput!.value = ''; // Очищаем поле категории
         this.loadCategories(selectedType); // Подгружаем категории нового типа
         this.hideTypes();
     }
 
-    showTypes() {
-        this.typesList.style.display = 'block';
+    private showTypes(): void {
+        if (this.typesList) {
+            this.typesList.style.display = 'block';
+        }
     }
 
-    hideTypes() {
+    private hideTypes(): void {
+        if (this.typesList) {
         this.typesList.style.display = 'none';
+
+        }
     }
 }
 
