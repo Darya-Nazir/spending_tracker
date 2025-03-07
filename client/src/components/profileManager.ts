@@ -45,7 +45,7 @@ export class ProfileManager {
         });
     }
 
-    private async showBalance(): Promise<void> {
+    public async showBalance(): Promise<void> {
         const url = 'http://localhost:3000/api/balance';
         const balanceSpan: HTMLElement | null = document.getElementById('balance');
         const balance = (await Http.request(url, 'GET')).balance;

@@ -6,8 +6,10 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "strict": true,
-    "noEmit": true,         // Это ключевой параметр - отключает генерацию файлов компилятором TypeScript
+    "noEmit": false,
+    "outDir": "./dist",
     "skipLibCheck": true,
+    "noImplicitAny": false,
     "allowJs": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -28,4 +30,3 @@
     "dist"
   ]
 }
-

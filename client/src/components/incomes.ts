@@ -1,4 +1,4 @@
-import { CardPage } from "./base-class/card-page.js";
+import { CardPage } from "./base-class/card-page";
 import {RoutePath} from "../types/route-type";
 import {Validator} from "../services/validator";
 

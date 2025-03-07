@@ -1,4 +1,4 @@
-import { DatePickerManager } from "../../services/date-picker.js";
+import { DatePickerManager } from "../../services/date-picker";
 import { ProfileManager } from "../profileManager";
 import {RoutePath} from "../../types/route-type";
 import {Operation} from "../../types/operations-type";
