@@ -21,12 +21,13 @@ export class DatePickerManager {
     }
 
     public init(element: DatePickerElement): void {
-        if (!(typeof element === 'string' || element instanceof HTMLElement)) {
+        if (!(typeof element === 'string' || element instanceof HTMLElement ||
+            (element as any).jquery)) {
             console.error('Элемент для датапикера не определен');
             return;
         }
 
-        $(element).datepicker(this.options);
+        $(element as any).datepicker(this.options);
     }
 
     public formatDate(dateString: string): string {
@@ -42,11 +43,11 @@ export class DatePickerManager {
     }
 
     public setValue(element: DatePickerElement, date: Date | string | null): void {
-        $(element).datepicker('setDate', date);
+        $(element as any).datepicker('setDate', date);
     }
 
     public update(element: DatePickerElement, newOptions: DatePickerOptions): void {
-        $(element).datepicker('update', newOptions);
+        $(element as any).datepicker('update', newOptions);
     }
 }
 

@@ -12,4 +12,4 @@ export type DateFormatOptions = {
     year: 'numeric' | '2-digit';
 };
 
-export type DatePickerElement = string | HTMLElement;
+export type DatePickerElement = string | HTMLElement | JQuery;
