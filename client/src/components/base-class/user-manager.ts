@@ -1,6 +1,6 @@
 import {RoutePath} from "../../types/route-type";
 
-export class UserManager {
+export abstract class UserManager {
     protected form: HTMLFormElement | null;
     protected emailInput: HTMLInputElement | null;
     protected passwordInput: HTMLInputElement | null;
@@ -8,10 +8,6 @@ export class UserManager {
     protected navigateToPath: (path: RoutePath) => void;
 
     constructor(navigateTo: (path: RoutePath) => void) {
-        if (this.constructor === UserManager) {
-            throw new Error('User is an abstract class and cannot be instantiated directly');
-        }
-
         this.form = document.getElementById('registrationForm') as HTMLFormElement;
         this.emailInput = document.getElementById('email') as HTMLInputElement;
         this.passwordInput = document.getElementById('password') as HTMLInputElement;
@@ -25,9 +21,7 @@ export class UserManager {
         }
     }
 
-    protected initializeEventListeners(): void {
-        throw new Error('Method initializeEventListeners() must be implemented in derived class');
-    }
+    protected abstract initializeEventListeners(): void;
 
     protected validateEmail(): boolean {
         if (!this.emailRegex.test((this.emailInput as HTMLInputElement).value.trim())) {
