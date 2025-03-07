@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 export default {
     mode: 'development',
-    entry: './src/app.js',
+    entry: './src/app.ts',
     output: {
         filename: 'app.js',
         path: path.resolve(__dirname, 'dist'),
@@ -21,6 +21,16 @@ export default {
         port: 9000,
         historyApiFallback: true,
     },
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/, // Добавлено правило для обработки .ts и .tsx файлов
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
+        ],
+    },
+    resolve: { extensions: ['.ts', '.js'] },
     plugins: [
         new HtmlWebpackPlugin({ template: "./index.html" }),
         new CopyPlugin({

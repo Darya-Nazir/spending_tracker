@@ -57,7 +57,7 @@ export class CardPage {
                     categoryIdToDelete = cardToDelete.dataset.id;
                 }
 
-                const deleteModal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
+                const deleteModal = new (bootstrap as any).Modal(document.getElementById('deleteCategoryModal'));
                 deleteModal.show();
             }
         });
@@ -74,7 +74,7 @@ export class CardPage {
                 cardToDelete = null;
                 categoryIdToDelete = null;
 
-                const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
+                const deleteModal = (bootstrap as any).Modal.getInstance(document.getElementById('deleteCategoryModal'));
                 if (deleteModal) {
                     deleteModal.hide();
                 }

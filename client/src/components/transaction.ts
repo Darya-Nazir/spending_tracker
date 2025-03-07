@@ -65,7 +65,7 @@ export class Transaction extends BaseOperations {
             transactionIdToDelete = rowToDelete?.dataset?.id;
 
             if (transactionIdToDelete) {
-                const deleteModal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
+                const deleteModal = new (bootstrap as any).Modal(document.getElementById('deleteCategoryModal'));
                 deleteModal.show();
             }
         });
