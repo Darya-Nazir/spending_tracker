@@ -6,10 +6,12 @@ import {
     ChartInstance,
     EmptyChartData, ProcessedOperationsData
 } from "../types/analytics-type";
-import { Chart, ChartConfiguration, TooltipItem } from "chart.js";
 import { Operation } from "../types/operations-type";
 import { DatePickerElement } from "../types/date-picker-type";
 import { RoutePath } from "../types/route-type";
+// Импорт объявлен, но инициализация происходит динамически через скрипт
+// Поэтому отдельно определяем тип для Chart
+declare const Chart: any;
 
 export class Analytics {
     private charts: {
@@ -51,11 +53,16 @@ export class Analytics {
     }
 
     public async init(): Promise<void> {
-        // Сначала инициализируем фильтры, так как они не зависят от графиков
-        this.initFilters();
+        try {
+            // Сначала инициализируем фильтры, так как они не зависят от графиков
+            this.initFilters();
 
-        // Загружаем библиотеку и ждем ее инициализации
-        await this.loadChartLibrary();
+            // Загружаем библиотеку и ждем ее инициализации
+            await this.loadChartLibrary();
+        } catch (error) {
+            console.error('Ошибка при инициализации Analytics:', error);
+            throw new Error('Не удалось инициализировать графики');
+        }
     }
 
     private initFilters(): void {
@@ -67,39 +74,81 @@ export class Analytics {
         });
 
         document.querySelectorAll('.datepicker').forEach((input: Element) => {
-            this.datePickerManager = new DatePickerManager();
             this.datePickerManager.init(input as DatePickerElement);
         });
     }
 
     private loadChartLibrary(): Promise<void> {
         return new Promise<void>((resolve, reject): void => {
-            const script: HTMLScriptElement = document.createElement('script');
-            script.src = './scripts/lib/chart.js';
-            script.async = true;
+            try {
+                // Загружаем скрипт Chart.js
+                const script: HTMLScriptElement = document.createElement('script');
+                script.src = './scripts/lib/chart.js';
+                script.async = true;
 
-            script.onload = () => {
-                if (typeof Chart === 'undefined') {
-                    reject('Chart.js не загрузился корректно');
-                    return;
-                }
-
-                // Ждем следующего тика для гарантии загрузки DOM
-                requestAnimationFrame(() => {
-                    if (this.tryInitializeCharts()) {
-                        new Unselect().init();
-                        this.selectMain();
-                        this.filter.fetchFilteredOperations('all');
-                        resolve();
-                    } else {
-                        reject('Не удалось инициализировать графики');
+                script.onload = () => {
+                    if (typeof Chart === 'undefined') {
+                        reject(new Error('Chart.js не загрузился корректно'));
+                        return;
                     }
-                });
-            };
 
-            script.onerror = () => reject('Ошибка загрузки Chart.js');
-            document.body.appendChild(script);
+                    // Ждем следующего тика для гарантии загрузки DOM
+                    requestAnimationFrame(() => {
+                        try {
+                            // Необходимо убедиться, что Chart.js полностью инициализировался
+                            this.registerChartComponents();
+
+                            if (this.tryInitializeCharts()) {
+                                new Unselect().init();
+                                this.selectMain();
+                                this.filter.fetchFilteredOperations('all');
+                                resolve();
+                            } else {
+                                reject(new Error('Не удалось инициализировать графики'));
+                            }
+                        } catch (error) {
+                            console.error('Ошибка при инициализации графиков:', error);
+                            reject(error);
+                        }
+                    });
+                };
+
+                script.onerror = () => reject(new Error('Ошибка загрузки Chart.js'));
+                document.body.appendChild(script);
+            } catch (error) {
+                reject(error);
+            }
         });
+    }
+
+    private registerChartComponents(): void {
+        try {
+            // В Chart.js 3.x и 4.x нужно явно регистрировать компоненты
+            // Проверяем версию Chart.js и в зависимости от этого регистрируем компоненты
+            if (Chart.register) {
+                // Chart.js v3.x или v4.x
+                if (Chart.ArcElement && Chart.Tooltip && Chart.Legend) {
+                    Chart.register(Chart.ArcElement, Chart.Tooltip, Chart.Legend);
+                } else if (Chart.controllers && Chart.controllers.pie) {
+                    // Ничего не делаем, контроллеры уже зарегистрированы
+                } else {
+                    // Используем альтернативный синтаксис для Chart.js v4
+                    Chart.defaults.plugins.tooltip = Chart.defaults.plugins.tooltip || {};
+                    Chart.defaults.plugins.legend = Chart.defaults.plugins.legend || {};
+
+                    // Регистрируем контроллер pie вручную, если он существует
+                    if (Chart.PieController) {
+                        Chart.register(Chart.PieController);
+                    }
+                }
+            } else if (Chart.controllers && !Chart.controllers.pie) {
+                // Chart.js v2.x - регистрируем контроллер "pie" если он не зарегистрирован
+                throw new Error('Chart.js v2.x требует предварительной регистрации контроллеров');
+            }
+        } catch (error) {
+            console.warn('Не удалось зарегистрировать компоненты Chart.js:', error);
+            // Продолжаем выполнение, возможно компоненты уже зарегистрированы
+        }
     }
 
     private createChartOptions() {
@@ -109,10 +158,13 @@ export class Analytics {
                 legend: { position: 'top' as const },
                 tooltip: {
                     callbacks: {
-                        label: function(context: TooltipItem<'pie'>): string {
+                        label: function(context: any): string {
                             const label: string = context.label || '';
-                            const value: number = context.parsed || 0;
-                            const total: number = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value: number = context.parsed || context.raw || 0;
+                            const dataset = context.dataset;
+                            const total: number = Array.isArray(dataset.data)
+                                ? dataset.data.reduce((a: number, b: number) => a + b, 0)
+                                : 0;
                             const percentage: string = total > 0 ? ((value / total) * 100).toFixed(1) : "0";
                             return `${label}: ${percentage}%`;
                         }
@@ -139,20 +191,38 @@ export class Analytics {
         const options = this.createChartOptions();
 
         try {
-            const incomeConfig: ChartConfiguration<'pie', number[], string> = {
+            // Используем упрощенную конфигурацию для совместимости с разными версиями Chart.js
+            const incomeConfig = {
                 type: 'pie',
                 data: this.createEmptyChartData(),
                 options: options
             };
 
-            const expensesConfig: ChartConfiguration<'pie', number[], string> = {
+            const expensesConfig = {
                 type: 'pie',
                 data: this.createEmptyChartData(),
                 options: options
             };
 
-            this.charts.income = new Chart(incomeCanvas, incomeConfig);
-            this.charts.expenses = new Chart(expensesCanvas, expensesConfig);
+            // Создаем диаграммы с проверкой ошибок
+            try {
+                this.charts.income = new Chart(incomeCanvas, incomeConfig);
+            } catch (error) {
+                console.error('Ошибка при создании диаграммы доходов:', error);
+                return false;
+            }
+
+            try {
+                this.charts.expenses = new Chart(expensesCanvas, expensesConfig);
+            } catch (error) {
+                console.error('Ошибка при создании диаграммы расходов:', error);
+                // Освобождаем ресурсы первой диаграммы, если она была создана
+                if (this.charts.income) {
+                    this.charts.income.destroy();
+                    this.charts.income = null;
+                }
+                return false;
+            }
 
             return true;
         } catch (error) {
@@ -161,14 +231,14 @@ export class Analytics {
         }
     }
 
-    tryInitializeCharts(): boolean {
+    public tryInitializeCharts(): boolean {
         const canvasElements = this.validateCanvasElements();
         if (!canvasElements) return false;
 
         return this.createCharts(canvasElements);
     }
 
-    createEmptyChartData(): EmptyChartData {
+    public createEmptyChartData(): EmptyChartData {
         return {
             labels: [],
             datasets: [{
@@ -228,7 +298,7 @@ export class Analytics {
         };
     }
 
-    updateChart(chart: ChartInstance | null, newData: ChartDataset): void {
+    public updateChart(chart: ChartInstance | null, newData: ChartDataset): void {
         if (!chart) return;
 
         chart.data.labels = newData.labels;
@@ -237,7 +307,7 @@ export class Analytics {
         chart.update();
     }
 
-    selectMain(): void {
+    public selectMain(): void {
         const mainPage = document.getElementById('mainPage');
         if (mainPage) {
             mainPage.classList.add('bg-primary', 'text-white');
