@@ -118,7 +118,7 @@ export class NewTransaction extends NewCard {
             return false;
         }
 
-        if (!(this.dateInput as HTMLInputElement).value) {
+        if (!this.dateInput?.value) {
             alert('Выберите дату');
             return false;
         }
@@ -197,7 +197,7 @@ export class NewTransaction extends NewCard {
 
     // Установка начального типа транзакции из URL
     private setInitialType(): void {
-        if (this.typeInput) return;
+        if (!this.typeInput) return;
 
         const urlParams = new URLSearchParams(window.location.search);
         const type: string | null = urlParams.get('type');
