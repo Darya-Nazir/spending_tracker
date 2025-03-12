@@ -5,21 +5,25 @@ export default {
         '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js',
         '\\.(html)$': 'jest-transform-stub'
     },
-    setupFiles: ['<rootDir>/jest.setup.js'],
     setupFilesAfterEnv: ['<rootDir>/__tests__/setup.test.js'],
+    setupFiles: ['<rootDir>/jest.setup.js'],
     moduleFileExtensions: ['js', 'ts', 'tsx', 'json', 'html'],
     testEnvironmentOptions: {
         customExportConditions: ['node', 'node-addons'],
         url: 'http://localhost'
     },
-    transformIgnorePatterns: [
-        'node_modules/(?!(msw|yargs|yargs-parser|@mswjs|text-encoding-utf-8|web-streams-polyfill|whatwg-fetch)/)'
-    ],
+    extensionsToTreatAsEsm:  ['.ts', '.tsx'],
     transform: {
-        '^.+\\.(ts|tsx)$': 'ts-jest',
-        '^.+\\.js$': 'babel-jest',
+        '^.+\\.(ts|tsx)$': ['ts-jest', {
+            useESM: true,
+            isolatedModules: true
+        }],
+        '^.+\\.(js|jsx|mjs)$': ['babel-jest', { rootMode: 'upward' }],
         '^.+\\.html?$': 'jest-transform-stub'
     },
+    transformIgnorePatterns: [
+        '/node_modules/(?!(msw|yargs|yargs-parser|@mswjs|text-encoding-utf-8|web-streams-polyfill|whatwg-fetch)/)'
+    ],
     testMatch: [
         "**/__tests__/**/*.(spec|test).js"
     ],
@@ -27,7 +31,5 @@ export default {
         "/node_modules/",
         "/__tests__/fixtures/",
         "/__tests__/mocks/setup.js"
-    ],
-    extensionsToTreatAsEsm: ['.ts', '.tsx'],
-    globals: { 'ts-jest': { useESM: true, }, },
-}
+    ]
+};
