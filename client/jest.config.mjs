@@ -1,5 +1,5 @@
 export default {
-    testEnvironment: 'jsdom',
+    testEnvironment: 'jest-fixed-jsdom',
     moduleNameMapper: {
         '\\.(css|less|scss)$': '<rootDir>/__mocks__/styleMock.js',
         '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js',
