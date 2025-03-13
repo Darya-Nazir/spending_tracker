@@ -23,7 +23,7 @@ export class DatePickerManager {
     public init(element: DatePickerElement): void {
         if (!(typeof element === 'string' || element instanceof HTMLElement ||
             (element as any).jquery)) {
-            console.error('Элемент для датапикера не определен');
+            console.error('The element for datepicker is not defined');
             return;
         }
 

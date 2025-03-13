@@ -12,8 +12,8 @@ export class NewTransaction extends NewCard {
     private amountInput: HTMLInputElement | null;
     private dateInput: HTMLInputElement | null;
     private commentInput: HTMLInputElement | null;
-    private createButton: HTMLElement | null;
-    private cancelButton: HTMLElement | null;
+    private createButton: HTMLButtonElement | null;
+    private cancelButton: HTMLButtonElement | null;
     private categoriesList: HTMLElement | null;
     private datePickerManager: DatePickerManager = new DatePickerManager();
     private selectedCategoryId: string | null = null;
@@ -32,8 +32,8 @@ export class NewTransaction extends NewCard {
         this.amountInput = document.querySelector('input[placeholder="Сумма в $..."]');
         this.dateInput = document.querySelector('input[placeholder="Дата..."]');
         this.commentInput = document.querySelector('input[placeholder="Комментарий..."]');
-        this.createButton = document.getElementById('create');
-        this.cancelButton = document.getElementById('cancel');
+        this.createButton = document.getElementById('create') as HTMLButtonElement;
+        this.cancelButton = document.getElementById('cancel') as HTMLButtonElement;
         this.categoriesList = document.getElementById('categoriesList');
 
         this.datePickerManager = new DatePickerManager();

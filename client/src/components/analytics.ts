@@ -143,10 +143,10 @@ export class Analytics {
                 }
             } else if (Chart.controllers && !Chart.controllers.pie) {
                 // Chart.js v2.x - регистрируем контроллер "pie" если он не зарегистрирован
-                throw new Error('Chart.js v2.x требует предварительной регистрации контроллеров');
+                throw new Error('Chart.js v2.x requires pre-registration of controllers');
             }
         } catch (error) {
-            console.warn('Не удалось зарегистрировать компоненты Chart.js:', error);
+            console.warn('Failed to register Chart.js components:', error);
             // Продолжаем выполнение, возможно компоненты уже зарегистрированы
         }
     }
