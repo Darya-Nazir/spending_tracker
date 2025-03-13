@@ -16,9 +16,6 @@ import { SignupFormData } from '../../src/types/signup-type';
 import { RoutePath } from '../../src/types/route-type';
 import { LoginData } from '../../src/types/login-type';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 // Определяем моки
 const httpMock = createHttpMock();
 
@@ -65,7 +62,7 @@ describe('Signup Component', () => {
         DefaultCategoriesManager.setupDefaultCategories = defaultCategoriesManagerMock.setupDefaultCategories;
 
         signupFormHtml = readFileSync(
-            join(__dirname, '../fixtures/html/signup-form.html'),
+            join(dirname(fileURLToPath(import.meta.url)), '../fixtures/html/signup-form.html'),
             'utf8'
         );
     });
