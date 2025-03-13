@@ -37,7 +37,7 @@ export class CardPage {
     protected addCategoryButtonListener(): void {
         const addCategoryButton: HTMLElement | null = document.getElementById('addCategoryBtn');
         if (!addCategoryButton) {
-            console.error('Элемент addCategoryBtn не найден в DOM!');
+            console.error('AddCategoryBtn element not found in DOM!');
             return;
         }
         addCategoryButton.addEventListener('click', (): void => {

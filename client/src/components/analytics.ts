@@ -60,8 +60,8 @@ export class Analytics {
             // Загружаем библиотеку и ждем ее инициализации
             await this.loadChartLibrary();
         } catch (error) {
-            console.error('Ошибка при инициализации Analytics:', error);
-            throw new Error('Не удалось инициализировать графики');
+            console.error('Error during Analytics initialization:', error);
+            throw new Error('Failed to initialize charts');
         }
     }
 
@@ -88,7 +88,7 @@ export class Analytics {
 
                 script.onload = () => {
                     if (typeof Chart === 'undefined') {
-                        reject(new Error('Chart.js не загрузился корректно'));
+                        reject(new Error('Chart.js did not load correctly'));
                         return;
                     }
 
@@ -104,16 +104,16 @@ export class Analytics {
                                 this.filter.fetchFilteredOperations('all');
                                 resolve();
                             } else {
-                                reject(new Error('Не удалось инициализировать графики'));
+                                reject(new Error('Failed to initialize charts'));
                             }
                         } catch (error) {
-                            console.error('Ошибка при инициализации графиков:', error);
+                            console.error('Error during initialization of charts:', error);
                             reject(error);
                         }
                     });
                 };
 
-                script.onerror = () => reject(new Error('Ошибка загрузки Chart.js'));
+                script.onerror = () => reject(new Error('Chart.ts loading error'));
                 document.body.appendChild(script);
             } catch (error) {
                 reject(error);
@@ -179,7 +179,7 @@ export class Analytics {
         const expensesCanvas: HTMLCanvasElement | null = document.getElementById('expensesChart') as HTMLCanvasElement;
 
         if (!incomeCanvas || !expensesCanvas) {
-            console.error('Canvas элементы не найдены');
+            console.error('Canvas elements not found');
             return null;
         }
 
@@ -208,14 +208,14 @@ export class Analytics {
             try {
                 this.charts.income = new Chart(incomeCanvas, incomeConfig);
             } catch (error) {
-                console.error('Ошибка при создании диаграммы доходов:', error);
+                console.error('Error when creating an income chart:', error);
                 return false;
             }
 
             try {
                 this.charts.expenses = new Chart(expensesCanvas, expensesConfig);
             } catch (error) {
-                console.error('Ошибка при создании диаграммы расходов:', error);
+                console.error('Error when creating an expense chart:', error);
                 // Освобождаем ресурсы первой диаграммы, если она была создана
                 if (this.charts.income) {
                     this.charts.income.destroy();
@@ -226,7 +226,7 @@ export class Analytics {
 
             return true;
         } catch (error) {
-            console.error('Ошибка при инициализации графиков:', error);
+            console.error('Error during initialization of charts:', error);
             return false;
         }
     }
@@ -250,7 +250,7 @@ export class Analytics {
 
     private updateCharts(operations: Operation[]): void {
         if (!operations || !Array.isArray(operations)) {
-            console.error('Получены некорректные данные операций:', operations);
+            console.error('Incorrect transaction data received:', operations);
             return;
         }
 

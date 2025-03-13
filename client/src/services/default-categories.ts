@@ -44,7 +44,7 @@ export class DefaultCategoriesManager {
             return true;
 
         } catch (error) {
-            console.error('Ошибка при входе:', error);
+            console.error('Login error:', error);
             return false;
         }
     }
@@ -63,7 +63,7 @@ export class DefaultCategoriesManager {
             ]);
             return true;
         } catch (error) {
-            console.error('Созданиe категорий:', error);
+            console.error('Creating categories:', error);
             return false;
         }
     }
@@ -78,7 +78,7 @@ export class DefaultCategoriesManager {
                 }
             }
         } catch (error) {
-            console.error('Созданиe категорий:', error);
+            console.error('Creating categories:', error);
             throw error;
         }
     }
