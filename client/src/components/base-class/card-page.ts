@@ -3,12 +3,12 @@ import {Unselect} from "../../services/unselect";
 import {RoutePath} from "../../types/route-type";
 import {Category} from "../../types/category-type";
 
-export class CardPage {
-    private navigateToPath: (path: RoutePath) => void;
-    private container: HTMLElement | null;
-    private apiUrl: string;
-    private addCategoryPath: RoutePath;
-    private editCategoryPath: RoutePath;
+export abstract class CardPage {
+    protected navigateToPath: (path: RoutePath) => void;
+    protected container: HTMLElement | null;
+    protected apiUrl: string;
+    protected addCategoryPath: RoutePath;
+    protected editCategoryPath: RoutePath;
 
     constructor(navigateTo: (path: RoutePath) => void,
                 containerId: string,
@@ -30,9 +30,7 @@ export class CardPage {
         this.deleteCategoryButtonListener();
     }
 
-    protected highlightPage(): void {
-        throw new Error("Метод 'highlightPage' должен быть переопределён в производном классе.");
-    }
+    protected abstract highlightPage(): void;
 
     protected addCategoryButtonListener(): void {
         const addCategoryButton: HTMLElement | null = document.getElementById('addCategoryBtn');
