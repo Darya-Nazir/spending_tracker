@@ -205,7 +205,7 @@ export class Filter extends BaseOperations {
                 }
             }
         } catch (error) {
-            console.error('Ошибка при получении операций:', error);
+            console.error('Error when receiving transactions:', error);
         }
     }
 }

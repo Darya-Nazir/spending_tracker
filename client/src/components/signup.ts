@@ -83,7 +83,7 @@ export class Signup extends UserManager {
                 }
             }
         } catch (error) {
-            console.error('Ошибка при отправке:', error);
+            console.error('Error in sending:', error);
             alert('Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.');
         }
     }

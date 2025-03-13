@@ -1,5 +1,5 @@
 import { DatePickerManager } from "../../services/date-picker";
-import { ProfileManager } from "../profileManager";
+import { ProfileManager } from "../profile-manager";
 import {RoutePath} from "../../types/route-type";
 import {Operation} from "../../types/operations-type";
 
@@ -61,7 +61,7 @@ export class BaseOperations {
 
     public renderOperations(operations: Operation[]): void {
         if (!this.container) {
-            console.warn('Контейнер для операций не найден');
+            console.warn('Container for operations not found');
             return;
         }
 

@@ -71,7 +71,7 @@ export class EditTransaction extends EditCard {
                 this.dateInput && this.commentInput && this.categoriesList &&
                 this.saveButton && this.cancelButton);
         } catch (error) {
-            console.error('Ошибка инициализации элементов формы:', error);
+            console.error('Form elements initialization error:', error);
             return false;
         }
     }
@@ -102,7 +102,7 @@ export class EditTransaction extends EditCard {
             await this.loadCategories(transaction.type);
             this.fillFormWithTransactionData(transaction);
         } catch (error) {
-            console.error('Ошибка загрузки данных транзакции:', error);
+            console.error('Transaction data loading error:', error);
             alert('Не удалось загрузить данные транзакции!');
             this.navigateToPath(this.redirectPath);
         }
@@ -116,7 +116,7 @@ export class EditTransaction extends EditCard {
             const categories = await Http.request<Category[]>(apiUrl, 'GET');
             this.renderCategories(categories);
         } catch (error) {
-            console.error('Ошибка загрузки категорий:', error);
+            console.error('Error loading categories:', error);
         }
     }
 
@@ -141,7 +141,7 @@ export class EditTransaction extends EditCard {
                         this.handleCategorySelect(event));
                 });
         } catch (error) {
-            console.error('Ошибка рендеринга категорий:', error);
+            console.error('Category rendering error:', error);
         }
     }
 
@@ -170,7 +170,7 @@ export class EditTransaction extends EditCard {
                 }
             }
         } catch (error) {
-            console.error('Ошибка заполнения формы данными:', error);
+            console.error('Error filling form with data:', error);
         }
     }
 
@@ -215,7 +215,7 @@ export class EditTransaction extends EditCard {
             );
             this.navigateToPath(this.redirectPath);
         } catch (error) {
-            console.error('Ошибка обновления транзакции:', error);
+            console.error('Transaction update error:', error);
             alert('Не удалось обновить транзакцию. Пожалуйста, проверьте введенные данные и попробуйте снова.');
         }
     }
@@ -286,7 +286,7 @@ export class EditTransaction extends EditCard {
                     this.handleTypeSelect(event));
             });
         } catch (error) {
-            console.error('Ошибка рендеринга типов:', error);
+            console.error('Type rendering error:', error);
         }
     }
 

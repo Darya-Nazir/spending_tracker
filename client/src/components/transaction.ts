@@ -46,7 +46,7 @@ export class Transaction extends BaseOperations {
 
             this.renderOperations(transactions);
         } catch (error) {
-            console.error('Ошибка при загрузке транзакций:', error);
+            console.error('Error when loading transactions:', error);
         }
     }
 
@@ -79,7 +79,7 @@ export class Transaction extends BaseOperations {
                     rowToDelete = null;
                     transactionIdToDelete = null;
                 } catch (error) {
-                    console.error('Ошибка при подтверждении удаления:', error);
+                    console.error('Error when confirming deletion:', error);
                 }
             }
         });
@@ -91,7 +91,7 @@ export class Transaction extends BaseOperations {
             await Http.request(url, 'DELETE');
             await this.updateBalance();
         } catch (error) {
-            console.error('Ошибка при удалении транзакции и обновлении баланса:', error);
+            console.error('Error when deleting transaction and updating balance:', error);
         }
     }
 

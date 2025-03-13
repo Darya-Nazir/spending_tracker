@@ -78,7 +78,7 @@ export class NewTransaction extends NewCard {
             await Http.request(this.apiUrl, 'POST', transactionData);
             this.navigateToPath('transactions' as RoutePath);
         } catch (error) {
-            console.error('Ошибка создания транзакции:', error);
+            console.error('Transaction creation error:', error);
             alert('Не удалось создать операцию. Пожалуйста, проверьте введенные данные и попробуйте снова.');
         }
     }
@@ -141,7 +141,7 @@ export class NewTransaction extends NewCard {
             const categories = await Http.request(apiUrl, 'GET');
             this.renderCategories(categories);
         } catch (error) {
-            console.error('Ошибка загрузки категорий:', error);
+            console.error('Error loading categories:', error);
         }
     }
 

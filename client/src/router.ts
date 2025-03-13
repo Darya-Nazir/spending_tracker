@@ -1,4 +1,4 @@
-import {ProfileManager} from "./components/profileManager";
+import {ProfileManager} from "./components/profile-manager";
 import {Auth} from "./services/auth";
 import {Route, Routes, RoutePath} from "./types/route-type";
 import {states} from "./constants/states";
@@ -85,7 +85,7 @@ export class Router {
         }
 
         if (!handlePage) {
-            console.error('Маршрут не найден:', this.path);
+            console.error('Route not found:', this.path);
             if (this.appElement) {
                 this.appElement.innerHTML = '<h1>Маршрут не найден</h1>';
             }
@@ -113,7 +113,7 @@ export class Router {
             this.toggleNav();
 
         } catch (error) {
-            console.error('Ошибка при загрузке страницы:', error);
+            console.error('Error during page loading:', error);
             if (this.appElement) {
                 this.appElement.innerHTML = '<h1>Страница не найдена</h1>';
             }

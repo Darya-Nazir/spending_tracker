@@ -64,7 +64,7 @@ export class Login extends UserManager {
             Auth.setUserInfo(userInfo);
             this.jumpIntoApp();
         } catch (error: unknown) {
-            console.error('Ошибка при отправке:', error);
+            console.error('Error in sending:', error);
 
             if (error instanceof Error) {
                 const statusMatch: RegExpMatchArray | null = error.message.match(/HTTP: (\d+)/);
