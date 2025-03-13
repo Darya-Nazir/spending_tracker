@@ -19,12 +19,13 @@
       "dom.iterable",
       "esnext"
     ],
-    "types": []
+    "types": ["node", "jest"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "__tests__/**/*.ts"
   ],
   "exclude": [
     "node_modules",

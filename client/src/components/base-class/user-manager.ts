@@ -1,7 +1,7 @@
 import {RoutePath} from "../../types/route-type";
 
 export abstract class UserManager {
-    protected form: HTMLFormElement | null;
+    public form: HTMLFormElement | null;
     protected emailInput: HTMLInputElement | null;
     protected passwordInput: HTMLInputElement | null;
     private emailRegex: RegExp;

@@ -4,30 +4,33 @@ import { fileURLToPath } from 'url';
 
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { test, expect, describe, beforeAll, beforeEach, afterEach } from '@jest/globals';
 
-import { Signup } from '../../src/components/signup.js';
-import { Auth } from "../../src/services/auth.js";
-import { DefaultCategoriesManager } from '../../src/services/default-categories.js';
-import { Http } from '../../src/services/http.js';
-import { createHttpMock } from '../mocks/handlers/http.js';
-import { createMockEvent } from '../mocks/utils/event.js';
-
+import { Signup } from '../../src/components/signup';
+import { Auth } from "../../src/services/auth";
+import { DefaultCategoriesManager } from '../../src/services/default-categories';
+import { Http } from '../../src/services/http';
+import { createHttpMock } from '../mocks/handlers/http';
+import { createMockEvent } from '../mocks/utils/event';
+import { SignupFormData } from '../../src/types/signup-type';
+import { RoutePath } from '../../src/types/route-type';
+import { LoginData } from '../../src/types/login-type';
 
 // Определяем моки
 const httpMock = createHttpMock();
 
 const defaultCategoriesManagerMock = {
-    processLogin: jest.fn(),
-    setupDefaultCategories: jest.fn()
+    processLogin: jest.fn() as jest.MockedFunction<typeof DefaultCategoriesManager.processLogin>,
+    setupDefaultCategories: jest.fn() as jest.MockedFunction<typeof DefaultCategoriesManager.setupDefaultCategories>
 };
 
 describe('Signup Component', () => {
-    let signup;
-    let mockNavigateTo;
-    let signupFormHtml;
+    let signup: Signup;
+    let mockNavigateTo: jest.MockedFunction<(path: RoutePath) => void>;
+    let signupFormHtml: string;
 
     // Объект, содержащий маппинг полей формы
-    const formFields = {
+    const formFields: Record<string, string> = {
         fullName: 'fullNameInput',
         email: 'emailInput',
         password: 'passwordInput',
@@ -35,22 +38,26 @@ describe('Signup Component', () => {
     };
 
     // Тестовые данные пользователя
-    const user = {
+    const user: SignupFormData & { fullName: string } = {
         fullName: 'Иван Иванов',
+        name: 'Иван Иванов', // Добавлено для соответствия типу SignupFormData
         email: 'test@example.com',
         password: 'Password123!',
         passwordRepeat: 'Password123!'
     };
 
     // Вспомогательная функция для заполнения формы
-    const fillFormFields = (component, data) => {
+    const fillFormFields = (component: Signup, data: Record<string, string>): void => {
         Object.entries(formFields).forEach(([dataKey, inputField]) => {
-            component[inputField].value = data[dataKey];
+            const input = component[inputField] as HTMLInputElement;
+            if (input) {
+                input.value = data[dataKey];
+            }
         });
     };
 
     beforeAll(() => {
-        Http.request = httpMock.request;
+        Http.request = httpMock.request as typeof Http.request;
         DefaultCategoriesManager.processLogin = defaultCategoriesManagerMock.processLogin;
         DefaultCategoriesManager.setupDefaultCategories = defaultCategoriesManagerMock.setupDefaultCategories;
 
@@ -63,7 +70,7 @@ describe('Signup Component', () => {
     beforeEach(() => {
         Auth.accessTokenKey = 'test_access_token';
         document.body.innerHTML = signupFormHtml;
-        mockNavigateTo = jest.fn();
+        mockNavigateTo = jest.fn() as jest.MockedFunction<(path: RoutePath) => void>;
         signup = new Signup(mockNavigateTo);
         signup.initializeEventListeners();
     });
@@ -79,35 +86,35 @@ describe('Signup Component', () => {
         // Заполняем форму используя вспомогательную функцию
         fillFormFields(signup, user);
 
-        Http.request.mockResolvedValueOnce(true);
-        DefaultCategoriesManager.processLogin.mockResolvedValueOnce(true);
-        DefaultCategoriesManager.setupDefaultCategories.mockResolvedValueOnce();
+        (httpMock.request as jest.Mock).mockResolvedValueOnce(true);
+        defaultCategoriesManagerMock.processLogin.mockResolvedValueOnce(true);
+        defaultCategoriesManagerMock.setupDefaultCategories.mockResolvedValueOnce();
 
-        await signup.submitForm(user);
+        await signup['submitForm'](user as SignupFormData);
 
-        expect(Http.request).toHaveBeenCalledWith(
+        expect(httpMock.request).toHaveBeenCalledWith(
             'http://localhost:3000/api/signup',
             'POST',
             user,
             false
         );
 
-        expect(DefaultCategoriesManager.processLogin).toHaveBeenCalledWith({
+        expect(defaultCategoriesManagerMock.processLogin).toHaveBeenCalledWith({
             email: user.email,
             password: user.password,
             rememberMe: false
-        });
+        } as LoginData);
 
-        expect(mockNavigateTo).toHaveBeenCalledWith('/');
+        expect(mockNavigateTo).toHaveBeenCalledWith('/' as RoutePath);
     });
 
     test('should show validation errors with empty fields', () => {
         const mockEvent = createMockEvent();
-        signup.handleSubmit(mockEvent);
+        signup['handleSubmit'](mockEvent as unknown as SubmitEvent);
 
         expect(mockEvent.preventDefault).toHaveBeenCalled();
-        expect(signup.form.classList.contains('was-validated')).toBeTruthy();
-        expect(signup.fullNameInput.classList.contains('is-invalid')).toBeTruthy();
+        expect(signup.form?.classList.contains('was-validated')).toBeTruthy();
+        expect(signup.fullNameInput?.classList.contains('is-invalid')).toBeTruthy();
     });
 
     test('should show an error if passwords do not match', () => {
@@ -115,9 +122,9 @@ describe('Signup Component', () => {
         fillFormFields(signup, invalidUser);
 
         const mockEvent = createMockEvent();
-        signup.handleSubmit(mockEvent);
+        signup['handleSubmit'](mockEvent as unknown as SubmitEvent);
 
-        expect(signup.confirmPasswordInput.classList.contains('is-invalid')).toBeTruthy();
-        expect(signup.confirmPasswordInput.validationMessage).toBe('Пароли не совпадают');
+        expect(signup.confirmPasswordInput?.classList.contains('is-invalid')).toBeTruthy();
+        expect(signup.confirmPasswordInput?.validationMessage).toBe('Пароли не совпадают');
     });
 });
