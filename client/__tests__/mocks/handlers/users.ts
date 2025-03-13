@@ -1,11 +1,11 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { users } from '../../fixtures/data/users';
 
 export const userHandlers = [
-    rest.get('/api/users', (req, res, ctx) => {
-        return res(
-            ctx.json(users),
-            ctx.status(200)
+    http.get('/api/users', () => {
+        return HttpResponse.json(
+            users,
+            { status: 200 }
         );
     })
 ];

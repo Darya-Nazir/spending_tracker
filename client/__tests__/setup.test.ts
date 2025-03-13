@@ -1,25 +1,14 @@
 import { TextEncoder, TextDecoder } from 'util';
-import { beforeAll, afterAll, afterEach } from '@jest/globals';
-
-import 'whatwg-fetch';
-
 import { server } from './mocks/server';
-import 'whatwg-fetch';
 
-// Расширяем глобальный тип
-declare global {
-    // Используем конкретный тип из Node.js вместо ссылки на typeof
-    var TextDecoder: {
-        new(label?: string, options?: TextDecoderOptions): TextDecoder;
-        prototype: TextDecoder;
-    };
-}
+global.TextEncoder = TextEncoder as any;
+global.TextDecoder = TextDecoder as any;
 
-// Устанавливаем глобальные TextEncoder и TextDecoder
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any; // Принудительное приведение типов
-
-// Настройка серверных обработчиков MSW
+// Setup MSW server handlers
 beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  // Clear localStorage and sessionStorage after each test
+  localStorage.clear();
+  sessionStorage.clear();
+});
 afterAll(() => server.close());
