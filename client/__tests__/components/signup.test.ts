@@ -16,6 +16,9 @@ import { SignupFormData } from '../../src/types/signup-type';
 import { RoutePath } from '../../src/types/route-type';
 import { LoginData } from '../../src/types/login-type';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 // Определяем моки
 const httpMock = createHttpMock();
 
@@ -62,7 +65,7 @@ describe('Signup Component', () => {
         DefaultCategoriesManager.setupDefaultCategories = defaultCategoriesManagerMock.setupDefaultCategories;
 
         signupFormHtml = readFileSync(
-            join(dirname(fileURLToPath(import.meta.url)), '../fixtures/html/signup-form.html'),
+            join(__dirname, '../fixtures/html/signup-form.html'),
             'utf8'
         );
     });
@@ -86,9 +89,9 @@ describe('Signup Component', () => {
         // Заполняем форму используя вспомогательную функцию
         fillFormFields(signup, user);
 
-        (httpMock.request as jest.Mock).mockResolvedValueOnce(true);
+        (httpMock.request as jest.Mock).mockReturnValue(true);
         defaultCategoriesManagerMock.processLogin.mockResolvedValueOnce(true);
-        defaultCategoriesManagerMock.setupDefaultCategories.mockResolvedValueOnce();
+        defaultCategoriesManagerMock.setupDefaultCategories.mockResolvedValueOnce(true);
 
         await signup['submitForm'](user as SignupFormData);
 
