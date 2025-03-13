@@ -6,14 +6,15 @@ export default {
         '\\.(html)$': 'jest-transform-stub'
     },
     setupFilesAfterEnv: ['<rootDir>/__tests__/setup.test.ts'],
-    moduleFileExtensions: ['js', 'json', 'html'],
-    testEnvironmentOptions: { customExportConditions: ['node', 'node-addons'] },
-    transformIgnorePatterns: [
-        'node_modules/(?!(yargs|yargs-parser)/)'
-    ],
+    moduleFileExtensions: ['js', 'ts', 'json', 'html'],
     transform: {
         // Добавляем трансформацию для HTML
-        '^.+\\.html?$': 'jest-transform-stub'
+        '^.+\\.html?$': 'jest-transform-stub',
+        // Add TypeScript transformation with options
+        '^.+\\.ts$': ['ts-jest', { 
+            tsconfig: 'tsconfig.jest.json', 
+            useESM: true
+        }]
     },
     testMatch: [
         "**/__tests__/**/*.(spec|test).ts"
@@ -24,5 +25,6 @@ export default {
         "/__tests__/fixtures/",
         "/__tests__/mocks/",
         "/__tests__/setup.test.ts"
-    ]
+    ],
+    extensionsToTreatAsEsm: ['.ts']
 };
