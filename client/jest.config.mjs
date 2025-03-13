@@ -25,7 +25,8 @@ export default {
         '/node_modules/(?!(msw|yargs|yargs-parser|@mswjs|text-encoding-utf-8|web-streams-polyfill|whatwg-fetch)/)'
     ],
     testMatch: [
-        "**/__tests__/**/*.(spec|test).js"
+        "**/__tests__/**/*.(spec|test).js",
+        "**/__tests__/**/*.(spec|test).ts"
     ],
     testPathIgnorePatterns: [
         "/node_modules/",
