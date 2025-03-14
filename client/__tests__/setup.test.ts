@@ -1,6 +1,6 @@
 import { TextEncoder, TextDecoder } from 'util';
 import { server } from './mocks/server';
-// import { beforeAll, afterAll, afterEach } from '@jest/globals';
+import { beforeAll, afterAll, afterEach } from '@jest/globals';
 // Устанавливаем глобальные TextEncoder и TextDecoder
 global.TextEncoder = TextEncoder as any;
 global.TextDecoder = TextDecoder as any;
