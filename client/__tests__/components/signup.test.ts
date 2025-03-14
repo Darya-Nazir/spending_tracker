@@ -86,9 +86,9 @@ describe('Signup Component', () => {
         // Заполняем форму используя вспомогательную функцию
         fillFormFields(signup, user);
 
-        (httpMock.request as jest.Mock).mockResolvedValueOnce(true);
+        (httpMock.request as jest.Mock).mockReturnValue(true);
         defaultCategoriesManagerMock.processLogin.mockResolvedValueOnce(true);
-        defaultCategoriesManagerMock.setupDefaultCategories.mockResolvedValueOnce();
+        defaultCategoriesManagerMock.setupDefaultCategories.mockResolvedValueOnce(true);
 
         await signup['submitForm'](user as SignupFormData);
 
