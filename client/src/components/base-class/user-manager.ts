@@ -1,0 +1,54 @@
+import {RoutePath} from "../../types/route-type";
+
+export abstract class UserManager {
+    public form: HTMLFormElement | null;
+    protected emailInput: HTMLInputElement | null;
+    protected passwordInput: HTMLInputElement | null;
+    private emailRegex: RegExp;
+    protected navigateToPath: (path: RoutePath) => void;
+
+    constructor(navigateTo: (path: RoutePath) => void) {
+        this.form = document.getElementById('registrationForm') as HTMLFormElement;
+        this.emailInput = document.getElementById('email') as HTMLInputElement;
+        this.passwordInput = document.getElementById('password') as HTMLInputElement;
+        this.emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        this.navigateToPath = navigateTo;
+    }
+
+    protected init(): void {
+        if (this.form) {
+            this.initializeEventListeners();
+        }
+    }
+
+    protected abstract initializeEventListeners(): void;
+
+    protected validateEmail(): boolean {
+        if (!this.emailRegex.test((this.emailInput as HTMLInputElement).value.trim())) {
+            this.markInputAsInvalid(this.emailInput!);
+            return false;
+        }
+        this.markInputAsValid(this.emailInput!);
+        return true;
+    }
+
+    protected validatePassword(minLength = 6): boolean {
+        if ((this.passwordInput as HTMLInputElement).value.length < minLength) {
+            this.markInputAsInvalid(this.passwordInput!);
+            return false;
+        }
+        this.markInputAsValid(this.passwordInput!);
+        return true;
+    }
+
+    protected markInputAsInvalid(inputElement: HTMLInputElement) {
+        inputElement.classList.remove('is-valid');
+        inputElement.classList.add('is-invalid');
+    }
+
+    protected markInputAsValid(inputElement: HTMLInputElement) {
+        inputElement.classList.remove('is-invalid');
+        inputElement.classList.add('is-valid');
+    }
+}
+

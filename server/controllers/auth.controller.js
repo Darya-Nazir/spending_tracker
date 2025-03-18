@@ -23,7 +23,7 @@ class AuthController {
             let user = UserModel.findOne({email: req.body.email});
             if (user) {
                 return res.status(400)
-                    .json({error: true, message: "User with given email already exist"});
+                    .json({error: true, message: "Profile with given email already exist"});
             }
 
             const salt = await bcrypt.genSalt(Number('example'));
