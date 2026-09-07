@@ -1,4 +1,5 @@
 import type { Database } from '../../db/database.ts';
+import { ConflictError } from '../../errors/app-error.ts';
 import type { NormalizedEmail } from './email.service.ts';
 
 type UserRow = {
@@ -19,11 +20,48 @@ export type User = {
     createdAt: Date;
 };
 
+export type CreateUserInput = {
+    email: NormalizedEmail;
+    name: string;
+    passwordHash: string;
+};
+
+const isUniqueViolation = (error: unknown): boolean => {
+    return typeof error === 'object'
+        && error !== null
+        && 'code' in error
+        && error.code === '23505';
+};
+
 export class UserRepository {
     readonly #database: Database;
 
     constructor(database: Database) {
         this.#database = database;
+    }
+
+    async create(input: CreateUserInput): Promise<User> {
+        try {
+            const { rows } = await this.#database.query<UserRow>(
+                `insert into users (email, name, password_hash)
+                 values ($1, $2, $3)
+                 returning id, email, name, password_hash, initial_balance, created_at`,
+                [input.email, input.name, input.passwordHash],
+            );
+            const row = rows[0];
+
+            if (row === undefined) {
+                throw new Error('PostgreSQL did not return the created user');
+            }
+
+            return UserRepository.#map(row);
+        } catch (error) {
+            if (isUniqueViolation(error)) {
+                throw new ConflictError('Profile with given email already exists');
+            }
+
+            throw error;
+        }
     }
 
     async findByEmail(email: NormalizedEmail): Promise<User | null> {
@@ -39,6 +77,10 @@ export class UserRepository {
             return null;
         }
 
+        return UserRepository.#map(row);
+    }
+
+    static #map(row: UserRow): User {
         return {
             id: row.id,
             email: row.email,

@@ -68,7 +68,7 @@ describe('ErrorHandler', () => {
     test('maps each error class to its own status code', async () => {
         // переводит каждый класс ошибок в свой код статуса
         const cases: { error: AppError; status: number }[] = [
-            { error: new ValidationError('name must be at least 3 characters'), status: 400 },
+            { error: new ValidationError('name must be at least 2 characters'), status: 400 },
             { error: new UnauthorizedError('incorrect email or password'), status: 401 },
             { error: new NotFoundError('operation not found'), status: 404 },
             { error: new ConflictError('category already exists'), status: 409 },

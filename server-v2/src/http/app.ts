@@ -5,11 +5,17 @@ import express, { json, type Express, type Router } from 'express';
 import type { Config } from '../config/config.ts';
 import type { Database } from '../db/database.ts';
 import type { Logger } from '../logging/logger.ts';
+import { AuthController } from '../modules/auth/auth.controller.ts';
+import { AuthRouter } from '../modules/auth/auth.router.ts';
+import { AuthService } from '../modules/auth/auth.service.ts';
+import { PasswordService } from '../modules/auth/password.service.ts';
 import { ErrorHandler } from './middleware/error-handler.ts';
 import { NotFoundHandler } from './middleware/not-found.ts';
 import { HealthController } from '../modules/health/health.controller.ts';
 import { HealthRouter } from '../modules/health/health.router.ts';
 import { HealthService } from '../modules/health/health.service.ts';
+import { EmailService } from '../modules/users/email.service.ts';
+import { UserRepository } from '../modules/users/user.repository.ts';
 import { RequestContext } from './middleware/request-context.ts';
 
 /**
@@ -42,6 +48,7 @@ export class AppFactory {
         app.use(json({ limit: BODY_LIMIT }));
 
         app.use(this.#healthRouter());
+        app.use('/api', this.#authRouter());
 
         app.use(new NotFoundHandler().reject);
         app.use(new ErrorHandler(this.#logger).respond);
@@ -51,10 +58,17 @@ export class AppFactory {
 
     /**
      * Сборка модуля health: сервис отдаётся контроллеру, контроллер — роутеру.
-     * Зависимости создаются здесь и передаются в конструкторы, поэтому сами
-     * классы друг друга не создают и их можно собрать иначе в тестах.
      */
     #healthRouter(): Router {
         return HealthRouter.create(new HealthController(new HealthService(this.#database)));
+    }
+
+    #authRouter(): Router {
+        const users = new UserRepository(this.#database);
+        const passwords = new PasswordService(this.#config);
+        const emails = new EmailService();
+        const service = new AuthService(users, passwords, emails);
+
+        return AuthRouter.create(new AuthController(service));
     }
 }

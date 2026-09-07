@@ -56,7 +56,7 @@ describe('POST /api/signup', () => {
     test('rejects invalid signup data with a JSON validation error', async () => {
         // отклоняет некорректные данные регистрации с JSON-ошибкой валидации
         const invalidPayloads = [
-            { ...validSignup, name: 'Да' },
+            { ...validSignup, name: 'Д' },
             { ...validSignup, email: 'invalid-email' },
             { ...validSignup, password: '12345', passwordRepeat: '12345' },
             { ...validSignup, passwordRepeat: 'another-password' },
