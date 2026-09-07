@@ -47,7 +47,7 @@ const envSchema = z.object({
         .int('PORT must be a whole number')
         .min(1, 'PORT must be between 1 and 65535')
         .max(65535, 'PORT must be between 1 and 65535')
-        .default(3500),
+        .default(3000),
 
     LOG_LEVEL: z
         .enum(LOG_LEVELS, `LOG_LEVEL must be one of: ${LOG_LEVELS.join(', ')}`)

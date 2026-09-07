@@ -43,7 +43,7 @@ describe('Config', () => {
         const config = Config.load(envWithout('NODE_ENV', 'PORT', 'LOG_LEVEL', 'BCRYPT_COST'));
 
         assert.equal(config.nodeEnv, 'development');
-        assert.equal(config.port, 3500);
+        assert.equal(config.port, 3000);
         assert.equal(config.logLevel, 'info');
         assert.equal(config.bcryptCost, 12);
     });
