@@ -35,6 +35,8 @@ export const createTestDatabase = (
         PORT: '3000',
         LOG_LEVEL: 'debug',
         DATABASE_URL: databaseUrl,
+        JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
+        JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
     });
     const sink = new MemorySink();
     const logger = Logger.create(config, sink);

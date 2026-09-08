@@ -13,6 +13,8 @@ const validEnv: Readonly<RawEnv> = Object.freeze({
     LOG_LEVEL: 'debug',
     DATABASE_URL: 'postgres://spending:spending@localhost:5432/spending_test',
     BCRYPT_COST: '11',
+    JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
+    JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
 });
 
 const envWith = (patch: RawEnv): RawEnv => ({ ...validEnv, ...patch });
@@ -36,6 +38,8 @@ describe('Config', () => {
         assert.equal(config.logLevel, 'debug');
         assert.equal(config.databaseUrl, 'postgres://spending:spending@localhost:5432/spending_test');
         assert.equal(config.bcryptCost, 11);
+        assert.equal(config.jwt.accessSecret, validEnv.JWT_ACCESS_SECRET);
+        assert.equal(config.jwt.refreshSecret, validEnv.JWT_REFRESH_SECRET);
     });
 
     test('applies a default to every optional variable', () => {
@@ -46,12 +50,43 @@ describe('Config', () => {
         assert.equal(config.port, 3000);
         assert.equal(config.logLevel, 'info');
         assert.equal(config.bcryptCost, 12);
+        assert.equal(config.jwt.accessTtl, '15m');
+        assert.equal(config.jwt.refreshTtl, '30d');
+        assert.equal(config.corsOrigin, 'http://localhost:9000');
+    });
+
+    test('validates token lifetimes and the browser origin', () => {
+        // проверяет сроки токенов и источник браузерных запросов
+        const config = Config.load(envWith({ ACCESS_TTL: '10s', REFRESH_TTL: '2h', CORS_ORIGIN: 'https://tracker.example' }));
+        assert.equal(config.jwt.accessTtl, '10s');
+        assert.equal(config.jwt.refreshTtl, '2h');
+        assert.equal(config.corsOrigin, 'https://tracker.example');
+        for (const key of ['ACCESS_TTL', 'REFRESH_TTL']) {
+            for (const value of ['0s', '-1m', '15', '1y', '1.5h']) {
+                assert.throws(() => Config.load(envWith({ [key]: value })), new RegExp(key));
+            }
+        }
+        assert.throws(() => Config.load(envWith({ CORS_ORIGIN: 'localhost:9000' })), /CORS_ORIGIN/);
     });
 
     test('fails when DATABASE_URL is missing or malformed', () => {
         // падает, если DATABASE_URL нет или он не похож на строку подключения
         assert.throws(() => Config.load(envWithout('DATABASE_URL')), /DATABASE_URL/);
         assert.throws(() => Config.load(envWith({ DATABASE_URL: 'localhost:5432' })), /DATABASE_URL/);
+    });
+
+    test('fails when a JWT secret is missing, too short or equal to the other', () => {
+        // падает, если JWT-секрета нет, он короче 32 символов или совпадает со вторым
+        assert.throws(() => Config.load(envWithout('JWT_ACCESS_SECRET')), /JWT_ACCESS_SECRET/);
+        assert.throws(() => Config.load(envWithout('JWT_REFRESH_SECRET')), /JWT_REFRESH_SECRET/);
+        assert.throws(() => Config.load(envWith({ JWT_ACCESS_SECRET: 'too-short' })), /JWT_ACCESS_SECRET/);
+
+        // Если в настройках указали один ключ для обоих видов токенов,
+        // загрузка конфигурации должна завершиться ошибкой
+        assert.throws(
+            () => Config.load(envWith({ JWT_REFRESH_SECRET: validEnv.JWT_ACCESS_SECRET })),
+            /JWT_REFRESH_SECRET/,
+        );
     });
 
     test('rejects invalid values, naming every offending variable at once', () => {
