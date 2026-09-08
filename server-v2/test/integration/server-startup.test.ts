@@ -36,7 +36,12 @@ type RunningServer = {
 
 const startServer = (env: Record<string, string>): RunningServer => {
     const child = spawn(process.execPath, [SERVER_ENTRY], {
-        env: { ...process.env, ...env },
+        env: {
+            ...process.env,
+            JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
+            JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
+            ...env,
+        },
         stdio: ['ignore', 'pipe', 'pipe'],
     });
 

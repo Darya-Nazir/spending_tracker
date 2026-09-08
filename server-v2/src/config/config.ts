@@ -16,16 +16,16 @@ const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'] as const
 
 const POSTGRES_URL_PATTERN = /^postgres(ql)?:\/\/.+/;
 
-// --- этап 12а (CORS) ---
-// const HTTP_URL_PATTERN = /^https?:\/\/[^\s/]+/;
+const HTTP_URL_PATTERN = /^https?:\/\/[^\s/]+$/;
 
-// --- этап 13 (минимальная аутентификация) ---
-// const TTL_PATTERN = /^\d+[smhd]$/;
-//
-// const ttl = (name: string, fallback: string) => z
-//     .string()
-//     .regex(TTL_PATTERN, `${name} must look like 15m, 2h, 1d or 30s`)
-//     .default(fallback);
+type TokenTtl = `${number}${'s' | 'm' | 'h' | 'd'}`;
+const TTL_PATTERN = /^[1-9]\d*[smhd]$/;
+
+const ttl = (name: string, fallback: TokenTtl) => z
+    .string()
+    .regex(TTL_PATTERN, `${name} must look like 15m, 2h, 1d or 30s and be positive`)
+    .default(fallback)
+    .transform((value) => value as TokenTtl);
 
 // --- этап 19 (фильтры периода) ---
 // const isKnownTimezone = (value: string): boolean => {
@@ -63,11 +63,10 @@ const envSchema = z.object({
             'DATABASE_URL must be a postgres:// or postgresql:// connection string',
         ),
 
-    // --- этап 12а (CORS): адрес webpack dev server, на котором работает клиент ---
-    // CORS_ORIGIN: z
-    //     .string()
-    //     .regex(HTTP_URL_PATTERN, 'CORS_ORIGIN must be an http(s) URL, including the scheme')
-    //     .default('http://localhost:9000'),
+    CORS_ORIGIN: z
+        .string()
+        .regex(HTTP_URL_PATTERN, 'CORS_ORIGIN must be an http(s) origin')
+        .default('http://localhost:9000'),
 
     // Старый сервер вызывал bcrypt.genSalt(Number('example')), то есть genSalt(NaN).
     // Проверка на целое число не меньше 10 не даёт передать сюда NaN.
@@ -78,18 +77,16 @@ const envSchema = z.object({
         .max(31, 'BCRYPT_COST must be at most 31')
         .default(12),
 
-    // --- этап 13 (минимальная аутентификация) ---
-    // JWT_ACCESS_SECRET: z
-    //     .string()
-    //     .min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
-    //
-    // JWT_REFRESH_SECRET: z
-    //     .string()
-    //     .min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
-    //
-    // ACCESS_TTL: ttl('ACCESS_TTL', '15m'),
-    // REFRESH_TTL: ttl('REFRESH_TTL', '1d'),
-    // REFRESH_TTL_REMEMBER: ttl('REFRESH_TTL_REMEMBER', '30d'),
+    JWT_ACCESS_SECRET: z
+        .string()
+        .min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
+
+    JWT_REFRESH_SECRET: z
+        .string()
+        .min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
+
+    ACCESS_TTL: ttl('ACCESS_TTL', '15m'),
+    REFRESH_TTL: ttl('REFRESH_TTL', '30d'),
 
     // --- этап 19 (фильтры периода) ---
     // Таймзона, в которой вычисляются границы today, week, month, year.
@@ -97,14 +94,10 @@ const envSchema = z.object({
     //     .string()
     //     .refine(isKnownTimezone, 'APP_TZ must be a timezone this runtime knows, e.g. Asia/Almaty')
     //     .default('UTC'),
+}).refine((env) => env.JWT_ACCESS_SECRET !== env.JWT_REFRESH_SECRET, {
+    message: 'JWT_REFRESH_SECRET must differ from JWT_ACCESS_SECRET',
+    path: ['JWT_REFRESH_SECRET'],
 });
-
-// --- этап 13 (минимальная аутентификация) ---
-// Проверка, затрагивающая два поля сразу, добавляется к схеме после z.object():
-// .refine((env) => env.JWT_ACCESS_SECRET !== env.JWT_REFRESH_SECRET, {
-//     message: 'JWT_REFRESH_SECRET must differ from JWT_ACCESS_SECRET',
-//     path: ['JWT_REFRESH_SECRET'],
-// });
 
 /** Разобранное окружение. Тип выводится из схемы, руками не описывается. */
 type ParsedEnv = z.infer<typeof envSchema>;
@@ -127,19 +120,16 @@ export class Config {
 
     readonly databaseUrl: string;
 
-    // --- этап 12а (CORS) ---
-    // readonly corsOrigin: string;
+    readonly corsOrigin: string;
 
     readonly bcryptCost: number;
 
-    // --- этап 13 ---
-    // readonly jwt: Readonly<{
-    //     accessSecret: string;
-    //     refreshSecret: string;
-    //     accessTtl: string;
-    //     refreshTtl: string;
-    //     refreshTtlRemember: string;
-    // }>;
+    readonly jwt: Readonly<{
+        accessSecret: string;
+        refreshSecret: string;
+        accessTtl: TokenTtl;
+        refreshTtl: TokenTtl;
+    }>;
 
     // --- этап 19 ---
     // readonly appTz: string;
@@ -180,19 +170,16 @@ export class Config {
 
         this.databaseUrl = values.DATABASE_URL;
 
-        // --- этап 12а (CORS) ---
-        // this.corsOrigin = values.CORS_ORIGIN;
+        this.corsOrigin = values.CORS_ORIGIN;
 
         this.bcryptCost = values.BCRYPT_COST;
 
-        // --- этап 13 ---
-        // this.jwt = Object.freeze({
-        //     accessSecret: values.JWT_ACCESS_SECRET,
-        //     refreshSecret: values.JWT_REFRESH_SECRET,
-        //     accessTtl: values.ACCESS_TTL,
-        //     refreshTtl: values.REFRESH_TTL,
-        //     refreshTtlRemember: values.REFRESH_TTL_REMEMBER,
-        // });
+        this.jwt = Object.freeze({
+            accessSecret: values.JWT_ACCESS_SECRET,
+            refreshSecret: values.JWT_REFRESH_SECRET,
+            accessTtl: values.ACCESS_TTL,
+            refreshTtl: values.REFRESH_TTL,
+        });
 
         // --- этап 19 ---
         // this.appTz = values.APP_TZ;

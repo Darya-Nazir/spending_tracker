@@ -40,7 +40,7 @@ const fakeResponse = (): Response => ({} as unknown as Response);
 const run = (req: Request): unknown => {
     let passed: unknown = 'next() не вызван';
 
-    authenticate.require(req, fakeResponse(), (value) => { passed = value; });
+    authenticate.requireAuth(req, fakeResponse(), (value) => { passed = value; });
 
     return passed;
 };
@@ -53,13 +53,13 @@ describe('Authenticate', () => {
         const logger = Logger.create(config, sink);
         const app = express();
         app.use(new RequestContext(logger).attach, express.json());
-        app.post('/protected', authenticate.require, (req, res) => {
+        app.post('/protected', authenticate.requireAuth, (req, res) => {
             res.json({ auth: req.auth, body: req.body });
         });
         app.use(new ErrorHandler(logger).respond);
         const body = { user: { userId: 999 } };
         const response = await request(app).post('/protected')
-            .set('Authorization', `Bearer ${tokens.issue(7).accessToken}`)
+            .set('Authorization', `Bearer ${tokens.issueTokenPair(7).accessToken}`)
             .set('x-request-id', 'authenticated-request').send(body);
         assert.equal(response.status, 200);
         assert.deepEqual(response.body, { auth: { userId: 7 }, body });
@@ -76,7 +76,7 @@ describe('Authenticate', () => {
 
     test('puts the caller identity on req.auth', () => {
         // ставит личность вызывающего в req.auth
-        const req = fakeRequest(`Bearer ${tokens.issue(7).accessToken}`);
+        const req = fakeRequest(`Bearer ${tokens.issueTokenPair(7).accessToken}`);
 
         assert.equal(run(req), undefined, 'next() вызван без ошибки');
         assert.deepEqual(req.auth, { userId: 7 });
@@ -85,7 +85,7 @@ describe('Authenticate', () => {
 
     test('preserves the request body and accepts a case-insensitive Bearer scheme', () => {
         // сохраняет тело запроса и принимает схему Bearer в любом регистре
-        const req = fakeRequest(`bearer ${tokens.issue(7).accessToken}`);
+        const req = fakeRequest(`bearer ${tokens.issueTokenPair(7).accessToken}`);
         const body = { user: { userId: 999 }, title: 'Еда' };
         req.body = body;
         assert.equal(run(req), undefined);
@@ -96,7 +96,7 @@ describe('Authenticate', () => {
 
     test('rejects a missing, malformed or wrong-kind bearer token with 401', () => {
         // отвергает отсутствующий, битый и неподходящий bearer-токен со статусом 401
-        const { accessToken, refreshToken } = tokens.issue(7);
+        const { accessToken, refreshToken } = tokens.issueTokenPair(7);
 
         const headers = [
             undefined,

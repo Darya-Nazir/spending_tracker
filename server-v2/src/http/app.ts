@@ -1,4 +1,5 @@
 import express, { json, type Express, type Router } from 'express';
+import cors from 'cors';
 // Express — библиотека поверх встроенного модуля Node node:http. 
 // Объект, который возвращает express(), физически является 
 // функцией-обработчиком запроса
@@ -9,6 +10,7 @@ import { AuthController } from '../modules/auth/auth.controller.ts';
 import { AuthRouter } from '../modules/auth/auth.router.ts';
 import { AuthService } from '../modules/auth/auth.service.ts';
 import { PasswordService } from '../modules/auth/password.service.ts';
+import { TokenService } from '../modules/auth/token.service.ts';
 import { ErrorHandler } from './middleware/error-handler.ts';
 import { NotFoundHandler } from './middleware/not-found.ts';
 import { HealthController } from '../modules/health/health.controller.ts';
@@ -45,6 +47,11 @@ export class AppFactory {
         app.disable('x-powered-by');
 
         app.use(new RequestContext(this.#logger).attach); // помечает все записи одного запроса requestId
+        app.use(cors({
+            origin: (origin, callback) => callback(null, origin === this.#config.corsOrigin),
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
+        }));
         app.use(json({ limit: BODY_LIMIT }));
 
         app.use(this.#healthRouter());
@@ -67,7 +74,8 @@ export class AppFactory {
         const users = new UserRepository(this.#database);
         const passwords = new PasswordService(this.#config);
         const emails = new EmailService();
-        const service = new AuthService(users, passwords, emails);
+        const tokens = new TokenService(this.#config);
+        const service = new AuthService(users, passwords, emails, tokens);
 
         return AuthRouter.create(new AuthController(service));
     }

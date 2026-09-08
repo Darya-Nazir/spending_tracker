@@ -1,7 +1,14 @@
 import { EmailService } from '../users/email.service.ts';
 import type { UserRepository } from '../users/user.repository.ts';
-import type { SignupInput } from './auth.schemas.ts';
+import type { LoginInput, RefreshInput, SignupInput } from './auth.schemas.ts';
 import type { PasswordService } from './password.service.ts';
+import type { TokenPair, TokenService } from './token.service.ts';
+import { UnauthorizedError } from '../../errors/app-error.ts';
+
+export type LoginResult = {
+    tokens: TokenPair;
+    user: { id: number; name: string };
+};
 
 export type PublicUser = {
     id: number;
@@ -13,15 +20,18 @@ export class AuthService {
     readonly #users: UserRepository;
     readonly #passwords: PasswordService;
     readonly #emails: EmailService;
+    readonly #tokens: TokenService;
 
     constructor(
         users: UserRepository,
         passwords: PasswordService,
         emails: EmailService,
+        tokens: TokenService,
     ) {
         this.#users = users;
         this.#passwords = passwords;
         this.#emails = emails;
+        this.#tokens = tokens;
     }
 
     async signup(input: SignupInput): Promise<PublicUser> {
@@ -38,5 +48,27 @@ export class AuthService {
             email: user.email,
             name: user.name,
         };
+    }
+
+    async login(input: LoginInput): Promise<LoginResult> {
+        const user = await this.#users.findByEmail(this.#emails.normalize(input.email));
+        if (user === null || !await this.#passwords.verify(input.password, user.passwordHash)) {
+            throw new UnauthorizedError('Invalid email or password');
+        }
+
+        // Этап 13: оба значения rememberMe используют общий срок refresh.
+        return {
+            tokens: this.#tokens.issueTokenPair(user.id),
+            user: { id: user.id, name: user.name },
+        };
+    }
+
+    refresh(input: RefreshInput): TokenPair {
+        const { userId } = this.#tokens.verifyRefresh(input.refreshToken);
+        return this.#tokens.issueTokenPair(userId);
+    }
+
+    logout(_input: RefreshInput): void {
+        // Этап 21 добавит отзыв сессии по переданному refreshToken.
     }
 }

@@ -30,7 +30,7 @@ describe('TokenService', () => {
 
     test('issues an HS256 pair that verifies back to the user id', () => {
         // выдаёт пару HS256, которая проверяется обратно в id пользователя
-        const pair = tokens.issue(42);
+        const pair = tokens.issueTokenPair(42);
 
         assert.equal(typeof pair.accessToken, 'string');
         assert.equal(typeof pair.refreshToken, 'string');
@@ -79,7 +79,7 @@ describe('TokenService', () => {
             ACCESS_TTL: '10s',
             REFRESH_TTL: '2h',
         }));
-        const pair = custom.issue(42);
+        const pair = custom.issueTokenPair(42);
         const access = segment(pair.accessToken, 1);
         const refresh = segment(pair.refreshToken, 1);
         assert.equal(Number(access.exp) - Number(access.iat), 10);
@@ -88,15 +88,15 @@ describe('TokenService', () => {
 
     test('issues distinct pairs for repeated calls within one second', () => {
         // выдаёт разные пары при повторных вызовах в течение одной секунды
-        const first = tokens.issue(42);
-        const second = tokens.issue(42);
+        const first = tokens.issueTokenPair(42);
+        const second = tokens.issueTokenPair(42);
         assert.notEqual(first.accessToken, second.accessToken);
         assert.notEqual(first.refreshToken, second.refreshToken);
     });
 
     test('rejects a token from the other secret or with a changed payload', () => {
         // отвергает токен от другого секрета или с изменённым пейлоадом
-        const { accessToken, refreshToken } = tokens.issue(42);
+        const { accessToken, refreshToken } = tokens.issueTokenPair(42);
 
         // Секреты access и refresh разделены: подпись одним не проходит проверку другим.
         assert.throws(() => tokens.verifyRefresh(accessToken), UnauthorizedError);

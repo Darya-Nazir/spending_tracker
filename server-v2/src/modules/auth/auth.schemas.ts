@@ -14,3 +14,16 @@ export const signupSchema = z
     });
 
 export type SignupInput = z.infer<typeof signupSchema>;
+
+export const loginSchema = z.object({
+    email: z.string().email('email must be valid'),
+    password: z.string().min(1, 'password is required'),
+    rememberMe: z.boolean().optional(),
+}).strict();
+
+export const refreshSchema = z.object({
+    refreshToken: z.string().min(1, 'refreshToken is required'),
+}).strict();
+
+export type LoginInput = z.infer<typeof loginSchema>;
+export type RefreshInput = z.infer<typeof refreshSchema>;
