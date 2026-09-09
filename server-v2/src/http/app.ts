@@ -9,6 +9,7 @@ import type { Logger } from '../logging/logger.ts';
 import { AuthController } from '../modules/auth/auth.controller.ts';
 import { AuthRouter } from '../modules/auth/auth.router.ts';
 import { AuthService } from '../modules/auth/auth.service.ts';
+import { RegistrationService } from '../modules/auth/registration.service.ts';
 import { PasswordService } from '../modules/auth/password.service.ts';
 import { TokenService } from '../modules/auth/token.service.ts';
 import { ErrorHandler } from './middleware/error-handler.ts';
@@ -19,6 +20,11 @@ import { HealthService } from '../modules/health/health.service.ts';
 import { EmailService } from '../modules/users/email.service.ts';
 import { UserRepository } from '../modules/users/user.repository.ts';
 import { RequestContext } from './middleware/request-context.ts';
+import { Authenticate } from './middleware/authenticate.ts';
+import { BalanceController } from '../modules/finance/balance/balance.controller.ts';
+import { BalanceRepository } from '../modules/finance/balance/balance.repository.ts';
+import { BalanceRouter } from '../modules/finance/balance/balance.router.ts';
+import { BalanceService } from '../modules/finance/balance/balance.service.ts';
 
 /**
  * Сборка объекта express-приложения: создаёт его, регистрирует middleware
@@ -56,6 +62,7 @@ export class AppFactory {
 
         app.use(this.#healthRouter());
         app.use('/api', this.#authRouter());
+        app.use('/api', this.#balanceRouter());
 
         app.use(new NotFoundHandler().reject);
         app.use(new ErrorHandler(this.#logger).respond);
@@ -75,8 +82,15 @@ export class AppFactory {
         const passwords = new PasswordService(this.#config);
         const emails = new EmailService();
         const tokens = new TokenService(this.#config);
-        const service = new AuthService(users, passwords, emails, tokens);
+        const registration = new RegistrationService(this.#database);
+        const service = new AuthService(users, passwords, emails, tokens, registration);
 
         return AuthRouter.create(new AuthController(service));
+    }
+
+    #balanceRouter(): Router {
+        const service = new BalanceService(new BalanceRepository(this.#database));
+        const authenticate = new Authenticate(new TokenService(this.#config));
+        return BalanceRouter.create(new BalanceController(service), authenticate);
     }
 }

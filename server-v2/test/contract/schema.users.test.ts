@@ -19,8 +19,8 @@ type IndexMetadata = {
 };
 
 describe('users schema', () => {
-    test('users has the required columns and initial_balance contract', async () => {
-        // в users есть обязательные колонки и соблюдается контракт initial_balance
+    test('users contains identity fields and mirrors the starting balance of the account', async () => {
+        // users содержит данные идентификации и повторяет стартовый баланс аккаунта
         const { rows: usersColumnMetadataRows } = await database.query<ColumnMetadata>(
             `select column_name, data_type, is_nullable,
                     numeric_precision, numeric_scale
@@ -42,7 +42,6 @@ describe('users schema', () => {
             'email',
             'name',
             'password_hash',
-            'initial_balance',
             'created_at',
         ]) {
             assert.ok(
@@ -51,23 +50,14 @@ describe('users schema', () => {
             );
         }
 
+        // Колонка сохранена слоем совместимости миграции 008: значение
+        // хранится в finance.accounts, триггеры держат оба места равными.
         const initialBalanceColumnMetadata = usersColumnsByName.get('initial_balance');
         assert.ok(initialBalanceColumnMetadata);
         assert.equal(initialBalanceColumnMetadata.data_type, 'numeric');
         assert.equal(initialBalanceColumnMetadata.numeric_precision, 14);
         assert.equal(initialBalanceColumnMetadata.numeric_scale, 2);
         assert.equal(initialBalanceColumnMetadata.is_nullable, 'NO');
-
-        const email = 'stage-6-default-balance@example.test';
-
-        const { rows: insertedUserRows } = await database.query<{ initial_balance: number }>(
-            `insert into users (email, name, password_hash)
-             values ($1, $2, $3)
-             returning initial_balance`,
-            [email, 'Stage Six', 'not-a-real-password-hash'],
-        );
-
-        assert.equal(insertedUserRows[0]?.initial_balance, 0);
     });
 
     test('email is unique regardless of letter case', async () => {

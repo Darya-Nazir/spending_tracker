@@ -14,7 +14,7 @@ type ReferencedOperation = {
 const createReferencedOperation = async (): Promise<ReferencedOperation> => {
     const user = await createUser(database);
     const { rows: categoryRows } = await database.query<{ id: number }>(
-        `insert into categories (user_id, type, title)
+        `insert into finance.categories (user_id, type, title)
          values ($1, $2, $3)
          returning id`,
         [user.id, 'expense', 'Еда'],
@@ -23,7 +23,7 @@ const createReferencedOperation = async (): Promise<ReferencedOperation> => {
     assert.ok(category);
 
     const { rows: operationRows } = await database.query<{ id: number }>(
-        `insert into operations (user_id, category_id, type, amount, date, comment)
+        `insert into finance.operations (user_id, category_id, type, amount, date, comment)
          values ($1, $2, $3, $4, $5, $6)
          returning id`,
         [user.id, category.id, 'expense', 100, '2026-09-01', 'Обед'],
@@ -41,7 +41,7 @@ describe('operations schema', () => {
         const fixture = await createReferencedOperation();
 
         await assert.rejects(
-            database.query('delete from categories where id = $1', [fixture.categoryId]),
+            database.query('delete from finance.categories where id = $1', [fixture.categoryId]),
             (error: unknown) => {
                 assert.equal((error as { code?: string }).code, '23503');
                 return true;
@@ -54,11 +54,11 @@ describe('operations schema', () => {
         const fixture = await createReferencedOperation();
 
         await database.query(
-            'delete from operations where id = $1',
+            'delete from finance.operations where id = $1',
             [fixture.operationId],
         );
         const deletion = await database.query(
-            'delete from categories where id = $1',
+            'delete from finance.categories where id = $1',
             [fixture.categoryId],
         );
 

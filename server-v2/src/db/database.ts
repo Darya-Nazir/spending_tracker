@@ -10,6 +10,13 @@ import type { Logger } from '../logging/logger.ts';
 
 const PING = 'select 1';
 
+export interface QueryExecutor {
+    query<T extends QueryResultRow = QueryResultRow>(
+        sql: string,
+        params?: readonly unknown[],
+    ): Promise<QueryResult<T>>;
+}
+
 // Денежные поля ограничены numeric(14,2) и безопасно помещаются в Number.
 pgTypes.setTypeParser(1700, (value) => Number(value));
 
@@ -43,6 +50,24 @@ export class Database {
         params: readonly unknown[] = [], //значения, которые PostgreSQL подставляет вместо $1, $2 и тд
     ): Promise<QueryResult<T>> {
         return this.#pool.query<T>(sql, [...params]);
+    }
+
+    async transaction<T>(work: (executor: QueryExecutor) => Promise<T>): Promise<T> {
+        const client = await this.#pool.connect();
+        const executor: QueryExecutor = {
+            query: (sql, params = []) => client.query(sql, [...params]),
+        };
+        try {
+            await client.query('begin');
+            const result = await work(executor);
+            await client.query('commit');
+            return result;
+        } catch (error) {
+            await client.query('rollback');
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 
     /**

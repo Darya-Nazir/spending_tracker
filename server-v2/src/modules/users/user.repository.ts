@@ -1,4 +1,4 @@
-import type { Database } from '../../db/database.ts';
+import type { QueryExecutor } from '../../db/database.ts';
 import { ConflictError } from '../../errors/app-error.ts';
 import type { NormalizedEmail } from './email.service.ts';
 
@@ -7,7 +7,6 @@ type UserRow = {
     email: string;
     name: string;
     password_hash: string;
-    initial_balance: number;
     created_at: Date;
 };
 
@@ -16,7 +15,6 @@ export type User = {
     email: string;
     name: string;
     passwordHash: string;
-    initialBalance: number;
     createdAt: Date;
 };
 
@@ -34,9 +32,9 @@ const isUniqueViolation = (error: unknown): boolean => {
 };
 
 export class UserRepository {
-    readonly #database: Database;
+    readonly #database: QueryExecutor;
 
-    constructor(database: Database) {
+    constructor(database: QueryExecutor) {
         this.#database = database;
     }
 
@@ -45,7 +43,7 @@ export class UserRepository {
             const { rows } = await this.#database.query<UserRow>(
                 `insert into users (email, name, password_hash)
                  values ($1, $2, $3)
-                 returning id, email, name, password_hash, initial_balance, created_at`,
+                 returning id, email, name, password_hash, created_at`,
                 [input.email, input.name, input.passwordHash],
             );
             const row = rows[0];
@@ -66,7 +64,7 @@ export class UserRepository {
 
     async findByEmail(email: NormalizedEmail): Promise<User | null> {
         const { rows } = await this.#database.query<UserRow>(
-            `select id, email, name, password_hash, initial_balance, created_at
+            `select id, email, name, password_hash, created_at
                from users
               where email = $1`,
             [email],
@@ -86,7 +84,6 @@ export class UserRepository {
             email: row.email,
             name: row.name,
             passwordHash: row.password_hash,
-            initialBalance: row.initial_balance,
             createdAt: row.created_at,
         };
     }

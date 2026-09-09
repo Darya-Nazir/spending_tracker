@@ -4,6 +4,7 @@ import type { LoginInput, RefreshInput, SignupInput } from './auth.schemas.ts';
 import type { PasswordService } from './password.service.ts';
 import type { TokenPair, TokenService } from './token.service.ts';
 import { UnauthorizedError } from '../../errors/app-error.ts';
+import type { RegistrationService } from './registration.service.ts';
 
 export type LoginResult = {
     tokens: TokenPair;
@@ -21,23 +22,26 @@ export class AuthService {
     readonly #passwords: PasswordService;
     readonly #emails: EmailService;
     readonly #tokens: TokenService;
+    readonly #registration: RegistrationService;
 
     constructor(
         users: UserRepository,
         passwords: PasswordService,
         emails: EmailService,
         tokens: TokenService,
+        registration: RegistrationService,
     ) {
         this.#users = users;
         this.#passwords = passwords;
         this.#emails = emails;
         this.#tokens = tokens;
+        this.#registration = registration;
     }
 
     async signup(input: SignupInput): Promise<PublicUser> {
         const email = this.#emails.normalize(input.email);
         const passwordHash = await this.#passwords.hash(input.password);
-        const user = await this.#users.create({
+        const user = await this.#registration.register({
             email,
             name: input.name,
             passwordHash,

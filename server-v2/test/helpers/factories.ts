@@ -39,12 +39,11 @@ export const createUser = async (
         email: string;
         name: string;
         password_hash: string;
-        initial_balance: number;
     }>(
-        `insert into users (email, name, password_hash, initial_balance)
-         values ($1, $2, $3, $4)
-         returning id, email, name, password_hash, initial_balance`,
-        [user.email, user.name, user.passwordHash, user.initialBalance],
+        `insert into users (email, name, password_hash)
+         values ($1, $2, $3)
+         returning id, email, name, password_hash`,
+        [user.email, user.name, user.passwordHash],
     );
     const persisted = rows[0];
 
@@ -52,11 +51,19 @@ export const createUser = async (
         throw new Error('User factory did not receive a numeric id from PostgreSQL');
     }
 
+    // Слой совместимости 008 создаёт аккаунт вместе со строкой users,
+    // поэтому стартовый баланс здесь дописывается поверх готовой записи.
+    await database.query(
+        `insert into finance.accounts (user_id, initial_balance) values ($1, $2)
+         on conflict (user_id) do update set initial_balance = excluded.initial_balance`,
+        [persisted.id, user.initialBalance],
+    );
+
     return {
         id: persisted.id,
         email: persisted.email,
         name: persisted.name,
         passwordHash: persisted.password_hash,
-        initialBalance: persisted.initial_balance,
+        initialBalance: user.initialBalance,
     };
 };

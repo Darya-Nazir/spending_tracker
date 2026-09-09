@@ -12,7 +12,7 @@ const insertCategory = async (
     title: string,
 ): Promise<number> => {
     const { rows } = await database.query<{ id: number }>(
-        `insert into categories (user_id, type, title)
+        `insert into finance.categories (user_id, type, title)
          values ($1, $2, $3)
          returning id`,
         [userId, type, title],
