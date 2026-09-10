@@ -5,7 +5,7 @@ import { once } from 'node:events';
 import { createServer } from 'node:net';
 import { fileURLToPath } from 'node:url';
 
-const SERVER_ENTRY = fileURLToPath(new URL('../../src/server.ts', import.meta.url));
+const SERVER_ENTRY = fileURLToPath(new URL('../../../src/server.ts', import.meta.url));
 
 /** Не 3000: там может работать старый server/ или dev-запуск этого. */
 const PORT = 3211;

@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import request from 'supertest';
 
-import { TokenService } from '../../src/modules/identity/auth/token.service.ts';
-import { useTestApp } from '../helpers/app.ts';
-import { createUser } from '../helpers/factories.ts';
-import { bearerAuth } from '../helpers/auth.ts';
+import { TokenService } from '../../../src/modules/identity/auth/token.service.ts';
+import { useTestApp } from '../../helpers/app.ts';
+import { createUser } from '../../helpers/factories.ts';
+import { bearerAuth } from '../../helpers/auth.ts';
 
 const { app, config, database } = useTestApp();
 const tokens = new TokenService(config);

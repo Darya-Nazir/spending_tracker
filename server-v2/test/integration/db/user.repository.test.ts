@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { EmailService } from '../../src/modules/identity/users/email.service.ts';
-import { UserRepository } from '../../src/modules/identity/users/user.repository.ts';
-import { useTestDatabase } from '../helpers/db.ts';
-import { createUser } from '../helpers/factories.ts';
+import { EmailService } from '../../../src/modules/identity/users/email.service.ts';
+import { UserRepository } from '../../../src/modules/identity/users/user.repository.ts';
+import { useTestDatabase } from '../../helpers/db.ts';
+import { createUser } from '../../helpers/factories.ts';
 
 const { database } = useTestDatabase();
 const repository = new UserRepository(database);

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { UserDeletionService } from '../../src/application/user-deletion.service.ts';
-import { useTestDatabase } from '../helpers/db.ts';
-import { createUser } from '../helpers/factories.ts';
+import { UserDeletionService } from '../../../src/application/user-deletion.service.ts';
+import { useTestDatabase } from '../../helpers/db.ts';
+import { createUser } from '../../helpers/factories.ts';
 
 const { database } = useTestDatabase();
 const deletion = new UserDeletionService(database);

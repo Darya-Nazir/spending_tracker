@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
 
-import type { Database } from '../../src/db/database.ts';
-import { BalanceRepository } from '../../src/modules/finance/balance/balance.repository.ts';
-import { createMigrationDatabase, MIGRATIONS_THROUGH_009 } from '../helpers/migrations.ts';
+import type { Database } from '../../../src/db/database.ts';
+import { BalanceRepository } from '../../../src/modules/finance/balance/balance.repository.ts';
+import { createMigrationDatabase, MIGRATIONS_THROUGH_009 } from '../../helpers/migrations.ts';
 
 /** Каждый сценарий проверяет совместимость на отдельной базе версии 009. */
 const createLegacyFixture = async (t: TestContext, initialBalance = 0) => {

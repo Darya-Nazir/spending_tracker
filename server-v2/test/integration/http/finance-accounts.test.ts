@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import request from 'supertest';
 
-import { useTestApp } from '../helpers/app.ts';
-import { BalanceRepository } from '../../src/modules/finance/balance/balance.repository.ts';
-import { ensureAccount } from '../../src/modules/finance/contracts.ts';
-import { createUser } from '../helpers/factories.ts';
+import { useTestApp } from '../../helpers/app.ts';
+import { BalanceRepository } from '../../../src/modules/finance/balance/balance.repository.ts';
+import { ensureAccount } from '../../../src/modules/finance/contracts.ts';
+import { createUser } from '../../helpers/factories.ts';
 
 const { app, database } = useTestApp();
 const signup = { name: 'Finance User', email: 'finance@example.test', password: 'secret1', passwordRepeat: 'secret1' };

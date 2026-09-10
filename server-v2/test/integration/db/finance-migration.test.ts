@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, test, type TestContext } from 'node:test';
 
-import type { Database } from '../../src/db/database.ts';
-import { applyMigration, createMigrationDatabase, MIGRATIONS_THROUGH_009 } from '../helpers/migrations.ts';
+import type { Database } from '../../../src/db/database.ts';
+import { applyMigration, createMigrationDatabase, MIGRATIONS_THROUGH_009 } from '../../helpers/migrations.ts';
 
 const BASE_MIGRATIONS = MIGRATIONS_THROUGH_009.slice(0, 6);
 const FINANCE = '007_finance_accounts.sql';

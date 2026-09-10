@@ -92,4 +92,4 @@ npm test
 npm run db:migrate:test && node --test --test-concurrency=1 {ptest path}
 
 Если тестовая база уже мигрирована, достаточно:
-node --test test/integration/isolation.test.ts
+node --test test/integration/db/isolation.test.ts

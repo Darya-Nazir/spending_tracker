@@ -2,8 +2,8 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 
-import { AppFactory } from '../../src/http/app.ts';
-import { createTestDatabase, TEST_DATABASE_URL } from '../helpers/db.ts';
+import { AppFactory } from '../../../src/http/app.ts';
+import { createTestDatabase, TEST_DATABASE_URL } from '../../helpers/db.ts';
 
 /**
  *  /ready отвечает 200 только когда база отвечает на запрос

@@ -3,8 +3,8 @@ import { describe, test } from 'node:test';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
-import { useTestApp } from '../helpers/app.ts';
-import { TokenService } from '../../src/modules/identity/auth/token.service.ts';
+import { useTestApp } from '../../helpers/app.ts';
+import { TokenService } from '../../../src/modules/identity/auth/token.service.ts';
 
 const { app, config, database } = useTestApp();
 
