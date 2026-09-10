@@ -74,24 +74,18 @@ describe('Authenticate', () => {
         assert.equal(rejected.body.error, true);
     });
 
-    test('puts the caller identity on req.auth', () => {
-        // ставит личность вызывающего в req.auth
-        const req = fakeRequest(`Bearer ${tokens.issueTokenPair(7).accessToken}`);
-
-        assert.equal(run(req), undefined, 'next() вызван без ошибки');
-        assert.deepEqual(req.auth, { userId: 7 });
-        assert.equal(req.body, undefined);
-    });
-
-    test('preserves the request body and accepts a case-insensitive Bearer scheme', () => {
-        // сохраняет тело запроса и принимает схему Bearer в любом регистре
-        const req = fakeRequest(`bearer ${tokens.issueTokenPair(7).accessToken}`);
-        const body = { user: { userId: 999 }, title: 'Еда' };
-        req.body = body;
-        assert.equal(run(req), undefined);
-        assert.deepEqual(req.auth, { userId: 7 });
-        assert.equal(req.body, body);
-        assert.deepEqual(req.body.user, { userId: 999 });
+    test('sets req.auth, preserves present or absent bodies and accepts a case-insensitive Bearer scheme', () => {
+        // заполняет req.auth, сохраняет тело или его отсутствие и принимает схему Bearer в любом регистре
+        for (const body of [undefined, { user: { userId: 999 }, title: 'Еда' }]) {
+            const req = fakeRequest(`bearer ${tokens.issueTokenPair(7).accessToken}`);
+            if (body !== undefined) {
+                req.body = body;
+            }
+            assert.equal(run(req), undefined);
+            assert.deepEqual(req.auth, { userId: 7 });
+            assert.equal(req.body, body);
+            assert.deepEqual(req.body?.user, body === undefined ? undefined : { userId: 999 });
+        }
     });
 
     test('rejects a missing, malformed or wrong-kind bearer token with 401', () => {

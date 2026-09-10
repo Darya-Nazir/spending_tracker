@@ -6,6 +6,13 @@ import type { TestContext } from 'node:test';
 import type { Database } from '../../src/db/database.ts';
 import { assertTestDatabaseName, createTestDatabase, TEST_DATABASE_URL } from './db.ts';
 
+/** Историческая схема с полным слоем совместимости. */
+export const MIGRATIONS_THROUGH_009 = [
+    '001_users.sql', '002_categories.sql', '003_operations.sql',
+    '004_sessions.sql', '005_users_canonical_email.sql', '006_categories_normalized_title.sql',
+    '007_finance_accounts.sql', '008_finance_compatibility.sql', '009_identity_schema.sql',
+] as const;
+
 /** Применяет выбранное направление SQL-миграции в транзакции. */
 export const applyMigration = async (
     database: Database,

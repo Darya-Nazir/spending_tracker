@@ -36,21 +36,4 @@ describe('sessions schema', () => {
             },
         );
     });
-
-    test('deletes sessions when their user is deleted', async () => {
-        // удаление пользователя каскадно удаляет его сессии
-        const user = await createUser(database);
-        const sessionId = await insertSession(user.id, 'b'.repeat(64));
-
-        await database.query('delete from identity.users where id = $1', [user.id]);
-
-        const { rows } = await database.query<{ count: number }>(
-            `select count(*)::integer as count
-               from identity.sessions
-              where id = $1`,
-            [sessionId],
-        );
-
-        assert.equal(rows[0]?.count, 0);
-    });
 });

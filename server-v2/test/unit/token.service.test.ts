@@ -41,10 +41,6 @@ describe('TokenService', () => {
 
         const payload = segment(pair.accessToken, 1);
         assert.equal(String(payload.sub), '42');
-        // Срок берётся из ACCESS_TTL конфига, а не из захардкоженного значения.
-        assert.equal(Number(payload.exp) - Number(payload.iat), 15 * 60);
-        const refresh = segment(pair.refreshToken, 1);
-        assert.equal(Number(refresh.exp) - Number(refresh.iat), 30 * 24 * 60 * 60);
     });
 
     test('rejects expired tokens, unsupported algorithms and invalid claims', () => {

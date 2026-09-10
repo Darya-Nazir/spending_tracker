@@ -15,8 +15,8 @@ const validSignup = {
 };
 
 describe('POST /api/signup', () => {
-    test('creates a user and returns only public user data', async () => {
-        // создаёт пользователя и возвращает только его публичные данные
+    test('creates a user with a financial account and returns only public user data', async () => {
+        // создаёт пользователя с финансовым аккаунтом и возвращает только публичные данные пользователя
         const response = await request(app)
             .post('/api/signup')
             .send(validSignup);
@@ -40,6 +40,13 @@ describe('POST /api/signup', () => {
             [response.body.user.id],
         );
         const persisted = rows[0];
+
+        const accounts = await database.query('select user_id, initial_balance, status from finance.accounts');
+        assert.deepEqual(accounts.rows, [{
+            user_id: response.body.user.id,
+            initial_balance: 0,
+            status: 'pending',
+        }]);
 
         assert.ok(persisted);
         assert.equal(persisted.email, 'darya@example.test');

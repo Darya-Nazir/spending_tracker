@@ -13,7 +13,7 @@ docker compose up -d
 ## PostgreSQL
 
 Список всех таблиц
-docker compose exec postgres psql -U spending -d spending_dev -c '\dtv (public|finance).*'
+docker compose exec postgres psql -U spending -d spending_dev -c '\dtv (public|finance|identity).*'
 
 Структура таблицы, например categories
 docker compose exec postgres psql -U spending -d spending_test -c '\d finance.categories'
@@ -68,7 +68,18 @@ docker compose exec postgres psql -U spending -d spending_dev \
 docker compose exec postgres psql -U spending -d spending_test \
   -c 'select * from pgmigrations order by id;'
 
+После миграции `010` пользователи и сессии находятся в `identity`, аккаунты,
+категории и операции — в `finance`. Стартовый баланс хранится в
+`finance.accounts.initial_balance`. Регистрация создаёт обе части явно в общей
+транзакции. `UserDeletionService` на уровне приложения удаляет финансовый аккаунт
+и пользователя; каскады внутри схем удаляют категории, операции и сессии.
+Прямое удаление строки `identity.users` затрагивает только данные identity.
+
 ## Тесты
+
+Исторические проверки совместимости используют отдельные временные базы версии
+`009`. Тесты миграции `010` проверяют сохранность данных и восстановление старых
+SQL-путей при откате, включая актуальный финансовый баланс.
 
 Полный прогон сам применяет миграции к `spending_test`, затем запускает файлы
 последовательно:

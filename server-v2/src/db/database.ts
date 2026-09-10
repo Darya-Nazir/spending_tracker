@@ -54,6 +54,7 @@ export class Database {
 
     async transaction<T>(work: (executor: QueryExecutor) => Promise<T>): Promise<T> {
         const client = await this.#pool.connect();
+        // позволяет выполнить создание пользователя и финансового аккаунта в одной транзакции
         const executor: QueryExecutor = {
             query: (sql, params = []) => client.query(sql, [...params]),
         };

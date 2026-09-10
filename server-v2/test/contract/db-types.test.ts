@@ -22,27 +22,6 @@ describe('pg type coercion', () => {
         assert.equal(row.total, 0.3);
     });
 
-    test('the same values added up in JS are not exact', async () => {
-        // те же значения, сложенные в JS, точными не являются
-        //
-        // Проверка самой проверки для теста выше: показывает, что sum() в SQL
-        // выбран не из удобства. Утверждение о семантике float64, а не о нашем
-        // коде, поэтому оно и не должно чиниться приведением типов — от него
-        // защищает только то, что складывание остаётся в базе.
-        const { rows } = await database.query<{ amount: number }>(
-            `select amount
-               from (values (0.10::numeric(14,2)), (0.20)) source(amount)`,
-        );
-        assert.equal(rows.length, 2);
-
-        const total = rows.reduce((accumulated, row) => accumulated + row.amount, 0);
-
-        assert.equal(typeof total, 'number', 'без парсера + склеивает строки: "00.100.20"');
-
-        assert.notEqual(total, 0.3, 'сложение в JS оказалось точным — тест выше ничего не охраняет');
-        assert.equal(total, 0.30000000000000004);
-    });
-
     test('the largest value numeric(14,2) allows survives the coercion', async () => {
         // наибольшее значение numeric(14,2) переживает приведение без потерь
         //

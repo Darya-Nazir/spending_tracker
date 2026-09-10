@@ -2,15 +2,13 @@ import assert from 'node:assert/strict';
 import { describe, test, type TestContext } from 'node:test';
 
 import type { Database } from '../../src/db/database.ts';
-import { applyMigration, createMigrationDatabase } from '../helpers/migrations.ts';
+import { applyMigration, createMigrationDatabase, MIGRATIONS_THROUGH_009 } from '../helpers/migrations.ts';
 
-const BASE_MIGRATIONS = [
-    '001_users.sql', '002_categories.sql', '003_operations.sql',
-    '004_sessions.sql', '005_users_canonical_email.sql', '006_categories_normalized_title.sql',
-];
+const BASE_MIGRATIONS = MIGRATIONS_THROUGH_009.slice(0, 6);
 const FINANCE = '007_finance_accounts.sql';
 const COMPATIBILITY = '008_finance_compatibility.sql';
 const IDENTITY = '009_identity_schema.sql';
+const REMOVE_COMPATIBILITY = '010_remove_finance_compatibility.sql';
 const HISTORICAL_OPERATION = {
     id: 1, user_id: 1, category_id: 1, amount: 23.15, date: '2026-09-01',
 };
@@ -55,6 +53,18 @@ const readLegacyData = async (database: Database) => {
         database.query('select * from public.users order by id'),
         database.query('select * from public.categories order by id'),
         database.query('select * from public.operations order by id'),
+    ]);
+    return results.map(result => result.rows);
+};
+
+/** Снимок данных модулей; баланс читается из финансового аккаунта. */
+const readModuleData = async (database: Database) => {
+    const results = await Promise.all([
+        database.query('select id, email, name, password_hash, created_at from identity.users order by id'),
+        database.query('select * from identity.sessions order by id'),
+        database.query('select * from finance.accounts order by user_id'),
+        database.query('select * from finance.categories order by id'),
+        database.query('select * from finance.operations order by id'),
     ]);
     return results.map(result => result.rows);
 };
@@ -182,15 +192,103 @@ describe('009 identity schema', () => {
     });
 });
 
+describe('010 removal of finance compatibility', () => {
+    test('preserves identity and financial data when removing compatibility', async (t) => {
+        // сохраняет данные identity и finance при снятии слоя совместимости
+        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY]);
+        await database.query(
+            `insert into identity.sessions (user_id, token_hash, expires_at, device)
+             values (1, repeat('a', 64), '2027-01-01', 'test device')`,
+        );
+        await database.query("update finance.accounts set initial_balance = 150, status = 'ready' where user_id = 1");
+        const original = await readModuleData(database);
+
+        await applyMigration(database, REMOVE_COMPATIBILITY);
+
+        assert.deepEqual(await readModuleData(database), original);
+    });
+
+    test('restores current balances and bidirectional synchronization on rollback', async (t) => {
+        // восстанавливает актуальные балансы и двустороннюю синхронизацию при откате
+        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+        await database.query('update finance.accounts set initial_balance = 200.50 where user_id = 1');
+
+        await applyMigration(database, REMOVE_COMPATIBILITY, 'down');
+
+        const restored = await database.query('select initial_balance from public.users where id = 1');
+        assert.equal(restored.rows[0]?.initial_balance, 200.5);
+        await database.query('update public.users set initial_balance = 150 where id = 1');
+        const accounts = await database.query('select initial_balance from finance.accounts where user_id = 1');
+        assert.equal(accounts.rows[0]?.initial_balance, 150);
+        await database.query('update finance.accounts set initial_balance = -30.50 where user_id = 1');
+        const users = await database.query('select initial_balance from public.users where id = 1');
+        assert.equal(users.rows[0]?.initial_balance, -30.5);
+    });
+
+    test('restores legacy writes and cascading deletion on rollback', async (t) => {
+        // восстанавливает запись через старые пути и каскадное удаление при откате
+        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+
+        await applyMigration(database, REMOVE_COMPATIBILITY, 'down');
+
+        await createLegacyIncome(database);
+        const operations = await database.query('select amount from finance.operations order by id');
+        assert.deepEqual(operations.rows, [{ amount: 23.15 }, { amount: 10 }]);
+        const user = await database.query(
+            `insert into public.users (email, name, password_hash, initial_balance)
+             values ('restored@example.test', 'Restored', 'hash', 42) returning id`,
+        );
+        assert.equal(user.rows[0]?.id, 2);
+        const account = await database.query('select initial_balance from finance.accounts where user_id = 2');
+        assert.equal(account.rows[0]?.initial_balance, 42);
+        await database.query('delete from public.users where id = 1');
+        const remaining = await database.query('select user_id from finance.accounts');
+        assert.deepEqual(remaining.rows, [{ user_id: 2 }]);
+        const categories = await database.query('select id from finance.categories');
+        const deletedOperations = await database.query('select id from finance.operations');
+        assert.deepEqual(categories.rows, []);
+        assert.deepEqual(deletedOperations.rows, []);
+    });
+
+    test('keeps legacy balance writes working after rolling back identity as well', async (t) => {
+        // сохраняет запись баланса через старые пути после дополнительного отката identity
+        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+
+        await applyMigration(database, REMOVE_COMPATIBILITY, 'down');
+        await applyMigration(database, IDENTITY, 'down');
+
+        await database.query('update finance.accounts set initial_balance = 75 where user_id = 1');
+        const users = await database.query('select initial_balance from public.users where id = 1');
+        assert.equal(users.rows[0]?.initial_balance, 75);
+    });
+
+    test('preserves independently created users and accounts on rollback', async (t) => {
+        // сохраняет независимо созданных пользователей и аккаунты при откате
+        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+        await database.query(
+            `insert into identity.users (email, name, password_hash)
+             values ('independent@example.test', 'Independent', 'hash')`,
+        );
+        await database.query('insert into finance.accounts (user_id, initial_balance) values (999, 42.15)');
+        const original = await readModuleData(database);
+
+        await applyMigration(database, REMOVE_COMPATIBILITY, 'down');
+
+        assert.deepEqual(await readModuleData(database), original);
+        const users = await database.query('select initial_balance from public.users where id = 2');
+        assert.equal(users.rows[0]?.initial_balance, 0);
+    });
+});
+
 test('preserves all historical rows through the complete migration round trip', async (t) => {
     // сохраняет все исторические строки при полном применении и откате цепочки миграций
     const database = await prepareHistoricalDatabase(t);
     const original = await readLegacyData(database);
 
-    for (const name of [FINANCE, COMPATIBILITY, IDENTITY]) {
+    for (const name of [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]) {
         await applyMigration(database, name);
     }
-    for (const name of [IDENTITY, COMPATIBILITY, FINANCE]) {
+    for (const name of [REMOVE_COMPATIBILITY, IDENTITY, COMPATIBILITY, FINANCE]) {
         await applyMigration(database, name, 'down');
     }
 

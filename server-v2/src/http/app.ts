@@ -70,9 +70,6 @@ export class AppFactory {
         return app;
     }
 
-    /**
-     * Сборка модуля health: сервис отдаётся контроллеру, контроллер — роутеру.
-     */
     #healthRouter(): Router {
         return HealthRouter.create(new HealthController(new HealthService(this.#database)));
     }
@@ -83,6 +80,7 @@ export class AppFactory {
         const emails = new EmailService();
         const tokens = new TokenService(this.#config);
         const registration = new RegistrationService(this.#database);
+        // input - данные для создания юзера, но еще не сам объект юзера
         const service = new AuthService(users, passwords, emails, tokens, input => registration.register(input));
 
         return AuthRouter.create(new AuthController(service));

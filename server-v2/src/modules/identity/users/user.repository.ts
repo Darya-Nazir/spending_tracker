@@ -78,6 +78,11 @@ export class UserRepository {
         return UserRepository.#map(row);
     }
 
+    /** Удаляет пользователя вместе с его сессиями через каскад identity. */
+    async deleteById(userId: number): Promise<void> {
+        await this.#database.query('delete from identity.users where id = $1', [userId]);
+    }
+
     static #map(row: UserRow): User {
         return {
             id: row.id,

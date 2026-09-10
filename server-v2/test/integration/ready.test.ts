@@ -23,9 +23,9 @@ const REACHABLE_URL = TEST_DATABASE_URL;
 const UNREACHABLE_URL = 'postgres://spending:spending@127.0.0.1:1/spending_test';
 
 const buildApp = (databaseUrl: string) => {
-    const { config, logger, database } = createTestDatabase(databaseUrl);
+    const { config, logger, database, sink } = createTestDatabase(databaseUrl);
 
-    return { app: new AppFactory(config, logger, database).build(), database };
+    return { app: new AppFactory(config, logger, database).build(), database, sink };
 };
 
 describe('readiness', () => {
@@ -47,9 +47,9 @@ describe('readiness', () => {
         }
     });
 
-    test('GET /ready answers 503 {db:"down"} when the pool cannot reach Postgres', async () => {
-        // GET /ready отвечает 503 {db:"down"}, когда пул не доходит до Postgres
-        const { app, database } = buildApp(UNREACHABLE_URL);
+    test('GET /ready answers 503 {db:"down"} and logs a warning when Postgres is unreachable', async () => {
+        // GET /ready отвечает 503 {db:"down"} и пишет предупреждение при недоступности Postgres
+        const { app, database, sink } = buildApp(UNREACHABLE_URL);
 
         try {
             const response = await request(app).get('/ready');
@@ -60,6 +60,8 @@ describe('readiness', () => {
             // deepEqual запрещает лишние поля: в ответ не должен попасть ни
             // текст ошибки pg, ни строка подключения — в ней пароль.
             assert.deepEqual(response.body, { db: 'down' });
+            const records = await sink.records();
+            assert.ok(records.some(({ level, msg }) => level === 'warn' && msg === 'database is not reachable'));
         } finally {
             await database.close();
         }

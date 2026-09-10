@@ -124,6 +124,7 @@ describe('server startup', () => {
 
             const response = await fetch(`http://127.0.0.1:${PORT}/health`);
             assert.equal(response.status, 200);
+            assert.match(response.headers.get('content-type') ?? '', /^application\/json(?:;|$)/i);
             assert.deepEqual(await response.json(), { status: 'ok' });
 
             assert.equal(server.hasExited(), false, `процесс должен быть жив:\n${server.stderr()}`);

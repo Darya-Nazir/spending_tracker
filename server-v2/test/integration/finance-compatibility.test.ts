@@ -1,24 +1,23 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { test, type TestContext } from 'node:test';
 
-import { ensureAccount } from '../../src/modules/finance/contracts.ts';
+import type { Database } from '../../src/db/database.ts';
 import { BalanceRepository } from '../../src/modules/finance/balance/balance.repository.ts';
-import { useTestDatabase } from '../helpers/db.ts';
+import { createMigrationDatabase, MIGRATIONS_THROUGH_009 } from '../helpers/migrations.ts';
 
-const { database } = useTestDatabase();
-const balances = new BalanceRepository(database);
-
-const createLegacyUser = async (initialBalance = 0): Promise<number> => {
+/** Каждый сценарий проверяет совместимость на отдельной базе версии 009. */
+const createLegacyFixture = async (t: TestContext, initialBalance = 0) => {
+    const database = await createMigrationDatabase(t, MIGRATIONS_THROUGH_009);
     const { rows } = await database.query<{ id: number }>(
         `insert into public.users (email, name, password_hash, initial_balance)
          values ('legacy@example.test', 'Legacy User', 'hash', $1) returning id, initial_balance`,
         [initialBalance],
     );
     assert.ok(rows[0]);
-    return rows[0].id;
+    return { database, balances: new BalanceRepository(database), userId: rows[0].id };
 };
 
-const legacyBalance = async (userId: number): Promise<number> => {
+const legacyBalance = async (database: Database, userId: number): Promise<number> => {
     const { rows } = await database.query<{ balance: number }>(
         `select u.initial_balance + coalesce((
             select sum(case when o.type = 'income' then o.amount else -o.amount end)
@@ -29,20 +28,18 @@ const legacyBalance = async (userId: number): Promise<number> => {
     return rows[0].balance;
 };
 
-test('supports legacy registration and repeated account preparation', async () => {
-    // поддерживает старую регистрацию и повторную подготовку аккаунта
-    const userId = await createLegacyUser(12.34);
-    await database.query("update finance.accounts set status = 'ready' where user_id = $1", [userId]);
-    await ensureAccount(userId, database);
+test('creates a financial account through legacy registration', async (t) => {
+    // создаёт финансовый аккаунт через старую регистрацию
+    const { database, balances, userId } = await createLegacyFixture(t, 12.34);
     const { rows } = await database.query('select initial_balance, status from finance.accounts where user_id = $1', [userId]);
-    assert.deepEqual(rows, [{ initial_balance: 12.34, status: 'ready' }]);
-    assert.equal(await legacyBalance(userId), 12.34);
+    assert.deepEqual(rows, [{ initial_balance: 12.34, status: 'pending' }]);
+    assert.equal(await legacyBalance(database, userId), 12.34);
     assert.equal(await balances.findByUserId(userId), 12.34);
 });
 
-test('shares category and operation writes between legacy and finance paths', async () => {
+test('shares category and operation writes between legacy and finance paths', async (t) => {
     // использует общие данные категорий и операций через старые пути и finance
-    const userId = await createLegacyUser(100);
+    const { database, balances, userId } = await createLegacyFixture(t, 100);
     const category = await database.query<{ id: number }>(
         "insert into public.categories (user_id, type, title) values ($1, 'expense'::public.category_type, 'Еда') returning id", [userId],
     );
@@ -54,7 +51,7 @@ test('shares category and operation writes between legacy and finance paths', as
     const operationId = operation.rows[0]!.id;
     assert.equal(await balances.findByUserId(userId), 74.5);
     await database.query('update finance.operations set amount = 50 where id = $1', [operationId]);
-    assert.equal(await legacyBalance(userId), 50);
+    assert.equal(await legacyBalance(database, userId), 50);
     await database.query('update public.operations set amount = 60 where id = $1', [operationId]);
     assert.equal(await balances.findByUserId(userId), 40);
     await database.query('delete from public.operations where id = $1', [operationId]);
@@ -64,25 +61,25 @@ test('shares category and operation writes between legacy and finance paths', as
     assert.equal(remaining.rows[0]?.count, 0);
 });
 
-test('synchronizes starting balances in both directions and rolls changes back atomically', async () => {
+test('synchronizes starting balances in both directions and rolls changes back atomically', async (t) => {
     // синхронизирует стартовые балансы в обе стороны и атомарно откатывает изменения
-    const userId = await createLegacyUser(10);
+    const { database, balances, userId } = await createLegacyFixture(t, 10);
     await database.query('update public.users set initial_balance = 20.25 where id = $1', [userId]);
     assert.equal(await balances.findByUserId(userId), 20.25);
     await database.query('update finance.accounts set initial_balance = -30.50 where user_id = $1', [userId]);
-    assert.equal(await legacyBalance(userId), -30.5);
+    assert.equal(await legacyBalance(database, userId), -30.5);
     const failure = new Error('Abort balance change');
     await assert.rejects(database.transaction(async executor => {
         await executor.query('update public.users set initial_balance = 999 where id = $1', [userId]);
         throw failure;
     }), failure);
-    assert.equal(await legacyBalance(userId), -30.5);
+    assert.equal(await legacyBalance(database, userId), -30.5);
     assert.equal(await balances.findByUserId(userId), -30.5);
 });
 
-test('preserves legacy cascading deletion of financial data', async () => {
+test('preserves legacy cascading deletion of financial data', async (t) => {
     // сохраняет каскадное удаление финансовых данных старым кодом
-    const userId = await createLegacyUser();
+    const { database, balances, userId } = await createLegacyFixture(t);
     const category = await database.query<{ id: number }>(
         "insert into public.categories (user_id, type, title) values ($1, 'income', 'Зарплата') returning id", [userId],
     );

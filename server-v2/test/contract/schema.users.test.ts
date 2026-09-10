@@ -7,10 +7,6 @@ const { database } = useTestDatabase();
 
 type ColumnMetadata = {
     column_name: string;
-    data_type: string;
-    is_nullable: 'YES' | 'NO';
-    numeric_precision: number | null;
-    numeric_scale: number | null;
 };
 
 type IndexMetadata = {
@@ -19,45 +15,20 @@ type IndexMetadata = {
 };
 
 describe('users schema', () => {
-    test('users contains identity fields and mirrors the starting balance of the account', async () => {
-        // users содержит данные идентификации и повторяет стартовый баланс аккаунта
+    test('users contains only identity fields', async () => {
+        // users содержит только данные идентификации
         const { rows: usersColumnMetadataRows } = await database.query<ColumnMetadata>(
-            `select column_name, data_type, is_nullable,
-                    numeric_precision, numeric_scale
+            `select column_name
                from information_schema.columns
               where table_schema = 'identity'
                 and table_name = 'users'
               order by ordinal_position`,
         );
 
-        const usersColumnsByName = new Map(
-            usersColumnMetadataRows.map((columnMetadata) => [
-                columnMetadata.column_name,
-                columnMetadata,
-            ]),
+        assert.deepEqual(
+            usersColumnMetadataRows.map(column => column.column_name),
+            ['id', 'email', 'name', 'password_hash', 'created_at'],
         );
-
-        for (const requiredColumnName of [
-            'id',
-            'email',
-            'name',
-            'password_hash',
-            'created_at',
-        ]) {
-            assert.ok(
-                usersColumnsByName.has(requiredColumnName),
-                `users.${requiredColumnName} must exist`,
-            );
-        }
-
-        // Колонка сохранена слоем совместимости миграции 008: значение
-        // хранится в finance.accounts, триггеры держат оба места равными.
-        const initialBalanceColumnMetadata = usersColumnsByName.get('initial_balance');
-        assert.ok(initialBalanceColumnMetadata);
-        assert.equal(initialBalanceColumnMetadata.data_type, 'numeric');
-        assert.equal(initialBalanceColumnMetadata.numeric_precision, 14);
-        assert.equal(initialBalanceColumnMetadata.numeric_scale, 2);
-        assert.equal(initialBalanceColumnMetadata.is_nullable, 'NO');
     });
 
     test('email is unique regardless of letter case', async () => {
