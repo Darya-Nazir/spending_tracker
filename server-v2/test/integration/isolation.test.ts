@@ -12,7 +12,7 @@ type UserCountRow = {
 
 const countUsers = async (): Promise<number> => {
     const { rows } = await database.query<UserCountRow>(
-        'select count(*)::integer as count from users',
+        'select count(*)::integer as count from identity.users',
     );
 
     return rows[0]?.count ?? -1;

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import request from 'supertest';
 
-import { PasswordService } from '../../src/modules/auth/password.service.ts';
+import { PasswordService } from '../../src/modules/identity/auth/password.service.ts';
 import { useTestApp } from '../helpers/app.ts';
 
 const { app, config, database } = useTestApp();
@@ -36,7 +36,7 @@ describe('POST /api/signup', () => {
             email: string;
             password_hash: string;
         }>(
-            'select email, password_hash from users where id = $1',
+            'select email, password_hash from identity.users where id = $1',
             [response.body.user.id],
         );
         const persisted = rows[0];
@@ -75,7 +75,7 @@ describe('POST /api/signup', () => {
         }
 
         const { rows } = await database.query<{ count: number }>(
-            'select count(*)::integer as count from users',
+            'select count(*)::integer as count from identity.users',
         );
         assert.equal(rows[0]?.count, 0);
     });

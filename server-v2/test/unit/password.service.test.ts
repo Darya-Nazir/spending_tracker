@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { Config, type RawEnv } from '../../src/config/config.ts';
-import { PasswordService } from '../../src/modules/auth/password.service.ts';
+import { PasswordService } from '../../src/modules/identity/auth/password.service.ts';
 
 const envWithCost = (bcryptCost: string): RawEnv => ({
     NODE_ENV: 'test',

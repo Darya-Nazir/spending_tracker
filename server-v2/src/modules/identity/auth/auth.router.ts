@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { ValidationMiddleware } from '../../http/middleware/validate.ts';
+import { ValidationMiddleware } from '../../../http/middleware/validate.ts';
 import type { AuthController } from './auth.controller.ts';
 import { loginSchema, refreshSchema, signupSchema } from './auth.schemas.ts';
 

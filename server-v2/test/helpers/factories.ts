@@ -40,7 +40,7 @@ export const createUser = async (
         name: string;
         password_hash: string;
     }>(
-        `insert into users (email, name, password_hash)
+        `insert into identity.users (email, name, password_hash)
          values ($1, $2, $3)
          returning id, email, name, password_hash`,
         [user.email, user.name, user.passwordHash],

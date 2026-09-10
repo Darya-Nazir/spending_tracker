@@ -1,5 +1,5 @@
-import type { QueryExecutor } from '../../db/database.ts';
-import { ConflictError } from '../../errors/app-error.ts';
+import type { QueryExecutor } from '../../../db/database.ts';
+import { ConflictError } from '../../../errors/app-error.ts';
 import type { NormalizedEmail } from './email.service.ts';
 
 type UserRow = {
@@ -41,7 +41,7 @@ export class UserRepository {
     async create(input: CreateUserInput): Promise<User> {
         try {
             const { rows } = await this.#database.query<UserRow>(
-                `insert into users (email, name, password_hash)
+                `insert into identity.users (email, name, password_hash)
                  values ($1, $2, $3)
                  returning id, email, name, password_hash, created_at`,
                 [input.email, input.name, input.passwordHash],
@@ -65,7 +65,7 @@ export class UserRepository {
     async findByEmail(email: NormalizedEmail): Promise<User | null> {
         const { rows } = await this.#database.query<UserRow>(
             `select id, email, name, password_hash, created_at
-               from users
+               from identity.users
               where email = $1`,
             [email],
         );

@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 
-import type { Config } from '../../config/config.ts';
-import { UnauthorizedError } from '../../errors/app-error.ts';
+import type { Config } from '../../../config/config.ts';
+import { UnauthorizedError } from '../../../errors/app-error.ts';
 
 export type TokenPair = {
     accessToken: string;

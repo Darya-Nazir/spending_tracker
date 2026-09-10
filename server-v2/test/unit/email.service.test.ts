@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { EmailService } from '../../src/modules/users/email.service.ts';
+import { EmailService } from '../../src/modules/identity/users/email.service.ts';
 
 describe('EmailService', () => {
     test('normalize lowercases every letter in an email', () => {

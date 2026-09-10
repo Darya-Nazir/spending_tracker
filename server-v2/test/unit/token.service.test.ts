@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 import { Config } from '../../src/config/config.ts';
 import { UnauthorizedError } from '../../src/errors/app-error.ts';
-import { TokenService } from '../../src/modules/auth/token.service.ts';
+import { TokenService } from '../../src/modules/identity/auth/token.service.ts';
 
 /** Тесты этого файла к базе не ходят: адрес нужен только чтобы Config.load прошёл. */
 const config = Config.load({

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-import type { Config } from '../../config/config.ts';
+import type { Config } from '../../../config/config.ts';
 
 /** Хеширует пароли и проверяет их, не раскрывая bcrypt остальному приложению. */
 export class PasswordService {

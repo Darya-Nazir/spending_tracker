@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { AccountRepository } from '../../src/modules/finance/accounts/account.repository.ts';
+import { ensureAccount } from '../../src/modules/finance/contracts.ts';
 import { BalanceRepository } from '../../src/modules/finance/balance/balance.repository.ts';
 import { useTestDatabase } from '../helpers/db.ts';
 
@@ -33,7 +33,7 @@ test('supports legacy registration and repeated account preparation', async () =
     // поддерживает старую регистрацию и повторную подготовку аккаунта
     const userId = await createLegacyUser(12.34);
     await database.query("update finance.accounts set status = 'ready' where user_id = $1", [userId]);
-    await new AccountRepository(database).create(userId);
+    await ensureAccount(userId, database);
     const { rows } = await database.query('select initial_balance, status from finance.accounts where user_id = $1', [userId]);
     assert.deepEqual(rows, [{ initial_balance: 12.34, status: 'ready' }]);
     assert.equal(await legacyBalance(userId), 12.34);

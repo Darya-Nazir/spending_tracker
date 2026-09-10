@@ -6,19 +6,19 @@ import cors from 'cors';
 import type { Config } from '../config/config.ts';
 import type { Database } from '../db/database.ts';
 import type { Logger } from '../logging/logger.ts';
-import { AuthController } from '../modules/auth/auth.controller.ts';
-import { AuthRouter } from '../modules/auth/auth.router.ts';
-import { AuthService } from '../modules/auth/auth.service.ts';
-import { RegistrationService } from '../modules/auth/registration.service.ts';
-import { PasswordService } from '../modules/auth/password.service.ts';
-import { TokenService } from '../modules/auth/token.service.ts';
+import { AuthController } from '../modules/identity/auth/auth.controller.ts';
+import { AuthRouter } from '../modules/identity/auth/auth.router.ts';
+import { AuthService } from '../modules/identity/auth/auth.service.ts';
+import { RegistrationService } from '../application/registration.service.ts';
+import { PasswordService } from '../modules/identity/auth/password.service.ts';
+import { TokenService } from '../modules/identity/auth/token.service.ts';
 import { ErrorHandler } from './middleware/error-handler.ts';
 import { NotFoundHandler } from './middleware/not-found.ts';
 import { HealthController } from '../modules/health/health.controller.ts';
 import { HealthRouter } from '../modules/health/health.router.ts';
 import { HealthService } from '../modules/health/health.service.ts';
-import { EmailService } from '../modules/users/email.service.ts';
-import { UserRepository } from '../modules/users/user.repository.ts';
+import { EmailService } from '../modules/identity/users/email.service.ts';
+import { UserRepository } from '../modules/identity/users/user.repository.ts';
 import { RequestContext } from './middleware/request-context.ts';
 import { Authenticate } from './middleware/authenticate.ts';
 import { BalanceController } from '../modules/finance/balance/balance.controller.ts';
@@ -83,7 +83,7 @@ export class AppFactory {
         const emails = new EmailService();
         const tokens = new TokenService(this.#config);
         const registration = new RegistrationService(this.#database);
-        const service = new AuthService(users, passwords, emails, tokens, registration);
+        const service = new AuthService(users, passwords, emails, tokens, input => registration.register(input));
 
         return AuthRouter.create(new AuthController(service));
     }

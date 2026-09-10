@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { CategoryTitleService } from '../../src/modules/categories/category-title.service.ts';
+import { CategoryTitleService } from '../../src/modules/finance/categories/category-title.service.ts';
 
 describe('CategoryTitleService', () => {
     test('normalize lowercases Latin and Cyrillic letters', () => {

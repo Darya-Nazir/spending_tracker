@@ -7,7 +7,7 @@ import request from 'supertest';
 import { Config } from '../../src/config/config.ts';
 import { AppError } from '../../src/errors/app-error.ts';
 import { Authenticate } from '../../src/http/middleware/authenticate.ts';
-import { TokenService } from '../../src/modules/auth/token.service.ts';
+import { TokenService } from '../../src/modules/identity/auth/token.service.ts';
 import { Logger } from '../../src/logging/logger.ts';
 import { RequestContext } from '../../src/http/middleware/request-context.ts';
 import { ErrorHandler } from '../../src/http/middleware/error-handler.ts';

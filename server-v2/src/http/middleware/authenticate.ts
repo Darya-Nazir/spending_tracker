@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
 import { UnauthorizedError } from '../../errors/app-error.ts';
-import type { AuthIdentity, TokenService } from '../../modules/auth/token.service.ts';
+import type { AuthIdentity, TokenService } from '../../modules/identity/contracts.ts';
 
 declare global {
     namespace Express {

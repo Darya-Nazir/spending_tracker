@@ -4,7 +4,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 
 import { useTestApp } from '../helpers/app.ts';
-import { TokenService } from '../../src/modules/auth/token.service.ts';
+import { TokenService } from '../../src/modules/identity/auth/token.service.ts';
 
 const { app, config, database } = useTestApp();
 
@@ -54,7 +54,7 @@ describe('POST /api/refresh', () => {
     test('refreshes repeatedly using only the token and rejects an expired refresh', async () => {
         // обновляет пару повторно по одному токену и отклоняет истёкший refresh
         const { refreshToken } = await login();
-        await database.query('delete from users');
+        await database.query('delete from identity.users');
         for (let i = 0; i < 2; i += 1) {
             const response = await request(app).post('/api/refresh').send({ refreshToken });
             assert.equal(response.status, 200);

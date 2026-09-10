@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 import request from 'supertest';
 
 import { useTestApp } from '../helpers/app.ts';
-import { TokenService } from '../../src/modules/auth/token.service.ts';
+import { TokenService } from '../../src/modules/identity/auth/token.service.ts';
 
 const { app, config, database } = useTestApp();
 
@@ -61,7 +61,7 @@ describe('POST /api/login', () => {
             const payload = JSON.parse(Buffer.from(response.body.tokens.refreshToken.split('.')[1], 'base64url').toString());
             assert.equal(payload.exp - payload.iat, 30 * 24 * 60 * 60);
         }
-        const result = await database.query('select count(*)::int as count from sessions');
+        const result = await database.query('select count(*)::int as count from identity.sessions');
         assert.equal(result.rows[0]?.count, 0);
     });
 

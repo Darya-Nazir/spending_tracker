@@ -25,7 +25,7 @@ describe('users schema', () => {
             `select column_name, data_type, is_nullable,
                     numeric_precision, numeric_scale
                from information_schema.columns
-              where table_schema = 'public'
+              where table_schema = 'identity'
                 and table_name = 'users'
               order by ordinal_position`,
         );
@@ -66,14 +66,14 @@ describe('users schema', () => {
         const sameEmailInAnotherCase = 'stage-6-case@example.TEST';
 
         await database.query(
-            `insert into users (email, name, password_hash)
+            `insert into identity.users (email, name, password_hash)
              values ($1, $2, $3)`,
             [firstEmail, 'First User', 'not-a-real-password-hash'],
         );
 
         await assert.rejects(
             database.query(
-                `insert into users (email, name, password_hash)
+                `insert into identity.users (email, name, password_hash)
                  values ($1, $2, $3)`,
                 [sameEmailInAnotherCase, 'Second User', 'not-a-real-password-hash'],
             ),
@@ -94,7 +94,7 @@ describe('users schema', () => {
         const { rows: indexRows } = await database.query<IndexMetadata>(
             `select indexname, indexdef
                from pg_indexes
-              where schemaname = 'public'
+              where schemaname = 'identity'
                 and tablename = 'users'
                 and indexname in ('users_email_unique', 'users_email_lower_unique')`,
         );
@@ -104,11 +104,11 @@ describe('users schema', () => {
 
         assert.match(
             indexesByName.get('users_email_unique') ?? '',
-            /create unique index users_email_unique on public\.users using btree \(email\)/i,
+            /create unique index users_email_unique on identity\.users using btree \(email\)/i,
         );
         assert.match(
             indexesByName.get('users_email_lower_unique') ?? '',
-            /create unique index users_email_lower_unique on public\.users using btree \(lower\(email\)\)/i,
+            /create unique index users_email_lower_unique on identity\.users using btree \(lower\(email\)\)/i,
         );
     });
 });

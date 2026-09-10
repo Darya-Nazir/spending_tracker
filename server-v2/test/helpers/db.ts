@@ -74,7 +74,7 @@ export const resetDb = async (database: Database): Promise<void> => {
     const { rows: tableNameRows } = await database.query<TableNameRow>(
         `select format('%I.%I', table_schema, table_name) as qualified_name
            from information_schema.tables
-          where table_schema in ('public', 'finance')
+          where table_schema in ('identity', 'public', 'finance')
             and table_type = 'BASE TABLE'
             and table_name <> 'pgmigrations'
           order by table_name`,

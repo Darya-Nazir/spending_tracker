@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { EmailService } from '../../src/modules/users/email.service.ts';
-import { UserRepository } from '../../src/modules/users/user.repository.ts';
+import { EmailService } from '../../src/modules/identity/users/email.service.ts';
+import { UserRepository } from '../../src/modules/identity/users/user.repository.ts';
 import { useTestDatabase } from '../helpers/db.ts';
 import { createUser } from '../helpers/factories.ts';
 
