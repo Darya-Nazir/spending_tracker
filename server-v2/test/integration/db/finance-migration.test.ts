@@ -9,6 +9,8 @@ const FINANCE = '007_finance_accounts.sql';
 const COMPATIBILITY = '008_finance_compatibility.sql';
 const IDENTITY = '009_identity_schema.sql';
 const REMOVE_COMPATIBILITY = '010_remove_finance_compatibility.sql';
+const OWNERSHIP = '011_operation_ownership.sql';
+const MODULE_CHAIN = [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY] as const;
 const HISTORICAL_OPERATION = {
     id: 1, user_id: 1, category_id: 1, amount: 23.15, date: '2026-09-01',
 };
@@ -182,7 +184,7 @@ describe('009 identity schema', () => {
 
     test('returns users to public with their updated balances on rollback', async (t) => {
         // возвращает пользователей в public с обновлёнными балансами при откате
-        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY]);
+        const database = await prepareHistoricalDatabase(t, MODULE_CHAIN.slice(0, 3));
         await database.query('update finance.accounts set initial_balance = 150 where user_id = 1');
 
         await applyMigration(database, IDENTITY, 'down');
@@ -195,7 +197,7 @@ describe('009 identity schema', () => {
 describe('010 removal of finance compatibility', () => {
     test('preserves identity and financial data when removing compatibility', async (t) => {
         // сохраняет данные identity и finance при снятии слоя совместимости
-        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY]);
+        const database = await prepareHistoricalDatabase(t, MODULE_CHAIN.slice(0, 3));
         await database.query(
             `insert into identity.sessions (user_id, token_hash, expires_at, device)
              values (1, repeat('a', 64), '2027-01-01', 'test device')`,
@@ -210,7 +212,7 @@ describe('010 removal of finance compatibility', () => {
 
     test('restores current balances and bidirectional synchronization on rollback', async (t) => {
         // восстанавливает актуальные балансы и двустороннюю синхронизацию при откате
-        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+        const database = await prepareHistoricalDatabase(t, MODULE_CHAIN);
         await database.query('update finance.accounts set initial_balance = 200.50 where user_id = 1');
 
         await applyMigration(database, REMOVE_COMPATIBILITY, 'down');
@@ -227,7 +229,7 @@ describe('010 removal of finance compatibility', () => {
 
     test('restores legacy writes and cascading deletion on rollback', async (t) => {
         // восстанавливает запись через старые пути и каскадное удаление при откате
-        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+        const database = await prepareHistoricalDatabase(t, MODULE_CHAIN);
 
         await applyMigration(database, REMOVE_COMPATIBILITY, 'down');
 
@@ -252,7 +254,7 @@ describe('010 removal of finance compatibility', () => {
 
     test('keeps legacy balance writes working after rolling back identity as well', async (t) => {
         // сохраняет запись баланса через старые пути после дополнительного отката identity
-        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+        const database = await prepareHistoricalDatabase(t, MODULE_CHAIN);
 
         await applyMigration(database, REMOVE_COMPATIBILITY, 'down');
         await applyMigration(database, IDENTITY, 'down');
@@ -264,7 +266,7 @@ describe('010 removal of finance compatibility', () => {
 
     test('preserves independently created users and accounts on rollback', async (t) => {
         // сохраняет независимо созданных пользователей и аккаунты при откате
-        const database = await prepareHistoricalDatabase(t, [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]);
+        const database = await prepareHistoricalDatabase(t, MODULE_CHAIN);
         await database.query(
             `insert into identity.users (email, name, password_hash)
              values ('independent@example.test', 'Independent', 'hash')`,
@@ -285,10 +287,10 @@ test('preserves all historical rows through the complete migration round trip', 
     const database = await prepareHistoricalDatabase(t);
     const original = await readLegacyData(database);
 
-    for (const name of [FINANCE, COMPATIBILITY, IDENTITY, REMOVE_COMPATIBILITY]) {
+    for (const name of [...MODULE_CHAIN, OWNERSHIP]) {
         await applyMigration(database, name);
     }
-    for (const name of [REMOVE_COMPATIBILITY, IDENTITY, COMPATIBILITY, FINANCE]) {
+    for (const name of [OWNERSHIP, REMOVE_COMPATIBILITY, IDENTITY, COMPATIBILITY, FINANCE]) {
         await applyMigration(database, name, 'down');
     }
 
