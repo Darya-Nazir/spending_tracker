@@ -3,16 +3,9 @@ import { describe, test } from 'node:test';
 
 import { Config, type RawEnv } from '../../src/config/config.ts';
 import { PasswordService } from '../../src/modules/identity/auth/password.service.ts';
+import { testEnv } from '../helpers/env.ts';
 
-const envWithCost = (bcryptCost: string): RawEnv => ({
-    NODE_ENV: 'test',
-    PORT: '3000',
-    LOG_LEVEL: 'debug',
-    DATABASE_URL: 'postgres://spending:spending@localhost:5432/spending_test',
-    JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
-    JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
-    BCRYPT_COST: bcryptCost,
-});
+const envWithCost = (bcryptCost: string): RawEnv => testEnv({ BCRYPT_COST: bcryptCost });
 
 describe('PasswordService', () => {
     test('hashes a password and verifies only the matching password', async () => {

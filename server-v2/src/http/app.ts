@@ -4,7 +4,7 @@ import cors from 'cors';
 // Объект, который возвращает express(), физически является 
 // функцией-обработчиком запроса
 import type { Config } from '../config/config.ts';
-import type { Database } from '../db/database.ts';
+import type { Connections } from '../db/connections.ts';
 import type { Logger } from '../logging/logger.ts';
 import { AuthController } from '../modules/identity/auth/auth.controller.ts';
 import { AuthRouter } from '../modules/identity/auth/auth.router.ts';
@@ -36,12 +36,12 @@ const BODY_LIMIT = '100kb';
 export class AppFactory {
     readonly #config: Config;
     readonly #logger: Logger;
-    readonly #database: Database;
+    readonly #connections: Connections;
 
-    constructor(config: Config, logger: Logger, database: Database) {
+    constructor(config: Config, logger: Logger, connections: Connections) {
         this.#config = config;
         this.#logger = logger;
-        this.#database = database;
+        this.#connections = connections;
     }
 
     build(): Express {
@@ -71,15 +71,15 @@ export class AppFactory {
     }
 
     #healthRouter(): Router {
-        return HealthRouter.create(new HealthController(new HealthService(this.#database)));
+        return HealthRouter.create(new HealthController(new HealthService(this.#connections)));
     }
 
     #authRouter(): Router {
-        const users = new UserRepository(this.#database);
+        const users = new UserRepository(this.#connections.identity);
         const passwords = new PasswordService(this.#config);
         const emails = new EmailService();
         const tokens = new TokenService(this.#config);
-        const registration = new RegistrationService(this.#database);
+        const registration = new RegistrationService(this.#connections.identity);
         // input - данные для создания юзера, но еще не сам объект юзера
         const service = new AuthService(users, passwords, emails, tokens, input => registration.register(input));
 
@@ -87,7 +87,7 @@ export class AppFactory {
     }
 
     #balanceRouter(): Router {
-        const service = new BalanceService(new BalanceRepository(this.#database));
+        const service = new BalanceService(new BalanceRepository(this.#connections.finance));
         const authenticate = new Authenticate(new TokenService(this.#config));
         return BalanceRouter.create(new BalanceController(service), authenticate);
     }

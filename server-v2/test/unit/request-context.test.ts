@@ -6,15 +6,9 @@ import { Config } from '../../src/config/config.ts';
 import { Logger } from '../../src/logging/logger.ts';
 import { RequestContext } from '../../src/http/middleware/request-context.ts';
 import { MemorySink } from '../helpers/memory-sink.ts';
+import { testEnv } from '../helpers/env.ts';
 
-/** Тесты этого файла к базе не ходят: адрес нужен только чтобы Config.load прошёл. */
-const DATABASE_URL = 'postgres://spending:spending@localhost:5432/spending_test';
-
-const config = Config.load({
-    NODE_ENV: 'test', PORT: '3000', LOG_LEVEL: 'debug', DATABASE_URL,
-    JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
-    JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
-});
+const config = Config.load(testEnv());
 
 // Здесь проверяется только requestId, поэтому заглушки дают ровно то, к чему
 // middleware обращается по пути к нему: у запроса — headers, у ответа —

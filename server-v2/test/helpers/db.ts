@@ -1,12 +1,20 @@
 import { after, beforeEach } from 'node:test';
 
 import { Config } from '../../src/config/config.ts';
+import { Connections, type ModuleName } from '../../src/db/connections.ts';
 import { Database } from '../../src/db/database.ts';
 import { Logger } from '../../src/logging/logger.ts';
 import { MemorySink } from './memory-sink.ts';
 
 export const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL
     ?? 'postgres://spending:spending@localhost:5432/spending_test';
+
+export const TEST_MODULE_DATABASE_URLS: Readonly<Record<ModuleName, string>> = Object.freeze({
+    identity: process.env.TEST_IDENTITY_DATABASE_URL
+        ?? 'postgres://identity_app:identity_app@localhost:5432/spending_test',
+    finance: process.env.TEST_FINANCE_DATABASE_URL
+        ?? 'postgres://finance_app:finance_app@localhost:5432/spending_test',
+});
 
 type DatabaseNameRow = {
     database_name: string;
@@ -19,9 +27,16 @@ type TableNameRow = {
 export type TestDatabaseContext = {
     config: Config;
     database: Database;
+    connections: Connections;
     logger: Logger;
     sink: MemorySink;
 };
+
+export type ModuleUrlOverrides = Partial<Record<ModuleName, string>>;
+
+const moduleUrlFor = (module: ModuleName, databaseUrl: string): string => (
+    databaseUrl === TEST_DATABASE_URL ? TEST_MODULE_DATABASE_URLS[module] : databaseUrl
+);
 
 /**
  * Собирает зависимости для тестовой базы
@@ -29,20 +44,24 @@ export type TestDatabaseContext = {
  */
 export const createTestDatabase = (
     databaseUrl: string = TEST_DATABASE_URL,
+    moduleUrls: ModuleUrlOverrides = {},
 ): TestDatabaseContext => {
     const config = Config.load({
         NODE_ENV: 'test',
         PORT: '3000',
         LOG_LEVEL: 'debug',
         DATABASE_URL: databaseUrl,
+        IDENTITY_DATABASE_URL: moduleUrls.identity ?? moduleUrlFor('identity', databaseUrl),
+        FINANCE_DATABASE_URL: moduleUrls.finance ?? moduleUrlFor('finance', databaseUrl),
         JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
         JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
     });
     const sink = new MemorySink();
     const logger = Logger.create(config, sink);
-    const database = new Database(config, logger);
+    const database = new Database(config.databaseUrl, logger);
+    const connections = new Connections(config, logger);
 
-    return { config, database, logger, sink };
+    return { config, database, connections, logger, sink };
 };
 
 /** Не позволяет очистить development/production базу из-за ошибки в окружении. */
@@ -100,7 +119,7 @@ export const useTestDatabase = (): TestDatabaseContext => {
     });
 
     after(async () => {
-        await context.database.close();
+        await Promise.all([context.database.close(), context.connections.close()]);
     });
 
     return context;

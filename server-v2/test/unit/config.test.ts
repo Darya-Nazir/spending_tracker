@@ -12,6 +12,8 @@ const validEnv: Readonly<RawEnv> = Object.freeze({
     PORT: '3000',
     LOG_LEVEL: 'debug',
     DATABASE_URL: 'postgres://spending:spending@localhost:5432/spending_test',
+    IDENTITY_DATABASE_URL: 'postgres://identity_app:secret@localhost:5432/spending_test',
+    FINANCE_DATABASE_URL: 'postgres://finance_app:secret@localhost:5432/spending_test',
     BCRYPT_COST: '11',
     JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
     JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
@@ -37,6 +39,8 @@ describe('Config', () => {
         assert.equal(config.port, 3000);
         assert.equal(config.logLevel, 'debug');
         assert.equal(config.databaseUrl, 'postgres://spending:spending@localhost:5432/spending_test');
+        assert.equal(config.moduleDatabaseUrls.identity, validEnv.IDENTITY_DATABASE_URL);
+        assert.equal(config.moduleDatabaseUrls.finance, validEnv.FINANCE_DATABASE_URL);
         assert.equal(config.bcryptCost, 11);
         assert.equal(config.jwt.accessSecret, validEnv.JWT_ACCESS_SECRET);
         assert.equal(config.jwt.refreshSecret, validEnv.JWT_REFRESH_SECRET);
@@ -69,10 +73,12 @@ describe('Config', () => {
         assert.throws(() => Config.load(envWith({ CORS_ORIGIN: 'localhost:9000' })), /CORS_ORIGIN/);
     });
 
-    test('fails when DATABASE_URL is missing or malformed', () => {
-        // падает, если DATABASE_URL нет или он не похож на строку подключения
-        assert.throws(() => Config.load(envWithout('DATABASE_URL')), /DATABASE_URL/);
-        assert.throws(() => Config.load(envWith({ DATABASE_URL: 'localhost:5432' })), /DATABASE_URL/);
+    test('fails when any database URL is missing or malformed', () => {
+        // падает, если любого адреса базы нет или он не похож на строку подключения
+        for (const key of ['DATABASE_URL', 'IDENTITY_DATABASE_URL', 'FINANCE_DATABASE_URL']) {
+            assert.throws(() => Config.load(envWithout(key)), new RegExp(key));
+            assert.throws(() => Config.load(envWith({ [key]: 'localhost:5432' })), new RegExp(key));
+        }
     });
 
     test('fails when a JWT secret is missing, too short or equal to the other', () => {

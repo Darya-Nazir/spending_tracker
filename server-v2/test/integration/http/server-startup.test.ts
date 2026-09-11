@@ -16,6 +16,8 @@ const DATABASE_URL = 'postgres://spending:spending@localhost:5432/spending_test'
 /** Порт, который тест занимает сам, чтобы проверить поведение при конфликте. */
 const BUSY_PORT = 3212;
 
+const SHUTDOWN_PORT = 3213;
+
 type LogRecord = Record<string, unknown>;
 
 /** Дочерний процесс сервера и то, что он записал в stdout и stderr. */
@@ -40,6 +42,8 @@ const startServer = (env: Record<string, string>): RunningServer => {
             ...process.env,
             JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
             JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
+            IDENTITY_DATABASE_URL: DATABASE_URL,
+            FINANCE_DATABASE_URL: DATABASE_URL,
             ...env,
         },
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -129,6 +133,29 @@ describe('server startup', () => {
 
             assert.equal(server.hasExited(), false, `процесс должен быть жив:\n${server.stderr()}`);
             assert.doesNotMatch(server.stderr(), /Error/, `в stderr не должно быть ошибок:\n${server.stderr()}`);
+        } finally {
+            await stop(server);
+        }
+    });
+
+    test('closes both database pools on SIGTERM and exits with code 0', { timeout: 20_000 }, async () => {
+        // закрывает оба пула по SIGTERM и завершается с кодом 0
+        const server = startServer({
+            NODE_ENV: 'production',
+            PORT: String(SHUTDOWN_PORT),
+            LOG_LEVEL: 'info',
+            DATABASE_URL,
+        });
+
+        try {
+            await server.waitForRecord((record) => record.msg === 'server listening');
+            await fetch(`http://127.0.0.1:${SHUTDOWN_PORT}/ready`);
+
+            server.child.kill('SIGTERM');
+            const [code] = await once(server.child, 'exit') as [number | null];
+
+            assert.equal(code, 0, `остановка по сигналу штатная:\n${server.stdout()}`);
+            assert.match(server.stdout(), /shutdown complete/);
         } finally {
             await stop(server);
         }

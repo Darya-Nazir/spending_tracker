@@ -1,26 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import request from 'supertest';
 
-import { useTestApp } from '../../helpers/app.ts';
 import { BalanceRepository } from '../../../src/modules/finance/balance/balance.repository.ts';
 import { ensureAccount } from '../../../src/modules/finance/contracts.ts';
+import { useTestDatabase } from '../../helpers/db.ts';
 import { createUser } from '../../helpers/factories.ts';
 
-const { app, database } = useTestApp();
-const signup = { name: 'Finance User', email: 'finance@example.test', password: 'secret1', passwordRepeat: 'secret1' };
-
-test('rolls back registration when financial account creation fails', async () => {
-    // откатывает регистрацию при ошибке создания финансового аккаунта
-    await database.query("alter table finance.accounts add constraint test_account_failure check (user_id < 0)");
-    try {
-        await request(app).post('/api/signup').send(signup).expect(500);
-        const result = await database.query('select count(*)::integer as count from identity.users');
-        assert.equal(result.rows[0]?.count, 0);
-    } finally {
-        await database.query('alter table finance.accounts drop constraint test_account_failure');
-    }
-});
+const { database } = useTestDatabase();
 
 test('reads a financial balance independently of the identity user', async () => {
     // читает финансовый баланс независимо от пользователя в модуле авторизации

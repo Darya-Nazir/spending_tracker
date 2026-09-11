@@ -1,6 +1,5 @@
 import { Pool, types as pgTypes, type QueryResult, type QueryResultRow } from 'pg';
 
-import type { Config } from '../config/config.ts';
 import type { Logger } from '../logging/logger.ts';
 
 /**
@@ -27,11 +26,14 @@ export class Database {
     readonly #pool: Pool;
     readonly #logger: Logger;
 
-    constructor(config: Config, logger: Logger) {
-        this.#logger = logger;
+    readonly name: string;
+
+    constructor(connectionString: string, logger: Logger, name = 'admin') {
+        this.name = name;
+        this.#logger = logger.child({ db: name });
 
         // Соединение открывается при первом query()
-        this.#pool = new Pool({ connectionString: config.databaseUrl });
+        this.#pool = new Pool({ connectionString });
 
         // Событие означает, что первое физическое
         // соединение с PostgreSQL действительно установлено.

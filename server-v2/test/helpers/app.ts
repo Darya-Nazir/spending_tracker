@@ -14,7 +14,7 @@ export const useTestApp = (): TestAppContext => {
     const app = new AppFactory(
         context.config,
         context.logger,
-        context.database,
+        context.connections,
     ).build();
 
     return { ...context, app };

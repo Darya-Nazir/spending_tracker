@@ -63,6 +63,20 @@ const envSchema = z.object({
             'DATABASE_URL must be a postgres:// or postgresql:// connection string',
         ),
 
+    IDENTITY_DATABASE_URL: z
+        .string()
+        .regex(
+            POSTGRES_URL_PATTERN,
+            'IDENTITY_DATABASE_URL must be a postgres:// or postgresql:// connection string',
+        ),
+
+    FINANCE_DATABASE_URL: z
+        .string()
+        .regex(
+            POSTGRES_URL_PATTERN,
+            'FINANCE_DATABASE_URL must be a postgres:// or postgresql:// connection string',
+        ),
+
     CORS_ORIGIN: z
         .string()
         .regex(HTTP_URL_PATTERN, 'CORS_ORIGIN must be an http(s) origin')
@@ -120,6 +134,11 @@ export class Config {
 
     readonly databaseUrl: string;
 
+    readonly moduleDatabaseUrls: Readonly<{
+        identity: string;
+        finance: string;
+    }>;
+
     readonly corsOrigin: string;
 
     readonly bcryptCost: number;
@@ -169,6 +188,11 @@ export class Config {
         this.logLevel = values.LOG_LEVEL;
 
         this.databaseUrl = values.DATABASE_URL;
+
+        this.moduleDatabaseUrls = Object.freeze({
+            identity: values.IDENTITY_DATABASE_URL,
+            finance: values.FINANCE_DATABASE_URL,
+        });
 
         this.corsOrigin = values.CORS_ORIGIN;
 

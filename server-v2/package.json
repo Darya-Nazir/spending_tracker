@@ -14,10 +14,12 @@
     "db:migration:create": "node ./node_modules/node-pg-migrate/bin/node-pg-migrate.js create -m migrations --migration-file-language sql --migration-filename-format index",
     "db:migrate": "node --env-file-if-exists=.env ./node_modules/node-pg-migrate/bin/node-pg-migrate.js up -m migrations",
     "db:migrate:test": "node --env-file-if-exists=.env ./node_modules/node-pg-migrate/bin/node-pg-migrate.js up -m migrations -d TEST_DATABASE_URL",
+    "db:roles": "docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U spending -d spending_dev < docker/postgres/roles.sql",
+    "db:roles:test": "docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U spending -d spending_test < docker/postgres/roles.sql",
     "db:rollback": "node --env-file-if-exists=.env ./node_modules/node-pg-migrate/bin/node-pg-migrate.js down -m migrations",
-    "test": "npm run db:migrate:test && node --test --test-concurrency=1 \"test/**/*.test.ts\"",
+    "test": "npm run db:migrate:test && npm run db:roles:test && node --test --test-concurrency=1 \"test/**/*.test.ts\"",
     "test:unit": "node --test \"test/unit/**/*.test.ts\"",
-    "test:watch": "npm run db:migrate:test && node --test --test-concurrency=1 --watch \"test/**/*.test.ts\"",
+    "test:watch": "npm run db:migrate:test && npm run db:roles:test && node --test --test-concurrency=1 --watch \"test/**/*.test.ts\"",
     "check": "npm run typecheck && npm test"
   },
   "dependencies": {

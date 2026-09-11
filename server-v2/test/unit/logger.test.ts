@@ -4,16 +4,11 @@ import assert from 'node:assert/strict';
 import { Config, type RawEnv } from '../../src/config/config.ts';
 import { Logger } from '../../src/logging/logger.ts';
 import { MemorySink } from '../helpers/memory-sink.ts';
+import { testEnv } from '../helpers/env.ts';
 
-const configFor = (patch: RawEnv): Config => Config.load({
-    NODE_ENV: 'production',
-    PORT: '3000',
-    LOG_LEVEL: 'info',
-    DATABASE_URL: 'postgres://spending:spending@localhost:5432/spending_test',
-    JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
-    JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
-    ...patch,
-});
+const configFor = (patch: RawEnv): Config => Config.load(
+    testEnv({ NODE_ENV: 'production', LOG_LEVEL: 'info', ...patch }),
+);
 
 describe('Logger', () => {
 

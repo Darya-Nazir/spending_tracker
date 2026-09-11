@@ -12,15 +12,9 @@ import { Logger } from '../../src/logging/logger.ts';
 import { RequestContext } from '../../src/http/middleware/request-context.ts';
 import { ErrorHandler } from '../../src/http/middleware/error-handler.ts';
 import { MemorySink } from '../helpers/memory-sink.ts';
+import { testEnv } from '../helpers/env.ts';
 
-const config = Config.load({
-    NODE_ENV: 'test',
-    PORT: '3000',
-    LOG_LEVEL: 'debug',
-    DATABASE_URL: 'postgres://spending:spending@localhost:5432/spending_test',
-    JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
-    JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
-});
+const config = Config.load(testEnv());
 
 const tokens = new TokenService(config);
 const authenticate = new Authenticate(tokens);

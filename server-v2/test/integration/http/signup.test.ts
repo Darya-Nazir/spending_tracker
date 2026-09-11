@@ -15,8 +15,8 @@ const validSignup = {
 };
 
 describe('POST /api/signup', () => {
-    test('creates a user with a financial account and returns only public user data', async () => {
-        // создаёт пользователя с финансовым аккаунтом и возвращает только публичные данные пользователя
+    test('creates a user with a pending registration event and returns only public user data', async () => {
+        // создаёт пользователя с ожидающим событием регистрации и возвращает только публичные данные пользователя
         const response = await request(app)
             .post('/api/signup')
             .send(validSignup);
@@ -41,11 +41,19 @@ describe('POST /api/signup', () => {
         );
         const persisted = rows[0];
 
-        const accounts = await database.query('select user_id, initial_balance, status from finance.accounts');
-        assert.deepEqual(accounts.rows, [{
+        const accounts = await database.query('select user_id from finance.accounts');
+        assert.deepEqual(accounts.rows, []);
+
+        const events = await database.query(
+            `select type, version, user_id, attempts, delivered_at
+               from identity.outbox`,
+        );
+        assert.deepEqual(events.rows, [{
+            type: 'UserRegistered',
+            version: 1,
             user_id: response.body.user.id,
-            initial_balance: 0,
-            status: 'pending',
+            attempts: 0,
+            delivered_at: null,
         }]);
 
         assert.ok(persisted);

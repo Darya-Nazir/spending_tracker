@@ -1,4 +1,4 @@
-import type { Database } from '../../db/database.ts';
+import type { Connections, ModuleReadiness } from '../../db/connections.ts';
 
 /**
  * Две проверки с разным смыслом:
@@ -10,13 +10,13 @@ import type { Database } from '../../db/database.ts';
 
 export type Health = { status: 'ok' };
 
-export type Readiness = { db: 'up' | 'down' };
+export type Readiness = ModuleReadiness & { db: 'up' | 'down' };
 
 export class HealthService {
-    readonly #database: Database;
+    readonly #connections: Connections;
 
-    constructor(database: Database) {
-        this.#database = database;
+    constructor(connections: Connections) {
+        this.#connections = connections;
     }
 
     check(): Health {
@@ -24,6 +24,9 @@ export class HealthService {
     }
 
     async readiness(): Promise<Readiness> {
-        return { db: (await this.#database.isReachable()) ? 'up' : 'down' };
+        const modules = await this.#connections.readiness();
+        const db = modules.identity === 'up' && modules.finance === 'up' ? 'up' : 'down';
+
+        return { db, ...modules };
     }
 }

@@ -5,17 +5,9 @@ import jwt from 'jsonwebtoken';
 import { Config } from '../../src/config/config.ts';
 import { UnauthorizedError } from '../../src/errors/app-error.ts';
 import { TokenService } from '../../src/modules/identity/auth/token.service.ts';
+import { testEnv } from '../helpers/env.ts';
 
-/** Тесты этого файла к базе не ходят: адрес нужен только чтобы Config.load прошёл. */
-const config = Config.load({
-    NODE_ENV: 'test',
-    PORT: '3000',
-    LOG_LEVEL: 'debug',
-    DATABASE_URL: 'postgres://spending:spending@localhost:5432/spending_test',
-    JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
-    JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
-    ACCESS_TTL: '15m',
-});
+const config = Config.load(testEnv({ ACCESS_TTL: '15m' }));
 
 const tokens = new TokenService(config);
 
@@ -68,13 +60,7 @@ describe('TokenService', () => {
 
     test('uses configured lifetimes for both tokens', () => {
         // использует заданные в конфигурации сроки обоих токенов
-        const custom = new TokenService(Config.load({
-            DATABASE_URL: config.databaseUrl,
-            JWT_ACCESS_SECRET: config.jwt.accessSecret,
-            JWT_REFRESH_SECRET: config.jwt.refreshSecret,
-            ACCESS_TTL: '10s',
-            REFRESH_TTL: '2h',
-        }));
+        const custom = new TokenService(Config.load(testEnv({ ACCESS_TTL: '10s', REFRESH_TTL: '2h' })));
         const pair = custom.issueTokenPair(42);
         const access = segment(pair.accessToken, 1);
         const refresh = segment(pair.refreshToken, 1);
