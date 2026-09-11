@@ -62,3 +62,16 @@ test('returns 404 when the financial account has been deleted', async () => {
     const response = await request(app).get('/api/balance').set(header).expect(404);
     assert.equal(response.body.error, true);
 });
+
+test('blocks the balance route with FINANCE_NOT_READY until the account is ready', async () => {
+    // блокирует маршрут баланса кодом FINANCE_NOT_READY, пока аккаунт не готов
+    const user = await createUser(database, { status: 'pending' });
+
+    const response = await request(app).get('/api/balance').set(auth(user.id)).expect(503);
+
+    assert.equal(response.type, 'application/json');
+    assert.equal(response.body.error, true);
+    assert.equal(response.body.code, 'FINANCE_NOT_READY');
+    assert.equal(typeof response.body.message, 'string');
+    assert.equal(response.headers['retry-after'], '2');
+});

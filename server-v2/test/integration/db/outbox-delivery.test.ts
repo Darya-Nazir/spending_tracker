@@ -4,7 +4,7 @@ import { test } from 'node:test';
 
 import { LocalEventDelivery } from '../../../src/application/local-event-delivery.ts';
 import { OutboxRepository } from '../../../src/modules/identity/outbox/outbox.repository.ts';
-import { OutboxWorker } from '../../../src/modules/identity/outbox/outbox.worker.ts';
+import { MAX_DELIVERY_ATTEMPTS, OutboxWorker } from '../../../src/modules/identity/outbox/outbox.worker.ts';
 import type { EventDelivery, UserRegisteredEvent } from '../../../src/modules/identity/contracts.ts';
 import { useTestDatabase } from '../../helpers/db.ts';
 
@@ -133,4 +133,50 @@ test('refuses an acknowledgement from an expired lease', async () => {
 
     assert.equal(await events.acknowledge(expired.eventId, expired.leaseToken), false);
     assert.equal(await events.acknowledge(current.eventId, current.leaseToken), true);
+});
+
+/**
+ * Пользователь, чья подготовка падает на данных: системная расходная категория
+ * уже есть под другим названием, и засев требует разбора руками. Попытки
+ * доставки выставлены в последнюю.
+ */
+const registerUserWithFailingPreparation = async (): Promise<number> => {
+    const userId = await registerUser();
+    await database.query('insert into finance.accounts (user_id) values ($1)', [userId]);
+    await database.query(
+        `insert into finance.categories (user_id, type, title, title_normalized, is_default)
+         values ($1, 'expense', 'Прочее', 'прочее', true)`,
+        [userId],
+    );
+    await database.query(
+        'update identity.outbox set attempts = $2 where user_id = $1',
+        [userId, MAX_DELIVERY_ATTEMPTS - 1],
+    );
+
+    return userId;
+};
+
+test('marks the account failed with the reason when the delivery attempts run out', async () => {
+    // переводит аккаунт в failed с причиной, когда попытки доставки кончились
+    const userId = await registerUserWithFailingPreparation();
+
+    await worker(new LocalEventDelivery(database)).drain();
+
+    const { rows } = await database.query<{ status: string; status_reason: string }>(
+        'select status, status_reason from finance.accounts where user_id = $1',
+        [userId],
+    );
+    assert.equal(rows[0]?.status, 'failed');
+    assert.match(rows[0]?.status_reason ?? '', /manual review/);
+});
+
+test('stops offering an event whose attempts have run out', async () => {
+    // перестаёт выдавать событие, у которого кончились попытки
+    const userId = await registerUserWithFailingPreparation();
+
+    await worker(new LocalEventDelivery(database)).drain();
+
+    const event = await readEvent(userId);
+    assert.equal(event?.attempts, MAX_DELIVERY_ATTEMPTS);
+    assert.equal(await worker(new LocalEventDelivery(database)).drain(), 0);
 });

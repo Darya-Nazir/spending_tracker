@@ -1,4 +1,5 @@
 import type { Database } from '../../src/db/database.ts';
+import type { AccountStatus } from '../../src/modules/finance/accounts/account.repository.ts';
 
 let userSequence = 0;
 
@@ -7,6 +8,7 @@ export type TestUserInput = {
     name: string;
     passwordHash: string;
     initialBalance: number;
+    status: AccountStatus;
 };
 
 export type PersistedTestUser = TestUserInput & {
@@ -24,6 +26,7 @@ export const makeUser = (overrides: TestUserOverrides = {}): TestUserInput => {
         name: 'Test User',
         passwordHash: 'not-a-real-password-hash',
         initialBalance: 0,
+        status: 'ready',
         ...overrides,
     };
 };
@@ -53,8 +56,8 @@ export const createUser = async (
 
     // Финансовая часть тестового пользователя создаётся явно.
     await database.query(
-        'insert into finance.accounts (user_id, initial_balance) values ($1, $2)',
-        [persisted.id, user.initialBalance],
+        'insert into finance.accounts (user_id, initial_balance, status) values ($1, $2, $3)',
+        [persisted.id, user.initialBalance, user.status],
     );
 
     return {
@@ -63,5 +66,6 @@ export const createUser = async (
         name: persisted.name,
         passwordHash: persisted.password_hash,
         initialBalance: user.initialBalance,
+        status: user.status,
     };
 };
