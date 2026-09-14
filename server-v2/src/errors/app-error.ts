@@ -11,11 +11,19 @@
 export class AppError extends Error {
     readonly status: number;
 
-    constructor(message: string, status: number) {
+    /** Машинный код ответа: клиент различает по нему причины одного статуса. */
+    readonly code: string | undefined;
+
+    /** Значение заголовка Retry-After в секундах, если повтор имеет смысл. */
+    readonly retryAfterSeconds: number | undefined;
+
+    constructor(message: string, status: number, code?: string, retryAfterSeconds?: number) {
         super(message);
         // Иначе во всех наследниках name остался бы 'Error'.
         this.name = new.target.name;
         this.status = status;
+        this.code = code;
+        this.retryAfterSeconds = retryAfterSeconds;
     }
 }
 
@@ -48,5 +56,15 @@ export class NotFoundError extends AppError {
 export class ConflictError extends AppError {
     constructor(message: string) {
         super(message, 409);
+    }
+}
+
+/**
+ * 503. Модуль не готов обслуживать запрос или его хранилище недоступно.
+ * Код называет причину, Retry-After задаёт паузу до повтора.
+ */
+export class ServiceUnavailableError extends AppError {
+    constructor(message: string, code: string, retryAfterSeconds = 2) {
+        super(message, 503, code, retryAfterSeconds);
     }
 }

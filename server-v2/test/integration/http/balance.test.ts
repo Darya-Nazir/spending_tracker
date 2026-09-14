@@ -54,13 +54,16 @@ test('requires authentication on the balance route', async () => {
     await request(app).get('/api/balance').expect(401);
 });
 
-test('returns 404 when the financial account has been deleted', async () => {
-    // возвращает 404 после удаления финансового аккаунта
+test('closes the balance route when the financial account has been deleted', async () => {
+    // закрывает маршрут баланса после удаления финансового аккаунта
+    // Проверка готовности стоит перед сервисом баланса, поэтому отсутствующая
+    // строка аккаунта читается как неготовая подготовка, а не как 404.
     const user = await createUser(database);
     const header = auth(user.id);
     await database.query('delete from finance.accounts where user_id = $1', [user.id]);
-    const response = await request(app).get('/api/balance').set(header).expect(404);
+    const response = await request(app).get('/api/balance').set(header).expect(503);
     assert.equal(response.body.error, true);
+    assert.equal(response.body.code, 'FINANCE_NOT_READY');
 });
 
 test('blocks the balance route with FINANCE_NOT_READY until the account is ready', async () => {

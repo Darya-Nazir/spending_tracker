@@ -58,6 +58,7 @@ export class OutboxRepository {
             `with claimed as (
                  select id from identity.outbox
                   where delivered_at is null
+                    and failed_at is null
                     and available_at <= now()
                     and (leased_until is null or leased_until <= now())
                   order by available_at, id
@@ -97,6 +98,17 @@ export class OutboxRepository {
                 set delivered_at = now(), lease_token = null, leased_until = null, last_error = null
               where event_id = $1 and lease_token = $2 and delivered_at is null`,
             [eventId, leaseToken],
+        );
+
+        return (rowCount ?? 0) > 0;
+    }
+// отказ: попытки исчерпаны, событие больше не выдаётся обработчику
+    async abandon(eventId: string, leaseToken: string, error: string): Promise<boolean> {
+        const { rowCount } = await this.#database.query(
+            `update identity.outbox
+                set failed_at = now(), lease_token = null, leased_until = null, last_error = $3
+              where event_id = $1 and lease_token = $2 and delivered_at is null`,
+            [eventId, leaseToken, error],
         );
 
         return (rowCount ?? 0) > 0;

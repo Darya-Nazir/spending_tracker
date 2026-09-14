@@ -21,6 +21,8 @@ import { EmailService } from '../modules/identity/users/email.service.ts';
 import { UserRepository } from '../modules/identity/users/user.repository.ts';
 import { RequestContext } from './middleware/request-context.ts';
 import { Authenticate } from './middleware/authenticate.ts';
+import { RequireFinanceReady } from './middleware/require-finance-ready.ts';
+import { AccountStatusController, AccountStatusRouter, AccountStatusService } from '../modules/finance/contracts.ts';
 import { BalanceController } from '../modules/finance/balance/balance.controller.ts';
 import { BalanceRepository } from '../modules/finance/balance/balance.repository.ts';
 import { BalanceRouter } from '../modules/finance/balance/balance.router.ts';
@@ -60,9 +62,14 @@ export class AppFactory {
         }));
         app.use(json({ limit: BODY_LIMIT }));
 
+        
+        const authenticate = new Authenticate(new TokenService(this.#config));
+        const accountStatuses = new AccountStatusService(this.#connections.finance);
+
         app.use(this.#healthRouter());
         app.use('/api', this.#authRouter());
-        app.use('/api', this.#balanceRouter());
+        app.use('/api', this.#financeStatusRouter(authenticate, accountStatuses));
+        app.use('/api', this.#balanceRouter(authenticate, accountStatuses));
 
         app.use(new NotFoundHandler().reject);
         app.use(new ErrorHandler(this.#logger).respond);
@@ -86,9 +93,16 @@ export class AppFactory {
         return AuthRouter.create(new AuthController(service));
     }
 
-    #balanceRouter(): Router {
+    #financeStatusRouter(authenticate: Authenticate, statuses: AccountStatusService): Router {
+        return AccountStatusRouter.create(new AccountStatusController(statuses), authenticate);
+    }
+
+    #balanceRouter(authenticate: Authenticate, statuses: AccountStatusService): Router {
         const service = new BalanceService(new BalanceRepository(this.#connections.finance));
-        const authenticate = new Authenticate(new TokenService(this.#config));
-        return BalanceRouter.create(new BalanceController(service), authenticate);
+        return BalanceRouter.create(
+            new BalanceController(service),
+            authenticate,
+            new RequireFinanceReady(statuses),
+        );
     }
 }

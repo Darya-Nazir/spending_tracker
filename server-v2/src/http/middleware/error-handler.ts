@@ -14,6 +14,8 @@ type ErrorResponse = {
     status: number;
     message: string;
     level: 'warn' | 'error';
+    code?: string | undefined;
+    retryAfterSeconds?: number | undefined;
 };
 
 export class ErrorHandler {
@@ -32,7 +34,7 @@ export class ErrorHandler {
         // если ошибка возникла до него.
         const log = req.log ?? this.#logger;
 
-        const { status, message, level } = ErrorHandler.#describe(error);
+        const { status, message, level, code, retryAfterSeconds } = ErrorHandler.#describe(error);
         const where = { status, method: req.method, url: req.originalUrl };
 
         if (level === 'error') {
@@ -51,12 +53,26 @@ export class ErrorHandler {
             return;
         }
 
-        res.status(status).json({ error: true, message });
+        if (retryAfterSeconds !== undefined) {
+            res.set('Retry-After', String(retryAfterSeconds));
+        }
+
+        // Ключ code появляется только там, где его ждёт клиент: недоступность
+        // и неготовность финансов он различает именно по нему.
+        res.status(status).json(code === undefined
+            ? { error: true, message }
+            : { error: true, code, message });
     };
 
     static #describe(error: unknown): ErrorResponse {
         if (error instanceof AppError) {
-            return { status: error.status, message: error.message, level: 'warn' };
+            return {
+                status: error.status,
+                message: error.message,
+                level: 'warn',
+                code: error.code,
+                retryAfterSeconds: error.retryAfterSeconds,
+            };
         }
 
         // express.json() бросает ошибку пакета http-errors: у неё есть status

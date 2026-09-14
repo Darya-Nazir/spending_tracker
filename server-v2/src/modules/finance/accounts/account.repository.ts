@@ -1,6 +1,6 @@
 import type { QueryExecutor } from '../../../db/database.ts';
 
-export type AccountStatus = 'pending' | 'ready';
+export type AccountStatus = 'pending' | 'ready' | 'failed';
 
 // работа с  колонкой status в finance.accounts
 export class AccountRepository {
@@ -8,6 +8,16 @@ export class AccountRepository {
 
     constructor(database: QueryExecutor) {
         this.#database = database;
+    }
+
+    /** Статус аккаунта; null означает, что строки ещё нет. */
+    async findStatusByUserId(userId: number): Promise<AccountStatus | null> {
+        const { rows } = await this.#database.query<{ status: AccountStatus }>(
+            'select status from finance.accounts where user_id = $1',
+            [userId],
+        );
+
+        return rows[0]?.status ?? null;
     }
 
     async create(userId: number): Promise<void> {
@@ -37,8 +47,19 @@ export class AccountRepository {
 // закрывает транзакцию
     async markReady(userId: number): Promise<void> {
         await this.#database.query(
-            "update finance.accounts set status = 'ready' where user_id = $1",
+            "update finance.accounts set status = 'ready', status_reason = null where user_id = $1",
             [userId],
+        );
+    }
+
+    /** Подготовка исчерпала попытки: причина хранится рядом со статусом. */
+    async markFailed(userId: number, reason: string): Promise<void> {
+        await this.#database.query(
+            `insert into finance.accounts (user_id, status, status_reason) values ($1, 'failed', $2)
+             on conflict (user_id) do update
+                set status = 'failed', status_reason = excluded.status_reason
+              where finance.accounts.status <> 'ready'`,
+            [userId, reason],
         );
     }
 

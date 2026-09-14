@@ -27,6 +27,7 @@ const registerUser = async (): Promise<number> => {
 
 class RecordingDelivery implements EventDelivery {
     readonly deliveredUserIds: number[] = [];
+    readonly failedUserIds: number[] = [];
     failures: number;
 
     constructor(failures = 0) {
@@ -40,6 +41,10 @@ class RecordingDelivery implements EventDelivery {
         }
         await new Promise(resolve => setTimeout(resolve, 20));
         this.deliveredUserIds.push(event.userId);
+    }
+
+    async fail(event: UserRegisteredEvent): Promise<void> {
+        this.failedUserIds.push(event.userId);
     }
 }
 

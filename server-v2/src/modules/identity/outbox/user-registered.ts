@@ -12,4 +12,7 @@ export type UserRegisteredEvent = {
 
 export interface EventDelivery {
     deliver(event: UserRegisteredEvent): Promise<void>;
+
+    /** Попытки исчерпаны: получатель записывает отказ у себя. */
+    fail(event: UserRegisteredEvent, reason: string): Promise<void>;
 }
