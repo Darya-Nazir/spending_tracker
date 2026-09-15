@@ -11,6 +11,10 @@ import { AuthRouter } from '../modules/auth/auth.router.ts';
 import { AuthService } from '../modules/auth/auth.service.ts';
 import { PasswordService } from '../modules/auth/password.service.ts';
 import { TokenService } from '../modules/auth/token.service.ts';
+import { BalanceController } from '../modules/balance/balance.controller.ts';
+import { BalanceRepository } from '../modules/balance/balance.repository.ts';
+import { BalanceRouter } from '../modules/balance/balance.router.ts';
+import { BalanceService } from '../modules/balance/balance.service.ts';
 import { CategoryRepository } from '../modules/categories/category.repository.ts';
 import { CategoryRouter } from '../modules/categories/category.router.ts';
 import { CategoryService } from '../modules/categories/category.service.ts';
@@ -61,6 +65,7 @@ export class AppFactory {
         app.use(this.#healthRouter());
         app.use('/api', this.#authRouter());
         app.use('/api/categories', this.#categoryRouter());
+        app.use('/api/balance', this.#balanceRouter());
 
         app.use(new NotFoundHandler().reject);
         app.use(new ErrorHandler(this.#logger).respond);
@@ -89,5 +94,11 @@ export class AppFactory {
         const service = new CategoryService(new CategoryRepository(this.#database));
         const authenticate = new Authenticate(new TokenService(this.#config));
         return CategoryRouter.create(service, authenticate);
+    }
+
+    #balanceRouter(): Router {
+        const service = new BalanceService(new BalanceRepository(this.#database));
+        const authenticate = new Authenticate(new TokenService(this.#config));
+        return BalanceRouter.create(new BalanceController(service), authenticate);
     }
 }
