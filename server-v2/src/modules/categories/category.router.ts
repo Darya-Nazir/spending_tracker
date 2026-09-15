@@ -3,7 +3,7 @@ import { Router } from 'express';
 import type { Authenticate } from '../../http/middleware/authenticate.ts';
 import { ValidationMiddleware } from '../../http/middleware/validate.ts';
 import { CategoryController } from './category.controller.ts';
-import { categoryParamsSchema } from './category.schemas.ts';
+import { categoryParamsSchema, categoryWriteSchema } from './category.schemas.ts';
 import type { CategoryService } from './category.service.ts';
 
 export class CategoryRouter {
@@ -15,6 +15,9 @@ export class CategoryRouter {
             const routes = Router();
             routes.get('/', controller.list);
             routes.get('/:id', ValidationMiddleware.params(categoryParamsSchema), controller.getById);
+            routes.post('/', ValidationMiddleware.body(categoryWriteSchema), controller.create);
+            routes.put('/:id', ValidationMiddleware.params(categoryParamsSchema),
+                ValidationMiddleware.body(categoryWriteSchema), controller.rename);
             router.use(`/${type}`, authenticate.requireAuth, routes);
         }
 

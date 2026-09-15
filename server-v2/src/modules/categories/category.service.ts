@@ -12,6 +12,18 @@ export class CategoryService {
         return this.#categories.list(userId, type);
     }
 
+    create(userId: number, type: CategoryType, title: string): Promise<Category> {
+        return this.#categories.create(userId, type, title);
+    }
+
+    async rename(userId: number, type: CategoryType, id: number, title: string): Promise<Category> {
+        const category = await this.#categories.rename(userId, type, id, title);
+        if (category === null) {
+            throw new NotFoundError('Category not found');
+        }
+        return category;
+    }
+
     async getById(userId: number, type: CategoryType, id: number): Promise<Category> {
         const category = await this.#categories.findById(userId, type, id);
         if (category === null) {

@@ -48,6 +48,29 @@ describe('POST and PUT /api/categories', () => {
         }
     });
 
+    test('renames the default category and allows reusing its original title', async () => {
+        // переименовывает категорию по умолчанию и позволяет повторно использовать её исходное название
+        const user = await createUser(database);
+        await categories.seedDefaults(user.id);
+        const auth = authFor(user.id);
+
+        for (const type of ['expense', 'income'] as const) {
+            const original = (await categories.list(user.id, type)).find(({ title }) => title === 'Общее')!;
+            const path = `/api/categories/${type}`;
+            const renamed = await request(app).put(`${path}/${original.id}`).set(auth).send({ title: 'Личное' });
+
+            assert.deepEqual(renamed.body, { id: original.id, title: 'Личное' });
+            assert.deepEqual(await categories.findById(user.id, type, original.id), renamed.body);
+
+            const created = await request(app).post(path).set(auth).send({ title: 'Общее' });
+
+            assert.equal(typeof created.body.id, 'number');
+            assert.notEqual(created.body.id, original.id);
+            assert.deepEqual(created.body, { id: created.body.id, title: 'Общее' });
+            assert.deepEqual(await categories.findById(user.id, type, created.body.id), created.body);
+        }
+    });
+
     test('concurrent creates of the same normalized title persist one category and report one conflict', async () => {
         // одновременные создания одного нормализованного названия сохраняют одну категорию и возвращают один конфликт
         const user = await createUser(database);
