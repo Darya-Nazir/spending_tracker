@@ -24,6 +24,10 @@ import { NotFoundHandler } from './middleware/not-found.ts';
 import { HealthController } from '../modules/health/health.controller.ts';
 import { HealthRouter } from '../modules/health/health.router.ts';
 import { HealthService } from '../modules/health/health.service.ts';
+import { OperationController } from '../modules/operations/operation.controller.ts';
+import { OperationRepository } from '../modules/operations/operation.repository.ts';
+import { OperationRouter } from '../modules/operations/operation.router.ts';
+import { OperationService } from '../modules/operations/operation.service.ts';
 import { EmailService } from '../modules/users/email.service.ts';
 import { UserRepository } from '../modules/users/user.repository.ts';
 import { RequestContext } from './middleware/request-context.ts';
@@ -66,6 +70,7 @@ export class AppFactory {
         app.use('/api', this.#authRouter());
         app.use('/api/categories', this.#categoryRouter());
         app.use('/api/balance', this.#balanceRouter());
+        app.use('/api/operations', this.#operationRouter());
 
         app.use(new NotFoundHandler().reject);
         app.use(new ErrorHandler(this.#logger).respond);
@@ -100,5 +105,11 @@ export class AppFactory {
         const service = new BalanceService(new BalanceRepository(this.#database));
         const authenticate = new Authenticate(new TokenService(this.#config));
         return BalanceRouter.create(new BalanceController(service), authenticate);
+    }
+
+    #operationRouter(): Router {
+        const service = new OperationService(new OperationRepository(this.#database));
+        const authenticate = new Authenticate(new TokenService(this.#config));
+        return OperationRouter.create(new OperationController(service), authenticate);
     }
 }

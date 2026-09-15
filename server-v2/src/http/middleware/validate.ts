@@ -12,7 +12,12 @@ export class ValidationMiddleware {
         return this.#validate(schema, 'params');
     }
 
-    static #validate(schema: ZodType, source: 'body' | 'params'): RequestHandler {
+    /** Проверяет query; Express предоставляет req.query через getter. */
+    static query(schema: ZodType): RequestHandler {
+        return this.#validate(schema, 'query');
+    }
+
+    static #validate(schema: ZodType, source: 'body' | 'params' | 'query'): RequestHandler {
         return (req: Request, _res: Response, next: NextFunction): void => {
             const result = schema.safeParse(req[source]);
 
@@ -24,7 +29,9 @@ export class ValidationMiddleware {
                 return next(new ValidationError(message));
             }
 
-            req[source] = result.data;
+            if (source !== 'query') {
+                req[source] = result.data;
+            }
             next();
         };
     }
