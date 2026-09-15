@@ -6,11 +6,32 @@ const STANDARD_CATEGORIES = {
     income: ['Депозиты', 'Зарплата', 'Сбережения', 'Инвестиции', 'Общее'],
 };
 
+export type CategoryType = keyof typeof STANDARD_CATEGORIES;
+export type Category = { id: number; title: string };
+
 export class CategoryRepository {
     readonly #database: QueryExecutor;
 
     constructor(database: QueryExecutor) {
         this.#database = database;
+    }
+
+    async list(userId: number, type: CategoryType): Promise<Category[]> {
+        const { rows } = await this.#database.query<Category>(
+            `select id, title from public.categories
+              where user_id = $1 and type = $2 order by id`,
+            [userId, type],
+        );
+        return rows;
+    }
+
+    async findById(userId: number, type: CategoryType, id: number): Promise<Category | null> {
+        const { rows } = await this.#database.query<Category>(
+            `select id, title from public.categories
+              where user_id = $1 and type = $2 and id = $3`,
+            [userId, type, id],
+        );
+        return rows[0] ?? null;
     }
 
     async seedDefaults(userId: number): Promise<void> {

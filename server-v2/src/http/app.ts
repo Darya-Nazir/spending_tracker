@@ -11,6 +11,10 @@ import { AuthRouter } from '../modules/auth/auth.router.ts';
 import { AuthService } from '../modules/auth/auth.service.ts';
 import { PasswordService } from '../modules/auth/password.service.ts';
 import { TokenService } from '../modules/auth/token.service.ts';
+import { CategoryRepository } from '../modules/categories/category.repository.ts';
+import { CategoryRouter } from '../modules/categories/category.router.ts';
+import { CategoryService } from '../modules/categories/category.service.ts';
+import { Authenticate } from './middleware/authenticate.ts';
 import { ErrorHandler } from './middleware/error-handler.ts';
 import { NotFoundHandler } from './middleware/not-found.ts';
 import { HealthController } from '../modules/health/health.controller.ts';
@@ -56,6 +60,7 @@ export class AppFactory {
 
         app.use(this.#healthRouter());
         app.use('/api', this.#authRouter());
+        app.use('/api/categories', this.#categoryRouter());
 
         app.use(new NotFoundHandler().reject);
         app.use(new ErrorHandler(this.#logger).respond);
@@ -78,5 +83,11 @@ export class AppFactory {
         const service = new AuthService(users, passwords, emails, tokens, this.#database);
 
         return AuthRouter.create(new AuthController(service));
+    }
+
+    #categoryRouter(): Router {
+        const service = new CategoryService(new CategoryRepository(this.#database));
+        const authenticate = new Authenticate(new TokenService(this.#config));
+        return CategoryRouter.create(service, authenticate);
     }
 }

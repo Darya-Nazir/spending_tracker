@@ -74,7 +74,7 @@ describe('GET /api/categories', () => {
         const user = await register('owner@example.test');
 
         for (const type of types) {
-            for (const id of ['abc', '1abc', '0', '-1', '1.5']) {
+            for (const id of ['abc', '1abc', '0', '-1', '1.5', '2147483648']) {
                 const response = await request(app).get(`/api/categories/${type}/${id}`).set(user.auth);
 
                 assert.equal(response.status, 400, `${type}/${id}`);
