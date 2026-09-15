@@ -48,13 +48,13 @@ docker compose up -d
 ## PostgreSQL
 
 Список всех таблиц
-docker compose exec postgres psql -U spending -d spending_test -c '\dt'
+docker compose exec postgres psql -U spending -d spending_dev -c '\dt'
 
 Структура таблицы, например categories
 docker compose exec postgres psql -U spending -d spending_test -c '\d categories'
 
 Содержимое таблицы
-docker compose exec postgres psql -U spending -d spending_test -c 'select * from categories;'
+docker compose exec postgres psql -U spending -d spending_dev -c 'select * from categories;'
 
 
 ## SQL-логи PostgreSQL
