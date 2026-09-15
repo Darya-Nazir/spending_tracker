@@ -35,6 +35,27 @@ const createReferencedOperation = async (): Promise<ReferencedOperation> => {
 };
 
 describe('operations schema', () => {
+    for (const mismatch of ['owner', 'type'] as const) {
+        test(`rejects an operation whose ${mismatch} differs from its category`, async () => {
+            // отклоняет операцию, у которой владелец или тип отличается от категории
+            const fixture = await createReferencedOperation();
+            const otherUser = await createUser(database);
+
+            await assert.rejects(
+                database.query(
+                    `insert into operations (user_id, category_id, type, amount, date)
+                     select coalesce($2::integer, user_id), category_id, $3, amount, date
+                       from operations where id = $1`,
+                    [
+                        fixture.operationId,
+                        mismatch === 'owner' ? otherUser.id : null,
+                        mismatch === 'type' ? 'income' : 'expense',
+                    ],
+                ),
+                { code: '23503' },
+            );
+        });
+    }
 
     test('rejects deleting a category while an operation references it', async () => {
         // Foreign Key запрещает удалять категорию, пока на неё ссылается операция
