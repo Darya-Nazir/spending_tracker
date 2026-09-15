@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import request from 'supertest';
 
-import { CategoryTitleService } from '../../src/modules/categories/category-title.service.ts';
-import { PasswordService } from '../../src/modules/auth/password.service.ts';
-import { useTestApp } from '../helpers/app.ts';
+import { CategoryTitleService } from '../../../src/modules/categories/category-title.service.ts';
+import { PasswordService } from '../../../src/modules/auth/password.service.ts';
+import { useTestApp } from '../../helpers/app.ts';
 
 const { app, config, database } = useTestApp();
 

@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { runner } from 'node-pg-migrate';
 import { Client } from 'pg';
 
-import { assertTestDatabaseName, TEST_DATABASE_URL } from '../helpers/db.ts';
+import { assertTestDatabaseName, TEST_DATABASE_URL } from '../../helpers/db.ts';
 
-const dir = fileURLToPath(new URL('../../migrations', import.meta.url));
+const dir = fileURLToPath(new URL('../../../migrations', import.meta.url));
 const logger = { info() {}, warn() {}, error() {}, debug() {} };
 
 // При обновлении count задаёт конечный номер миграции: эти тесты проверяют этап 014.

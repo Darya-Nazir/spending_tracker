@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import request from 'supertest';
 
-import { useTestApp } from '../helpers/app.ts';
+import { useTestApp } from '../../helpers/app.ts';
 
 const { app } = useTestApp();
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { useTestDatabase } from '../helpers/db.ts';
+import { useTestDatabase } from '../../helpers/db.ts';
 
 const { database } = useTestDatabase();
 

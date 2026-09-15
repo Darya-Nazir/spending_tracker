@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createTestDatabase, TEST_DATABASE_URL } from '../helpers/db.ts';
+import { createTestDatabase, TEST_DATABASE_URL } from '../../helpers/db.ts';
 
 const REACHABLE_URL = TEST_DATABASE_URL;
 
