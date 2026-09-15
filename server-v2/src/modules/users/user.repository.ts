@@ -1,4 +1,4 @@
-import type { Database } from '../../db/database.ts';
+import type { QueryExecutor } from '../../db/database.ts';
 import { ConflictError } from '../../errors/app-error.ts';
 import type { NormalizedEmail } from './email.service.ts';
 
@@ -34,9 +34,9 @@ const isUniqueViolation = (error: unknown): boolean => {
 };
 
 export class UserRepository {
-    readonly #database: Database;
+    readonly #database: QueryExecutor;
 
-    constructor(database: Database) {
+    constructor(database: QueryExecutor) {
         this.#database = database;
     }
 

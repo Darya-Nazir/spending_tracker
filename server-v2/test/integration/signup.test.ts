@@ -65,7 +65,8 @@ describe('POST /api/signup', () => {
     test('rolls back failed signup and allows retry', async () => {
         // откатывает регистрацию при сбое и позволяет повторить попытку
         await database.query(
-            'alter table categories add constraint test_reject_signup_categories check (false) not valid',
+            `alter table categories add constraint test_reject_signup_categories
+             check (type = 'expense') not valid`,
         );
         try {
             const response = await request(app)

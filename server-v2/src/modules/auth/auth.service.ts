@@ -1,5 +1,7 @@
 import { EmailService } from '../users/email.service.ts';
-import type { UserRepository } from '../users/user.repository.ts';
+import { UserRepository } from '../users/user.repository.ts';
+import { CategoryRepository } from '../categories/category.repository.ts';
+import type { Database } from '../../db/database.ts';
 import type { LoginInput, RefreshInput, SignupInput } from './auth.schemas.ts';
 import type { PasswordService } from './password.service.ts';
 import type { TokenPair, TokenService } from './token.service.ts';
@@ -21,26 +23,33 @@ export class AuthService {
     readonly #passwords: PasswordService;
     readonly #emails: EmailService;
     readonly #tokens: TokenService;
+    readonly #database: Database;
 
     constructor(
         users: UserRepository,
         passwords: PasswordService,
         emails: EmailService,
         tokens: TokenService,
+        database: Database,
     ) {
         this.#users = users;
         this.#passwords = passwords;
         this.#emails = emails;
         this.#tokens = tokens;
+        this.#database = database;
     }
 
     async signup(input: SignupInput): Promise<PublicUser> {
         const email = this.#emails.normalize(input.email);
         const passwordHash = await this.#passwords.hash(input.password);
-        const user = await this.#users.create({
-            email,
-            name: input.name,
-            passwordHash,
+        const user = await this.#database.transaction(async (executor) => {
+            const created = await new UserRepository(executor).create({
+                email,
+                name: input.name,
+                passwordHash,
+            });
+            await new CategoryRepository(executor).seedDefaults(created.id);
+            return created;
         });
 
         return {

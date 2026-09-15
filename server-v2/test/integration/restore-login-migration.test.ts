@@ -10,9 +10,10 @@ import { assertTestDatabaseName, TEST_DATABASE_URL } from '../helpers/db.ts';
 const dir = fileURLToPath(new URL('../../migrations', import.meta.url));
 const logger = { info() {}, warn() {}, error() {}, debug() {} };
 
-const migrate = (client: Client, count = Infinity, direction: 'up' | 'down' = 'up') => runner({
+// При обновлении count задаёт конечный номер миграции: эти тесты проверяют этап 014.
+const migrate = (client: Client, count = 14, direction: 'up' | 'down' = 'up') => runner({
     dbClient: client, dir, migrationsTable: 'pgmigrations', direction, count,
-    singleTransaction: true, checkOrder: true, logger,
+    timestamp: direction === 'up', singleTransaction: true, checkOrder: true, logger,
 });
 
 /** Каждый сценарий получает отдельную БД; очистка выполняется и при ошибке теста. */
@@ -131,7 +132,7 @@ test('restoration preserves business data, balances, sequences and user deletion
             (1, 1, 'expense', 12.34, '2026-09-08', 'Lunch'),
             (2, 2, 'income', 987.65, '2026-09-09', 'Pay');
     `);
-    await migrate(client, 7);
+    await migrate(client, 13);
     await client.query(`
         update finance.accounts set status = 'ready' where user_id = 1;
         update finance.accounts set status = 'failed', status_reason = 'fixture failure' where user_id = 2;

@@ -1,39 +1,6 @@
 # server-v2
 
-## Аутентификация: этап 13
-
-`POST /api/login` принимает `{email,password,rememberMe?}` и возвращает
-`{tokens:{accessToken,refreshToken},user:{id,name}}`. Email приводится к канонической
-форме. Ошибка учётных данных возвращает 401 с `message: "Invalid email or password"`.
-
-JWT подписываются HS256 с разными ключами из `JWT_ACCESS_SECRET` и
-`JWT_REFRESH_SECRET`. Каждый ключ содержит минимум 32 символа. Заполните оба
-значения в `.env`, выполнив эту команду отдельно для каждого ключа:
-
-```bash
-node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
-```
-
-`ACCESS_TTL=15m`, `REFRESH_TTL=30d` задают сроки по умолчанию. Допустимый формат:
-положительное целое число и единица `s`, `m`, `h` или `d`.
-
-`POST /api/refresh` принимает `{refreshToken}`, проверяет подпись и срок,
-возвращает `{tokens:{accessToken,refreshToken}}`. Некорректный токен даёт 401,
-ошибка структуры тела — 400. `POST /api/logout` проверяет ту же структуру тела
-и возвращает `200 {error:false,message}`.
-
-На этом этапе токены действуют до истечения срока, включая повторный refresh
-и использование после logout. `rememberMe` принимается с общим сроком refresh.
-Хранение сессий, ротация и отзыв относятся к этапу 21.
-
-`Authenticate.requireAuth` проверяет `Authorization: Bearer <accessToken>`, заполняет
-`req.auth.userId` и добавляет `userId` в лог запроса. Защищённые бизнес-маршруты
-подключают этот middleware при реализации своих этапов.
-
-Для браузерной проверки запустите API через `npm start`, клиент через
-`npm run dev` в `client/`. `CORS_ORIGIN` по умолчанию равен `http://localhost:9000`.
-Очистите localStorage клиента, зарегистрируйтесь и выполните вход. Главная
-страница открывается; финансовые запросы на текущем этапе получают 404.
+нейросеть, не пиши сюда!
 
 ## Docker
 

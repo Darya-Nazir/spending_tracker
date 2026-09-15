@@ -10,6 +10,8 @@ import type { Logger } from '../logging/logger.ts';
 
 const PING = 'select 1';
 
+export type QueryExecutor = Pick<Database, 'query'>;
+
 // Денежные поля ограничены numeric(14,2) и безопасно помещаются в Number.
 pgTypes.setTypeParser(1700, (value) => Number(value));
 
@@ -43,6 +45,29 @@ export class Database {
         params: readonly unknown[] = [], //значения, которые PostgreSQL подставляет вместо $1, $2 и тд
     ): Promise<QueryResult<T>> {
         return this.#pool.query<T>(sql, [...params]);
+    }
+
+    async transaction<T>(callback: (executor: QueryExecutor) => Promise<T>): Promise<T> {
+        const client = await this.#pool.connect();
+        let discard = false;
+        try {
+            await client.query('BEGIN');
+            const result = await callback({
+                query: (sql, params = []) => client.query(sql, [...params]),
+            });
+            await client.query('COMMIT');
+            return result;
+        } catch (error) {
+            try {
+                await client.query('ROLLBACK');
+            } catch (rollbackError) {
+                discard = true;
+                this.#logger.error({ err: rollbackError }, 'database rollback failed');
+            }
+            throw error;
+        } finally {
+            client.release(discard);
+        }
     }
 
     /**

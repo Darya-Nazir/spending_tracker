@@ -75,7 +75,7 @@ export class AppFactory {
         const passwords = new PasswordService(this.#config);
         const emails = new EmailService();
         const tokens = new TokenService(this.#config);
-        const service = new AuthService(users, passwords, emails, tokens);
+        const service = new AuthService(users, passwords, emails, tokens, this.#database);
 
         return AuthRouter.create(new AuthController(service));
     }
