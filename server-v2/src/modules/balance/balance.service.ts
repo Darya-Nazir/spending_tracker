@@ -15,4 +15,12 @@ export class BalanceService {
         }
         return balance;
     }
+
+    async set(userId: number, balance: number): Promise<number> {
+        const updated = await this.#balances.update(userId, balance);
+        if (updated === null) {
+            throw new NotFoundError('User not found');
+        }
+        return updated;
+    }
 }
