@@ -21,6 +21,11 @@ export class CategoryController {
         res.json(await this.#service.getById(req.auth!.userId, this.#type, Number(req.params.id)));
     };
 
+    readonly delete = async (req: Request, res: Response): Promise<void> => {
+        await this.#service.delete(req.auth!.userId, this.#type, Number(req.params.id));
+        res.json({ error: false, message: 'Category deleted successfully' });
+    };
+
     readonly create = async (
         req: Request<Record<string, never>, Category, CategoryWriteInput>,
         res: Response<Category>,

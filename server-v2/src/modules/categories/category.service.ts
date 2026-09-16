@@ -24,6 +24,13 @@ export class CategoryService {
         return category;
     }
 
+    async delete(userId: number, type: CategoryType, id: number): Promise<void> {
+        const deleted = await this.#categories.delete(userId, type, id);
+        if (!deleted) {
+            throw new NotFoundError('Category not found');
+        }
+    }
+
     async getById(userId: number, type: CategoryType, id: number): Promise<Category> {
         const category = await this.#categories.findById(userId, type, id);
         if (category === null) {

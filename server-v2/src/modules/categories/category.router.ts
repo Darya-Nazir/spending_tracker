@@ -18,6 +18,7 @@ export class CategoryRouter {
             routes.post('/', ValidationMiddleware.body(categoryWriteSchema), controller.create);
             routes.put('/:id', ValidationMiddleware.params(categoryParamsSchema),
                 ValidationMiddleware.body(categoryWriteSchema), controller.rename);
+            routes.delete('/:id', ValidationMiddleware.params(categoryParamsSchema), controller.delete);
             router.use(`/${type}`, authenticate.requireAuth, routes);
         }
 

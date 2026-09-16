@@ -77,6 +77,23 @@ export class CategoryRepository {
         }
     }
 
+    async delete(userId: number, type: CategoryType, id: number): Promise<boolean> {
+        try {
+            const { rowCount } = await this.#database.query(
+                `delete from public.categories where user_id = $1 and type = $2 and id = $3`,
+                [userId, type, id],
+            );
+            return rowCount === 1;
+        } catch (error) {
+            if (typeof error === 'object' && error !== null
+                && 'code' in error && error.code === '23503'
+                && 'constraint' in error && error.constraint === 'operations_category_fkey') {
+                throw new ConflictError('Category has operations');
+            }
+            throw error;
+        }
+    }
+
     async seedDefaults(userId: number): Promise<void> {
         for (const [type, titles] of Object.entries(STANDARD_CATEGORIES)) {
             await this.#database.query(
