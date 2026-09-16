@@ -1,5 +1,5 @@
 import type { QueryExecutor } from '../../db/database.ts';
-import { ConflictError } from '../../errors/app-error.ts';
+import { ConflictError, NotFoundError } from '../../errors/app-error.ts';
 import { CategoryTitleService } from './category-title.service.ts';
 
 const STANDARD_CATEGORIES = {
@@ -89,6 +89,32 @@ export class CategoryRepository {
                 && 'code' in error && error.code === '23503'
                 && 'constraint' in error && error.constraint === 'operations_category_fkey') {
                 throw new ConflictError('Category has operations');
+            }
+            throw error;
+        }
+    }
+
+    async deleteOperations(userId: number, type: CategoryType, categoryId: number): Promise<void> {
+        await this.#database.query(
+            `delete from public.operations where user_id = $1 and type = $2 and category_id = $3`,
+            [userId, type, categoryId],
+        );
+    }
+
+    async moveOperations(
+        userId: number, type: CategoryType, categoryId: number, targetCategoryId: number,
+    ): Promise<void> {
+        try {
+            await this.#database.query(
+                `update public.operations set category_id = $4
+                  where user_id = $1 and type = $2 and category_id = $3`,
+                [userId, type, categoryId, targetCategoryId],
+            );
+        } catch (error) {
+            if (typeof error === 'object' && error !== null
+                && 'code' in error && error.code === '23503'
+                && 'constraint' in error && error.constraint === 'operations_category_fkey') {
+                throw new NotFoundError('Target category not found');
             }
             throw error;
         }

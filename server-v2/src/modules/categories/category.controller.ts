@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 
 import type { Category, CategoryType } from './category.repository.ts';
-import type { CategoryWriteInput } from './category.schemas.ts';
+import type { CategoryWriteInput, MoveOperationsInput } from './category.schemas.ts';
 import type { CategoryService } from './category.service.ts';
 
 export class CategoryController {
@@ -24,6 +24,21 @@ export class CategoryController {
     readonly delete = async (req: Request, res: Response): Promise<void> => {
         await this.#service.delete(req.auth!.userId, this.#type, Number(req.params.id));
         res.json({ error: false, message: 'Category deleted successfully' });
+    };
+
+    readonly deleteOperations = async (req: Request, res: Response): Promise<void> => {
+        await this.#service.deleteOperations(req.auth!.userId, this.#type, Number(req.params.id));
+        res.json({ error: false, message: 'Operations deleted successfully' });
+    };
+
+    readonly moveOperations = async (
+        req: Request<{ id: string }, unknown, MoveOperationsInput>,
+        res: Response,
+    ): Promise<void> => {
+        await this.#service.moveOperations(
+            req.auth!.userId, this.#type, Number(req.params.id), req.body.targetCategoryId,
+        );
+        res.json({ error: false, message: 'Operations moved successfully' });
     };
 
     readonly create = async (

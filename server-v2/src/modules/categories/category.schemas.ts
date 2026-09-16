@@ -11,3 +11,10 @@ export const categoryParamsSchema = z.object({
     id: z.string().regex(/^[1-9]\d*$/)
         .refine((id) => Number(id) <= 2147483647, 'Category ID exceeds the integer range'),
 });
+
+export const moveOperationsSchema = z.object({
+    // ID хранится в PostgreSQL integer: положительное целое до 2^31 − 1.
+    targetCategoryId: z.number().int().positive().max(2147483647),
+}).strict();
+
+export type MoveOperationsInput = z.infer<typeof moveOperationsSchema>;
