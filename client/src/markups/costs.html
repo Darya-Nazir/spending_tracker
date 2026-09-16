@@ -36,3 +36,65 @@
     </div>
 </div>
 
+<!-- Окно выбора действия с операциями -->
+<div class="modal fade" id="categoryOperationsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="categoryOperationsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-4">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5 text-primary-emphasis" id="categoryOperationsLabel">
+                    Категория содержит операции. Выберите действие.
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div id="operationsChoiceStep">
+                    <button type="button" class="btn btn-outline-danger w-100 mb-2" id="chooseDeleteOperationsBtn">
+                        Удалить операции
+                    </button>
+                    <button type="button" class="btn btn-outline-primary w-100" id="chooseMoveOperationsBtn">
+                        Перенести операции
+                    </button>
+                </div>
+                <div id="deleteOperationsStep" class="d-none">
+                    <p class="text-danger">Операции будут удалены навсегда.</p>
+                </div>
+                <div id="moveOperationsStep" class="d-none">
+                    <select class="form-select mb-2" id="targetCategorySelect"></select>
+                    <p class="text-danger">
+                        Перенос применяется сразу. Обратный перенос выполняется отдельным действием.
+                    </p>
+                </div>
+                <p class="text-danger d-none" id="categoryOperationsError"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success d-none" id="confirmOperationsActionBtn">Подтвердить</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Окно удаления опустевшей категории -->
+<div class="modal fade" id="categoryEmptyModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="categoryEmptyLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-4">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5 text-primary-emphasis" id="categoryEmptyLabel">
+                    Удалить пустую категорию?
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger">Категория будет удалена навсегда.</p>
+                <p class="text-danger d-none" id="categoryEmptyError"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="confirmDeleteEmptyCategoryBtn">Удалить категорию</button>
+                <button type="button" class="btn btn-danger" id="keepEmptyCategoryBtn">Оставить категорию</button>
+            </div>
+        </div>
+    </div>
+</div>
+

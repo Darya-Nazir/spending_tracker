@@ -1,6 +1,16 @@
 import { Auth } from "./auth";
 import {HttpMethod, RequestParams} from "../types/http-type";
 
+export class HttpError extends Error {
+    readonly status: number;
+
+    constructor(message: string, status: number) {
+        super(message);
+        this.name = 'HttpError';
+        this.status = status;
+    }
+}
+
 export class Http {
     public static async request<T = any>(
         url: string,
@@ -57,7 +67,7 @@ export class Http {
         if (responseBody.message) {
             errorMsg += '. ' + responseBody.message;
         }
-        throw new Error(errorMsg);
+        throw new HttpError(errorMsg, response.status);
     }
 
     static async handleUnauthorizedAccess() {
