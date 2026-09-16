@@ -14,8 +14,7 @@ const rethrowWriteError = (error: unknown): never => {
     if (typeof error === 'object' && error !== null
         && 'code' in error && error.code === '23505'
         && 'constraint' in error
-        && (error.constraint === 'categories_user_type_title_normalized_unique'
-            || error.constraint === 'categories_user_type_title_lower_unique')) {
+        && error.constraint === 'categories_user_type_title_normalized_unique') {
         throw new ConflictError('Category with given title already exists');
     }
     throw error;

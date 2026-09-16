@@ -14,10 +14,10 @@ type ReferencedOperation = {
 const createReferencedOperation = async (): Promise<ReferencedOperation> => {
     const user = await createUser(database);
     const { rows: categoryRows } = await database.query<{ id: number }>(
-        `insert into categories (user_id, type, title)
-         values ($1, $2, $3)
+        `insert into categories (user_id, type, title, title_normalized)
+         values ($1, $2, $3, $4)
          returning id`,
-        [user.id, 'expense', 'Еда'],
+        [user.id, 'expense', 'Еда', 'еда'],
     );
     const category = categoryRows[0];
     assert.ok(category);

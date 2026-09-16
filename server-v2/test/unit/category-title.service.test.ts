@@ -11,5 +11,7 @@ describe('CategoryTitleService', () => {
         const normalizedTitle = service.normalize('ЕДА and CaFÉ');
 
         assert.equal(normalizedTitle, 'еда and café');
+        assert.equal(service.normalize('İ'), 'i\u0307');
+        assert.equal(service.normalize('ΟΣ'), 'ος');
     });
 });

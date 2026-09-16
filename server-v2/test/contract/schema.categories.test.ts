@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
+import { CategoryTitleService } from '../../src/modules/categories/category-title.service.ts';
 import { useTestDatabase } from '../helpers/db.ts';
 import { createUser } from '../helpers/factories.ts';
 
@@ -12,10 +13,10 @@ const insertCategory = async (
     title: string,
 ): Promise<number> => {
     const { rows } = await database.query<{ id: number }>(
-        `insert into categories (user_id, type, title)
-         values ($1, $2, $3)
+        `insert into categories (user_id, type, title, title_normalized)
+         values ($1, $2, $3, $4)
          returning id`,
-        [userId, type, title],
+        [userId, type, title, new CategoryTitleService().normalize(title)],
     );
     const category = rows[0];
 
@@ -26,6 +27,33 @@ const insertCategory = async (
 
 describe('categories schema', () => {
 
+    test('requires a normalized title on insert and update', async () => {
+        // требует нормализованное название при создании и обновлении
+        const user = await createUser(database);
+        await assert.rejects(database.query(
+            `insert into categories (user_id, type, title) values ($1, 'expense', 'Еда')`,
+            [user.id],
+        ), { code: '23502', column: 'title_normalized' });
+        const id = await insertCategory(user.id, 'expense', 'Еда');
+        await assert.rejects(database.query(
+            'update categories set title_normalized = null where id = $1', [id],
+        ), { code: '23502', column: 'title_normalized' });
+    });
+
+    test('uses one full unique index for category titles', async () => {
+        // использует один полный уникальный индекс для названий категорий
+        const { rows } = await database.query(`
+            select indexname, indexdef from pg_indexes
+            where schemaname = 'public' and tablename = 'categories'
+              and indexname in ('categories_user_type_title_lower_unique',
+                                'categories_user_type_title_normalized_unique')
+        `);
+        assert.equal(rows.length, 1);
+        assert.ok(rows[0]);
+        assert.equal(rows[0].indexname, 'categories_user_type_title_normalized_unique');
+        assert.match(rows[0].indexdef, /CREATE UNIQUE INDEX.*\(user_id, type, title_normalized\)$/);
+    });
+
     test('rejects a case-insensitive duplicate within the same user and type', async () => {
         // отвергает Еда и еда внутри одной пары пользователь–тип
         const user = await createUser(database);
@@ -35,6 +63,8 @@ describe('categories schema', () => {
             insertCategory(user.id, 'expense', 'еда'),
             (error: unknown) => {
                 assert.equal((error as { code?: string }).code, '23505');
+                assert.equal((error as { constraint?: string }).constraint,
+                    'categories_user_type_title_normalized_unique');
                 return true;
             },
         );

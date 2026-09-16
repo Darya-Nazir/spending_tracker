@@ -23,26 +23,26 @@ describe('POST and PUT /api/categories', () => {
             for (const type of ['expense', 'income']) {
                 const path = `/api/categories/${type}`;
                 const auth = authFor(user.id);
-                const created = await request(app).post(path).set(auth).send({ title: 'Кофе Café' });
+                const created = await request(app).post(path).set(auth).send({ title: 'Кофе Café İ' });
                 const id: number = created.body.id;
 
                 assert.equal(typeof id, 'number');
-                assert.deepEqual(created.body, { id, title: 'Кофе Café' });
+                assert.deepEqual(created.body, { id, title: 'Кофе Café İ' });
                 const { rows: inserted } = await database.query(
                     'select user_id, type, title, title_normalized from categories where id = $1', [id],
                 );
                 assert.deepEqual(inserted, [{
-                    user_id: user.id, type, title: 'Кофе Café', title_normalized: 'кофе café',
+                    user_id: user.id, type, title: 'Кофе Café İ', title_normalized: 'кофе café i\u0307',
                 }]);
 
-                const renamed = await request(app).put(`${path}/${id}`).set(auth).send({ title: 'Чай Tea' });
+                const renamed = await request(app).put(`${path}/${id}`).set(auth).send({ title: 'Чай Tea İ' });
 
-                assert.deepEqual(renamed.body, { id, title: 'Чай Tea' });
+                assert.deepEqual(renamed.body, { id, title: 'Чай Tea İ' });
                 const { rows: updated } = await database.query(
                     'select user_id, type, title, title_normalized from categories where id = $1', [id],
                 );
                 assert.deepEqual(updated, [{
-                    user_id: user.id, type, title: 'Чай Tea', title_normalized: 'чай tea',
+                    user_id: user.id, type, title: 'Чай Tea İ', title_normalized: 'чай tea i\u0307',
                 }]);
             }
         }

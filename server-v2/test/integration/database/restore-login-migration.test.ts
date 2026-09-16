@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { runner } from 'node-pg-migrate';
 import { Client } from 'pg';
 
+import { CategoryRepository } from '../../../src/modules/categories/category.repository.ts';
 import { assertTestDatabaseName, TEST_DATABASE_URL } from '../../helpers/db.ts';
 
 const dir = fileURLToPath(new URL('../../../migrations', import.meta.url));
@@ -194,4 +195,33 @@ test('reversing restoration requires a backup and preserves the restored schema'
     await assert.rejects(migrate(client, 1, 'down'), /Restore the pre-014 database backup/);
     assert.deepEqual(await schema(client), before);
     assert.deepEqual(await history(client), applied);
+});
+
+test('migration 016 preserves service-normalized data and matches a fresh database', async t => {
+    // миграция 016 сохраняет нормализованные сервисом данные и даёт схему как у новой базы
+    const client = await createDatabase(t, 15);
+    const fresh = await createDatabase(t, 16);
+    await client.query(`insert into users (email, name, password_hash)
+        values ('categories@example.test', 'Categories', 'hash')`);
+    const categories = new CategoryRepository(client);
+    await categories.seedDefaults(1);
+    await categories.create(1, 'expense', 'Кофе Café İ');
+    await client.query(`insert into operations (user_id, category_id, type, amount, date)
+        values (1, 1, 'expense', 12.34, '2026-09-16')`);
+    const before = await data(client, false);
+    const previousHistory = await history(client);
+
+    await migrate(client, 16);
+
+    assert.deepEqual(await schema(client), await schema(fresh));
+    assert.deepEqual(await data(client, false), before);
+    const applied = await history(client);
+    assert.deepEqual(applied.slice(0, 15), previousHistory);
+    assert.equal(applied.at(-1)?.name, '016_categories_normalized_title_required');
+    assert.deepEqual(await migrate(client, 16), []);
+    assert.deepEqual(await history(client), applied);
+    await migrate(client, 1, 'down');
+    await migrate(client, 16);
+    assert.deepEqual(await schema(client), await schema(fresh));
+    assert.deepEqual(await data(client, false), before);
 });
