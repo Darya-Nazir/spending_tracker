@@ -46,6 +46,14 @@ export class CategoryRepository {
         return rows[0] ?? null;
     }
 
+    async findOwnedById(userId: number, id: number): Promise<(Category & { type: CategoryType }) | null> {
+        const { rows } = await this.#database.query<Category & { type: CategoryType }>(
+            `select id, title, type from public.categories where user_id = $1 and id = $2`,
+            [userId, id],
+        );
+        return rows[0] ?? null;
+    }
+
     async create(userId: number, type: CategoryType, title: string): Promise<Category> {
         try {
             const { rows } = await this.#database.query<Category>(
