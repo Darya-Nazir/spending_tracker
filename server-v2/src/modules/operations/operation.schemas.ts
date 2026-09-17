@@ -1,9 +1,20 @@
 import { z } from 'zod';
 
-export const operationListSchema = z.object({
-    // Этап 19 расширит список периодов и добавит фильтрацию по датам.
-    period: z.literal('all', { error: 'Only period=all is currently supported' }).optional(),
+const intervalDate = z.iso.date().refine((date) => date >= '0001-01-01', 'Date must have a positive year');
+
+export const operationListSchema = z.discriminatedUnion('period', [
+    z.object({ period: z.enum(['all', 'today', 'week', 'month', 'year']).optional() }),
+    z.object({
+        period: z.literal('interval'),
+        dateFrom: intervalDate,
+        dateTo: intervalDate,
+    }),
+]).refine((input) => input.period !== 'interval' || input.dateFrom <= input.dateTo, {
+    message: 'dateFrom must be on or before dateTo',
+    path: ['dateFrom'],
 });
+
+export type OperationListInput = z.infer<typeof operationListSchema>;
 
 export const operationCreateSchema = z.object({
     type: z.enum(['expense', 'income']),

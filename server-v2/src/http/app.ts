@@ -110,6 +110,7 @@ export class AppFactory {
     #operationRouter(): Router {
         const service = new OperationService(
             new OperationRepository(this.#database), new CategoryRepository(this.#database),
+            this.#config.appTz,
         );
         const authenticate = new Authenticate(new TokenService(this.#config));
         return OperationRouter.create(new OperationController(service), authenticate);

@@ -13,6 +13,7 @@ const validEnv: Readonly<RawEnv> = Object.freeze({
     LOG_LEVEL: 'debug',
     DATABASE_URL: 'postgres://spending:spending@localhost:5432/spending_test',
     BCRYPT_COST: '11',
+    APP_TZ: 'Asia/Almaty',
     JWT_ACCESS_SECRET: 'test-access-secret-with-enough-length',
     JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
 });
@@ -38,13 +39,14 @@ describe('Config', () => {
         assert.equal(config.logLevel, 'debug');
         assert.equal(config.databaseUrl, 'postgres://spending:spending@localhost:5432/spending_test');
         assert.equal(config.bcryptCost, 11);
+        assert.equal(config.appTz, 'Asia/Almaty');
         assert.equal(config.jwt.accessSecret, validEnv.JWT_ACCESS_SECRET);
         assert.equal(config.jwt.refreshSecret, validEnv.JWT_REFRESH_SECRET);
     });
 
     test('applies a default to every optional variable', () => {
         // подставляет значение по умолчанию каждой необязательной переменной
-        const config = Config.load(envWithout('NODE_ENV', 'PORT', 'LOG_LEVEL', 'BCRYPT_COST'));
+        const config = Config.load(envWithout('NODE_ENV', 'PORT', 'LOG_LEVEL', 'BCRYPT_COST', 'APP_TZ'));
 
         assert.equal(config.nodeEnv, 'development');
         assert.equal(config.port, 3000);
@@ -53,6 +55,7 @@ describe('Config', () => {
         assert.equal(config.jwt.accessTtl, '15m');
         assert.equal(config.jwt.refreshTtl, '30d');
         assert.equal(config.corsOrigin, 'http://localhost:9000');
+        assert.equal(config.appTz, 'UTC');
     });
 
     test('validates token lifetimes and the browser origin', () => {
@@ -95,6 +98,7 @@ describe('Config', () => {
         assert.throws(() => Config.load(envWith({ PORT: 'nope' })), /PORT/);
         assert.throws(() => Config.load(envWith({ PORT: '70000' })), /PORT/);
         assert.throws(() => Config.load(envWith({ LOG_LEVEL: 'verbose' })), /LOG_LEVEL/);
+        assert.throws(() => Config.load(envWith({ APP_TZ: 'invalid/timezone' })), /APP_TZ/);
 
         let message = '';
         try {

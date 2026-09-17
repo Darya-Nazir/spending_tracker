@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 
 import type { Operation } from './operation.repository.ts';
-import type { OperationCreateInput } from './operation.schemas.ts';
+import type { OperationCreateInput, OperationListInput } from './operation.schemas.ts';
 import type { OperationService } from './operation.service.ts';
 
 export class OperationController {
@@ -11,8 +11,11 @@ export class OperationController {
         this.#service = service;
     }
 
-    readonly list = async (req: Request, res: Response): Promise<void> => {
-        res.json(await this.#service.list(req.auth!.userId));
+    readonly list = async (
+        req: Request<Record<string, never>, Operation[], unknown, OperationListInput>,
+        res: Response<Operation[]>,
+    ): Promise<void> => {
+        res.json(await this.#service.list(req.auth!.userId, req.query));
     };
 
     readonly create = async (

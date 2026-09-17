@@ -45,8 +45,8 @@ describe('DELETE /api/categories/:type/:id/operations', () => {
 });
 
 describe('PUT /api/categories/:type/:id/operations', () => {
-    test('moves all operations to another category', async () => {
-        // переносит все операции в другую категорию
+    test('moves all operations to another category and lists its current title', async () => {
+        // переносит все операции в другую категорию и возвращает её актуальное название в списке
         const user = await createUser(database);
         await categories.seedDefaults(user.id);
         const source = await findCategory(user.id, 'expense', 'Еда');
@@ -60,5 +60,9 @@ describe('PUT /api/categories/:type/:id/operations', () => {
         assert.equal(response.status, 200);
         const { rows } = await database.query('select category_id from operations where user_id = $1', [user.id]);
         assert.deepEqual(rows, [{ category_id: target.id }]);
+
+        const listed = await request(app).get('/api/operations?period=all').set(authFor(user.id));
+        assert.equal(listed.status, 200);
+        assert.deepEqual(listed.body.map(({ category }: { category: string }) => category), [target.title]);
     });
 });

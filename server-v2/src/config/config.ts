@@ -8,8 +8,7 @@ import { z } from 'zod';
  * значения некорректны, Config.load() бросает ошибку со списком всех проблем,
  * и процесс не поднимается.
  *
- * В схеме находятся только те переменные, которые уже кем-то читаются.
- * Остальные закомментированы, у каждой указан этап, на котором она включится.
+ * В схеме находятся только те переменные, которые используются приложением.
  */
 
 const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'] as const;
@@ -27,15 +26,14 @@ const ttl = (name: string, fallback: TokenTtl) => z
     .default(fallback)
     .transform((value) => value as TokenTtl);
 
-// --- этап 19 (фильтры периода) ---
-// const isKnownTimezone = (value: string): boolean => {
-//     try {
-//         new Intl.DateTimeFormat('en-US', { timeZone: value });
-//         return true;
-//     } catch {
-//         return false;
-//     }
-// };
+const isKnownTimezone = (value: string): boolean => {
+    try {
+        new Intl.DateTimeFormat('en-US', { timeZone: value });
+        return true;
+    } catch {
+        return false;
+    }
+};
 
 const envSchema = z.object({
     NODE_ENV: z
@@ -88,12 +86,11 @@ const envSchema = z.object({
     ACCESS_TTL: ttl('ACCESS_TTL', '15m'),
     REFRESH_TTL: ttl('REFRESH_TTL', '30d'),
 
-    // --- этап 19 (фильтры периода) ---
     // Таймзона, в которой вычисляются границы today, week, month, year.
-    // APP_TZ: z
-    //     .string()
-    //     .refine(isKnownTimezone, 'APP_TZ must be a timezone this runtime knows, e.g. Asia/Almaty')
-    //     .default('UTC'),
+    APP_TZ: z
+        .string()
+        .refine(isKnownTimezone, 'APP_TZ must be a timezone this runtime knows, e.g. Asia/Almaty')
+        .default('UTC'),
 }).refine((env) => env.JWT_ACCESS_SECRET !== env.JWT_REFRESH_SECRET, {
     message: 'JWT_REFRESH_SECRET must differ from JWT_ACCESS_SECRET',
     path: ['JWT_REFRESH_SECRET'],
@@ -131,8 +128,7 @@ export class Config {
         refreshTtl: TokenTtl;
     }>;
 
-    // --- этап 19 ---
-    // readonly appTz: string;
+    readonly appTz: string;
 
     /**
      * @param env по умолчанию process.env. Тесты передают окружение
@@ -181,8 +177,7 @@ export class Config {
             refreshTtl: values.REFRESH_TTL,
         });
 
-        // --- этап 19 ---
-        // this.appTz = values.APP_TZ;
+        this.appTz = values.APP_TZ;
 
         this.isDevelopment = this.nodeEnv === 'development';
         this.isTest = this.nodeEnv === 'test';

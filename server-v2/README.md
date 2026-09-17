@@ -22,7 +22,7 @@ docker compose exec postgres psql -U spending -d spending_test -c '\d categories
 
 Содержимое таблицы
 docker compose exec postgres psql -U spending -d spending_dev -c 'select * from categories;'
-
+docker compose exec postgres psql -U spending -d spending_dev -c 'select * from operations;'
 
 ## SQL-логи PostgreSQL
 

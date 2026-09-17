@@ -1,6 +1,7 @@
 import type { QueryExecutor } from '../../db/database.ts';
 import { NotFoundError } from '../../errors/app-error.ts';
 import type { CategoryType } from '../categories/category.repository.ts';
+import type { DateRange } from './period.ts';
 
 export type Operation = {
     id: number;
@@ -21,15 +22,17 @@ export class OperationRepository {
         this.#database = database;
     }
 
-    async list(userId: number): Promise<Operation[]> {
+    async list(userId: number, range: DateRange | null): Promise<Operation[]> {
         const { rows } = await this.#database.query<Operation>(
             `select o.id, o.type, o.amount, o.date, o.comment, c.title as category
                from public.operations o
                join public.categories c
                  on c.id = o.category_id and c.user_id = o.user_id and c.type = o.type
               where o.user_id = $1
+                and ($2::date is null or o.date >= $2::date)
+                and ($3::date is null or o.date <= $3::date)
               order by o.date desc, o.id desc`,
-            [userId],
+            [userId, range?.dateFrom ?? null, range?.dateTo ?? null],
         );
         return rows;
     }

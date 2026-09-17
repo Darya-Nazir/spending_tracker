@@ -2,19 +2,22 @@ import type { CategoryRepository } from '../categories/category.repository.ts';
 import { NotFoundError, ValidationError } from '../../errors/app-error.ts';
 import { OperationMapper } from './operation.mapper.ts';
 import type { Operation, OperationRepository } from './operation.repository.ts';
-import type { OperationCreateInput } from './operation.schemas.ts';
+import type { OperationCreateInput, OperationListInput } from './operation.schemas.ts';
+import { Period } from './period.ts';
 
 export class OperationService {
     readonly #operations: OperationRepository;
     readonly #categories: CategoryRepository;
+    readonly #timeZone: string;
 
-    constructor(operations: OperationRepository, categories: CategoryRepository) {
+    constructor(operations: OperationRepository, categories: CategoryRepository, timeZone: string) {
         this.#operations = operations;
         this.#categories = categories;
+        this.#timeZone = timeZone;
     }
 
-    list(userId: number): Promise<Operation[]> {
-        return this.#operations.list(userId);
+    list(userId: number, input: OperationListInput): Promise<Operation[]> {
+        return this.#operations.list(userId, Period.range(input, this.#timeZone));
     }
 
     async create(userId: number, input: OperationCreateInput): Promise<Operation> {
