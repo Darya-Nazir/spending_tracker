@@ -12,7 +12,6 @@ export type Operation = {
     category: string;
 };
 
-/** Строка, которую отдаёт INSERT: без category, её добавляет OperationMapper. */
 export type InsertedOperation = Omit<Operation, 'category'>;
 
 export class OperationRepository {
@@ -20,6 +19,18 @@ export class OperationRepository {
 
     constructor(database: QueryExecutor) {
         this.#database = database;
+    }
+
+    async findOwnedById(userId: number, id: number): Promise<Operation | null> {
+        const { rows } = await this.#database.query<Operation>(
+            `select o.id, o.type, o.amount, o.date, o.comment, c.title as category
+               from public.operations o
+               join public.categories c
+                 on c.id = o.category_id and c.user_id = o.user_id and c.type = o.type
+              where o.user_id = $1 and o.id = $2`,
+            [userId, id],
+        );
+        return rows[0] ?? null;
     }
 
     async list(userId: number, range: DateRange | null): Promise<Operation[]> {
@@ -52,14 +63,43 @@ export class OperationRepository {
             }
             return rows[0];
         } catch (error) {
-            // Категорию удалили между проверкой в сервисе и этим INSERT — составной FK
-            // (user_id, category_id, type) -> categories(user_id, id, type) из миграции 015 это ловит.
-            if (typeof error === 'object' && error !== null
-                && 'code' in error && error.code === '23503'
-                && 'constraint' in error && error.constraint === 'operations_category_fkey') {
-                throw new NotFoundError('Category not found');
-            }
-            throw error;
+            throw OperationRepository.#asCategoryNotFound(error);
         }
+    }
+
+    async update(
+        userId: number, id: number, categoryId: number, type: CategoryType, amount: number, date: string,
+        comment: string,
+    ): Promise<InsertedOperation | null> {
+        try {
+            const { rows } = await this.#database.query<InsertedOperation>(
+                `update public.operations
+                    set category_id = $3, type = $4, amount = $5, date = $6, comment = $7
+                  where user_id = $1 and id = $2
+                 returning id, type, amount, date, comment`,
+                [userId, id, categoryId, type, amount, date, comment],
+            );
+            return rows[0] ?? null;
+        } catch (error) {
+            throw OperationRepository.#asCategoryNotFound(error);
+        }
+    }
+
+    /** true — строка была и удалена, false — такой операции у пользователя нет. */
+    async delete(userId: number, id: number): Promise<boolean> {
+        const { rows } = await this.#database.query(
+            'delete from public.operations where user_id = $1 and id = $2 returning id',
+            [userId, id],
+        );
+        return rows.length > 0;
+    }
+
+    static #asCategoryNotFound(error: unknown): unknown {
+        if (typeof error === 'object' && error !== null
+            && 'code' in error && error.code === '23503'
+            && 'constraint' in error && error.constraint === 'operations_category_fkey') {
+            return new NotFoundError('Category not found');
+        }
+        return error;
     }
 }

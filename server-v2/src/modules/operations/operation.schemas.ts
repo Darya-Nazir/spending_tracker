@@ -23,8 +23,18 @@ export const operationCreateSchema = z.object({
     // numeric(14,2) в БД проверяет amount > 0.
     amount: z.number().positive(),
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be in YYYY-MM-DD format'),
-    // Пустая строка допустима: старый сервер отвергал её, это баг, а не правило.
+    // Пустая строка допустима
     comment: z.string().default(''),
 }).strict();
 
 export type OperationCreateInput = z.infer<typeof operationCreateSchema>;
+
+// PUT принимает тот же набор полей, что и создание
+export const operationUpdateSchema = operationCreateSchema;
+
+export type OperationUpdateInput = z.infer<typeof operationUpdateSchema>;
+
+export const operationIdParamsSchema = z.object({
+    id: z.string().regex(/^[1-9]\d*$/)
+        .refine((id) => Number(id) <= 2147483647, 'Operation ID exceeds the integer range'),
+});
