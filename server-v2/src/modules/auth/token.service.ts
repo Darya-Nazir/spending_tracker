@@ -11,7 +11,6 @@ export type TokenPair = {
 
 export type AuthIdentity = Readonly<{ userId: number }>;
 
-/** Выпускает JWT и возвращает личность после проверки подписи и срока. */
 export class TokenService {
     readonly #jwt: Config['jwt'];
 
@@ -19,7 +18,16 @@ export class TokenService {
         this.#jwt = config.jwt;
     }
 
-    issueTokenPair(userId: number): TokenPair {
+    sessionExpiresAt(rememberMe = true): Date {
+        // TTL (Time To Live) — срок действия
+        const ttl = this.#jwt.refreshTtl;
+        const units: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86400 };
+        const seconds = Number(ttl.slice(0, -1)) * units[ttl.slice(-1)]!;
+        const lifetime = rememberMe ? seconds : Math.min(seconds, 86400);
+        return new Date((Math.floor(Date.now() / 1000) + lifetime) * 1000); // время истечения сессии
+    }
+
+    issueTokenPair(userId: number, refreshExpiresAt = this.sessionExpiresAt()): TokenPair {
         if (!Number.isSafeInteger(userId) || userId <= 0) {
             throw new Error('Token userId must be a positive safe integer');
         }
@@ -29,8 +37,8 @@ export class TokenService {
             accessToken: jwt.sign({}, this.#jwt.accessSecret, {
                 algorithm: 'HS256', subject, expiresIn: this.#jwt.accessTtl, jwtid: randomUUID(),
             }),
-            refreshToken: jwt.sign({}, this.#jwt.refreshSecret, {
-                algorithm: 'HS256', subject, expiresIn: this.#jwt.refreshTtl, jwtid: randomUUID(),
+            refreshToken: jwt.sign({ exp: Math.floor(refreshExpiresAt.getTime() / 1000) }, this.#jwt.refreshSecret, {
+                algorithm: 'HS256', subject, jwtid: randomUUID(),
             }),
         };
     }

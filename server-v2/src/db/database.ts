@@ -46,7 +46,8 @@ export class Database {
     ): Promise<QueryResult<T>> {
         return this.#pool.query<T>(sql, [...params]);
     }
-
+    
+// общая обёртка для выполнения разных действий внутри транзакции
     async transaction<T>(callback: (executor: QueryExecutor) => Promise<T>): Promise<T> {
         const client = await this.#pool.connect();
         let discard = false;

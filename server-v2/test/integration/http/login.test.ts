@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { describe, test } from 'node:test';
 import request from 'supertest';
 
@@ -48,21 +49,40 @@ describe('POST /api/login', () => {
         });
     });
 
-    test('accepts either rememberMe value and keeps authentication stateless', async () => {
-        // принимает оба значения rememberMe и сохраняет аутентификацию без состояния
+    test('stores the SHA-256 hash of the refresh token in the user session', async () => {
+        // сохраняет SHA-256-хеш refresh-токена в сессии пользователя
         const userId = await register();
+        const response = await request(app).post('/api/login')
+            .send({ email: signup.email, password: signup.password });
+        assert.equal(response.status, 200);
+
         const tokens = new TokenService(config);
+        assert.deepEqual(tokens.verifyAccess(response.body.tokens.accessToken), { userId });
+        assert.deepEqual(tokens.verifyRefresh(response.body.tokens.refreshToken), { userId });
+        const tokenHash = createHash('sha256').update(response.body.tokens.refreshToken).digest('hex');
+        const { rows } = await database.query(
+            'select user_id, token_hash, revoked_at from sessions',
+        );
+        assert.deepEqual(rows, [{ user_id: userId, token_hash: tokenHash, revoked_at: null }]);
+    });
+
+    test('gives remembered sessions a longer lifetime', async () => {
+        // продлевает срок запоминаемых сессий
+        const userId = await register();
         for (const rememberMe of [true, false]) {
             const response = await request(app).post('/api/login')
                 .send({ email: signup.email, password: signup.password, rememberMe });
             assert.equal(response.status, 200);
-            assert.deepEqual(tokens.verifyAccess(response.body.tokens.accessToken), { userId });
-            assert.deepEqual(tokens.verifyRefresh(response.body.tokens.refreshToken), { userId });
-            const payload = JSON.parse(Buffer.from(response.body.tokens.refreshToken.split('.')[1], 'base64url').toString());
-            assert.equal(payload.exp - payload.iat, 30 * 24 * 60 * 60);
         }
-        const result = await database.query('select count(*)::int as count from sessions');
-        assert.equal(result.rows[0]?.count, 0);
+        const { rows } = await database.query<{ expires_at: Date }>(
+            'select expires_at from sessions where user_id = $1 order by id',
+            [userId],
+        );
+        assert.equal(rows.length, 2, 'Each login must create a session');
+        const [remembered, temporary] = rows;
+        assert.ok(remembered && temporary);
+        assert.ok(temporary.expires_at.getTime() > Date.now());
+        assert.ok(remembered.expires_at > temporary.expires_at, 'rememberMe=false must shorten the session lifetime');
     });
 
     test('validates login input and returns 401 for a short incorrect password', async () => {

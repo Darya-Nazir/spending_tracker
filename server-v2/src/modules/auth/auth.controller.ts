@@ -28,7 +28,7 @@ export class AuthController {
         req: Request<Record<string, never>, LoginResult, LoginInput>,
         res: Response<LoginResult>,
     ): Promise<void> => {
-        const result = await this.#service.login(req.body);
+        const result = await this.#service.login(req.body, req.get('user-agent'));
         req.log.info({ userId: result.user.id }, 'user logged in');
         res.status(200).json(result);
     };
