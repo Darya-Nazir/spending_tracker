@@ -74,6 +74,11 @@ export class Login extends UserManager {
                     return;
                 }
 
+                if (statusMatch && statusMatch.length > 0 && parseInt(statusMatch[1]) === 429) {
+                    alert('Слишком много попыток входа. Пожалуйста, попробуйте позже.');
+                    return;
+                }
+
                 if (error.message.includes('email or password')) {
                     alert('Неверная электронная почта или пароль');
                     return;

@@ -50,3 +50,10 @@ export class ConflictError extends AppError {
         super(message, 409);
     }
 }
+
+/** 429. Число запросов от одного ключа превысило лимит окна: см. rate-limit.ts. */
+export class TooManyRequestsError extends AppError {
+    constructor(message: string) {
+        super(message, 429);
+    }
+}

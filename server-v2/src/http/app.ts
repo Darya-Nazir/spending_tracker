@@ -7,6 +7,7 @@ import type { Config } from '../config/config.ts';
 import type { Database } from '../db/database.ts';
 import type { Logger } from '../logging/logger.ts';
 import { AuthController } from '../modules/auth/auth.controller.ts';
+import { AuthRateLimiterFactory } from '../modules/auth/auth-rate-limiters.ts';
 import { AuthRouter } from '../modules/auth/auth.router.ts';
 import { AuthService } from '../modules/auth/auth.service.ts';
 import { PasswordService } from '../modules/auth/password.service.ts';
@@ -53,9 +54,7 @@ export class AppFactory {
     build(): Express {
         const app = express();
 
-        // По умолчанию express добавляет к каждому ответу заголовок
-        // X-Powered-By: Express. Он называет используемый фреймворк и ничего
-        // не даёт клиенту, поэтому выключен.
+        //Дефолтный X-Powered-By: Express
         app.disable('x-powered-by');
 
         app.use(new RequestContext(this.#logger).attach); // помечает все записи одного запроса requestId
@@ -78,9 +77,6 @@ export class AppFactory {
         return app;
     }
 
-    /**
-     * Сборка модуля health: сервис отдаётся контроллеру, контроллер — роутеру.
-     */
     #healthRouter(): Router {
         return HealthRouter.create(new HealthController(new HealthService(this.#database)));
     }
@@ -92,7 +88,7 @@ export class AppFactory {
         const tokens = new TokenService(this.#config);
         const service = new AuthService(users, passwords, emails, tokens, this.#database);
 
-        return AuthRouter.create(new AuthController(service));
+        return AuthRouter.create(new AuthController(service), AuthRateLimiterFactory.create());
     }
 
     #categoryRouter(): Router {
