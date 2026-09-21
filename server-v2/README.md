@@ -79,8 +79,8 @@ docker compose exec postgres psql -U spending -d spending_test \
 npm test
 ```
 запустить конкретный тест
-Из папки server-v2:
-npm run db:migrate:test && node --test --test-concurrency=1 {ptest path}
+Из основной папки:
+npm run db:migrate:test && node {ptest path}
 
 Если тестовая база уже мигрирована, достаточно:
 node --test test/integration/isolation.test.ts
