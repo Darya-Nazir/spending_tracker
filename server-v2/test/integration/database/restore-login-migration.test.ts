@@ -8,7 +8,7 @@ import { Client } from 'pg';
 import { CategoryRepository } from '../../../src/modules/categories/category.repository.ts';
 import { assertTestDatabaseName, TEST_DATABASE_URL } from '../../helpers/db.ts';
 
-const dir = fileURLToPath(new URL('../../../migrations', import.meta.url));
+const dir = fileURLToPath(new URL('../../../migrations/old', import.meta.url));
 const logger = { info() {}, warn() {}, error() {}, debug() {} };
 
 // При обновлении count задаёт конечный номер миграции: эти тесты проверяют этап 014.
