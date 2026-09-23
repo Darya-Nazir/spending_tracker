@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# Создаёт дополнительную тестовую базу PostgreSQL.
+# Основную базу создаёт официальный образ PostgreSQL по переменной:
+# POSTGRES_DB
+
 set -eu
 
 test_database=${POSTGRES_TEST_DB:-spending_test}

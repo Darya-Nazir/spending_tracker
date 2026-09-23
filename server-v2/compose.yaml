@@ -46,6 +46,21 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  server:
+    build: 
+    container_name: spending-tracker-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-spending}:${POSTGRES_PASSWORD:-spending}@postgres:5432/${POSTGRES_DB:-spending_dev}
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+        
 volumes:
   postgres_data:
     name: spending_tracker_postgres_data
