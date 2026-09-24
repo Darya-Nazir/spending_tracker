@@ -1,166 +1,61 @@
-## Overview
+# Spending Tracker
 
-This project is a single-page application built with TypeScript and a custom client-side router.  
-The application includes user authentication, transaction management, balance calculation, and basic analytics.
+Приложение для учёта доходов и расходов. Пользователь может управлять операциями и категориями, 
+смотреть баланс и аналитику за выбранный период.
 
-The project is split into a client and a server part and is intended as a learning / test assignment.  
-Data is stored in memory only and is not persisted between server restarts.
+## Структура проекта
 
----
+- `client/` — клиент на TypeScript с Webpack, HTML-шаблонами, собственным роутером и Chart.js.
+- `server-v2/` — актуальный REST API на Node.js 24, TypeScript и Express 5 с PostgreSQL 17.
+- `server/` — прежняя версия API с хранением данных в памяти.
 
-## Architecture
+## Актуальный сервер
 
-The application follows a simple client–server architecture.
+`server-v2` предоставляет:
 
-- Client: SPA with a custom router, rendered via HTML templates and JavaScript.
-- Server: REST API built with Express and JWT-based authentication.
-- State: stored on the client in `localStorage`.
-- Data storage: in-memory TAFFY collections without persistence.
+- регистрацию, вход, обновление и отзыв JWT-сессий;
+- CRUD для категорий и операций;
+- перенос и удаление операций при удалении категории;
+- расчёт и изменение баланса;
+- фильтрацию операций по периодам;
+- валидацию запросов, CORS, rate limiting и структурированные логи;
+- миграции PostgreSQL, health checks, unit-, integration- и contract-тесты.
 
----
+API доступен по адресу `http://localhost:3000/api`. Эндпоинты состояния: `GET /health` и `GET /ready`.
 
-## Client
+## Локальный запуск
 
-The client is built with TypeScript and bundled using Webpack.
+Требуются Docker и Node.js 24+.
 
-HTML templates are located in `client/src/markups`. Components and services are assembled during the build process, and routing is handled on the client side.
-
-### Router
-
-The router (`client/src/router.ts`) works with the History API and loads page templates using `fetch`.  
-It hides the navigation bar for guest users. At the same time, it does not initialize `Auth.navigateToPath` and contains an unused `Auth.processUnauthorizedResponse.bind(this)`.
-
-### Services
-
-- `Auth` (`client/src/services/auth.ts`)  
-  Stores access and refresh tokens and handles token refresh.
-- `Http`  
-  Centralizes all `fetch` calls and retries requests after a 401 response.
-- `DefaultCategoriesManager`  
-  Automatically creates default categories on the user’s first login.
-- `Filter` (`client/src/services/filter.ts`)  
-  Filters transactions and prepares data for analytics.
-
-### Components
-
-- Login and registration forms (inherit from `UserManager`)
-- Tables for transactions and categories (based on `BaseOperations`)
-- Transaction creation and editing forms
-- Analytics component (`client/src/components/analytics.ts`) built with Chart.js and a custom `Unselect` component
-
----
-
-## Server
-
-The server is built with Express and runs on Node.js.
-
-### API Routes
-
-Main routes are defined in `server/app.js`:
-
-- `/api/login`, `/api/signup`, `/api/refresh`, `/api/logout`
-- `/api/categories/{expense|income}`
-- `/api/operations`
-- `/api/balance`
-
-Authorization is handled via `MiddlewareUtils.validateUser`.
-
-### Controllers and Data
-
-Controllers perform basic validation and work with TAFFY models.  
-The balance is recalculated on every transaction CRUD operation (`server/controllers/operation.controller.js`).
-
-### Authentication
-
-Tokens are issued by `TokenUtils` using a single shared secret.
-
-- Access token lifetime: 15 minutes
-- Refresh token lifetime: 1 or 30 days
-- Refresh tokens are stored in memory (`server/utils/token.utils.js`)
-
----
-
-## Tests
-
-Test coverage is minimal.
-
-- One unit test for the signup form (`client/__tests__/components/signup.test.ts`)
-- Placeholders for end-to-end tests (Playwright)
-- MSW mocks for API stubbing
-
----
-
-## User Scenarios
-
-First-time registration:  
-The user navigates to `/signup`, enters full name, email, and password, confirms registration, and immediately enters the application with default categories already created.
-
-Returning login:  
-The user opens `/login`, enters email and password (optionally enabling “Remember me”), and accesses the personal dashboard.
-
-View balance and transactions:  
-On the “Transactions” page, the user sees the current balance and a table with all transactions.
-
-Filter transactions by period:  
-The user can filter transactions by predefined periods (“Today”, “Week”, “Month”, “Year”, “All”) or by a custom date range.
-
-Create a transaction:  
-The user adds an income or expense, fills in the form, saves it, and returns to the list.
-
-Edit or delete a transaction:  
-Existing transactions can be edited via the pencil icon or deleted via the trash icon, with balance recalculated automatically.
-
-View analytics:  
-The “Analytics” page shows pie charts for income and expenses grouped by category, using the same period filters.
-
-Log out:  
-The user logs out via the header menu and is redirected to the login page.
-
----
-
-## Technical Assignment
-
-### Stage 1
-
-Layout of all pages, including form validation error states.  
-Result: all pages match the design mockups and have responsive versions.
-
-### Stage 2
-
-Full implementation of registration and authentication.  
-An application shell and core router are introduced.
-
-Result: authentication works fully, while all other pages are rendered as static layouts without internal logic.
-
-Stage 2 includes:
-1. Implementation of login and registration pages with client-side validation and visual error states. Authentication uses a standard token exchange flow based on the provided YAML specification and should be tested in Postman before implementation.
-2. Implementation of the application core and router. Unauthorized users are redirected to the login page. Authorized users can access all pages except registration. All pages are rendered through the routing mechanism, not by directly opening HTML files.
-
-### Stage 3
-
-Project completion.  
-Result: a fully finished application that meets the design and technical requirements.
-
-This stage includes implementation of all remaining functionality according to the specification and design mockups.
-
----
-
-## Local Development
-
-### Start the server
+### Сервер и PostgreSQL
 
 ```bash
-cd server
-npm install
-npm start
+cd server-v2
+cp .env.example .env
 ```
 
-Start the client
+Заполните в `.env` разные значения `JWT_ACCESS_SECRET` и `JWT_REFRESH_SECRET` длиной от 32 символов, затем запустите контейнеры:
+
+```bash
+docker compose up --build
+```
+
+Миграции применяются при запуске контейнера сервера и перед тестами. Дополнительные команды для базы, 
+миграций и тестов описаны в [`server-v2/README.md`](server-v2/README.md).
+
+### Клиент
+
 ```bash
 cd client
-npm install
+npm ci
 npm run dev
 ```
 
-The server runs on http://localhost:3000.
-The client is available at http://localhost:8080 by default (webpack-dev-server).
+Клиент откроется на `http://localhost:9000` и будет обращаться к API на порту `3000`.
+
+## Проверки
+
+```bash
+cd server-v2 && npm ci && npm run check
+cd client && npm ci && npm test
+```
