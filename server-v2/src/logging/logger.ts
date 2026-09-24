@@ -5,18 +5,6 @@ import pretty from 'pino-pretty';
 
 import type { Config } from '../config/config.ts';
 
-/**
- * Обёртка над pino. Наружу отдаёт четыре метода уровней и child().
- * Настройки формата и уровня задаются один раз здесь, в остальных модулях
- * pino не импортируется.
- *
- * Какой уровень когда использовать:
- *   error — непредвиденный сбой
- *   warn  — отказ по правилам приложения: 401, 403, 409, 422
- *   info  — событие бизнес-логики: пользователь зарегистрирован, сервер поднялся
- *   debug — детали выполнения приложения
- */
-
 /** Поля записи. Всё, кроме текста сообщения, передаётся через этот объект. */
 export type LogFields = Record<string, unknown>;
 
@@ -25,10 +13,6 @@ type LevelName = 'error' | 'warn' | 'info' | 'debug';
 export class Logger {
     readonly #pino: PinoLogger;
 
-    /**
-     * @param destination куда писать. process.stdout по умолчанию; тесты
-     *   передают сюда свой Writable, накапливающий записи в памяти.
-     */
     static create(config: Config, destination: Writable = process.stdout): Logger {
         return new Logger(pino(
             Logger.#options(config),
@@ -40,10 +24,6 @@ export class Logger {
         const options: LoggerOptions = { level: config.logLevel };
 
         if (!config.isDevelopment) {
-            // По умолчанию pino пишет уровень числом: 30 вместо "info".
-            // В NDJSON нужна строка — по ней фильтруют grep и jq.
-            // В development форматтер не ставится: pino-pretty читает
-            // именно число, чтобы выбрать цвет и подпись уровня.
             options.formatters = { level: (label) => ({ level: label }) };
         }
 
@@ -64,10 +44,6 @@ export class Logger {
         this.#pino = instance;
     }
 
-    /**
-     * Новый Logger, который добавляет переданные поля в каждую свою запись.
-     * Исходный объект не меняется: его записи этих полей не получают.
-     */
     child(fields: LogFields): Logger {
         return new Logger(this.#pino.child(fields));
     }

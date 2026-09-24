@@ -5,16 +5,6 @@ import request from 'supertest';
 import { AppFactory } from '../../../src/http/app.ts';
 import { createTestDatabase, TEST_DATABASE_URL } from '../../helpers/db.ts';
 
-/**
- *  /ready отвечает 200 только когда база отвечает на запрос
- *
- * Первому тесту нужен запущенный контейнер: docker compose up -d --wait.
- *
- * Второй тест контейнер не останавливает, а создаёт Database с адресом
- * закрытого порта: прогон не должен менять состояние базы, с которой в это
- * же время может работать запущенный сервер.
- */
-
 // Адрес spending_test, а не spending_dev: с этапа 7 весь прогон работает
 // с тестовой базой.
 const REACHABLE_URL = TEST_DATABASE_URL;

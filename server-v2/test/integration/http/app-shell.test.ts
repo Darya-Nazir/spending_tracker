@@ -6,11 +6,6 @@ import { useTestApp } from '../../helpers/app.ts';
 
 const { app } = useTestApp();
 
-// Это название группы тестов. Речь про «каркас приложения»: 
-// собранный express-объект со всеми middleware и роутерами, но без запуска сервера: listen() не вызывается. 
-// Тест проверяет, что этот каркас в целом жив — что через всю цепочку 
-// RequestContext → json → healthRouter → NotFoundHandler → ErrorHandler 
-// запрос доходит и возвращает корректный ответ.
 describe('app shell', () => {
 
     test('GET /health answers 200 {status:"ok"} as JSON', async () => {

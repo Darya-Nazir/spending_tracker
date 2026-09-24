@@ -59,9 +59,6 @@ export class ErrorHandler {
             return { status: error.status, message: error.message, level: 'warn' };
         }
 
-        // express.json() бросает ошибку пакета http-errors: у неё есть status
-        // и expose: true, означающее «текст можно показать клиенту». Так сюда
-        // приходит битый JSON в теле запроса.
         const exposed = ErrorHandler.#exposedHttpError(error);
         if (exposed) {
             return { ...exposed, level: 'warn' };
@@ -93,11 +90,6 @@ export class ErrorHandler {
         return { status, message };
     }
 
-    /**
-     * Бросить в JS можно любое значение, не только Error. Error отдаётся
-     * логгеру как есть — pino разложит его на type, message и stack.
-     * Остальное заворачивается в объект, чтобы значение не потерялось.
-     */
     static #serialize(error: unknown): unknown {
         if (error instanceof Error) {
             return error;

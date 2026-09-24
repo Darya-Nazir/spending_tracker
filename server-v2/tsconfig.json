@@ -13,9 +13,6 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
 
-    // Запрещает синтаксис, который стирание типов не умеет: enum, namespace
-    // и сокращённые поля вида constructor(private readonly dep: Dep).
-    // Без этого флага такой код прошёл бы проверку и упал в рантайме.
     "erasableSyntaxOnly": true,
 
     "strict": true,

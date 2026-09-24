@@ -23,9 +23,6 @@ const config = Config.load({
     JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
 });
 
-// Обработчик вызывает у ответа только status() и json(), а у запроса читает
-// req.log и метаданные для лога. Вместо объектов express подставляются заглушки
-// с этими полями, записывающие переданные им значения.
 type Captured = {
     statusCode: number | undefined;
     body: Record<string, unknown> | undefined;

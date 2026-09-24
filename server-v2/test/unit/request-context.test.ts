@@ -16,10 +16,6 @@ const config = Config.load({
     JWT_REFRESH_SECRET: 'test-refresh-secret-with-enough-length',
 });
 
-// Здесь проверяется только requestId, поэтому заглушки дают ровно то, к чему
-// middleware обращается по пути к нему: у запроса — headers, у ответа —
-// setHeader() и подписку on(). Заголовок ответа и access-лог проверяются
-// интеграционными тестами, на настоящих объектах express.
 const fakeRequest = (headers: Record<string, string> = {}): Request =>
     ({ headers, method: 'GET', originalUrl: '/health' } as unknown as Request);
 

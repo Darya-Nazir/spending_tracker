@@ -1,16 +1,5 @@
 import { Writable } from 'node:stream';
 
-/**
- * Writable, который не пишет никуда наружу, а накапливает полученные байты
- * в массиве в памяти процесса. Ни файла, ни вывода в терминал не создаётся.
- *
- * Logger.create() вторым аргументом принимает Writable; по умолчанию это
- * process.stdout, который тоже Writable. Тест подставляет сюда этот класс
- * и потом читает записанное. Отдельной ветки для тестов в логгере нет.
- *
- * Очистки нет: каждый тест создаёт новый экземпляр, старый удаляет сборщик
- * мусора. Между тестами записи не накапливаются.
- */
 export class MemorySink extends Writable {
     #chunks: Buffer[] = [];
 
@@ -23,13 +12,6 @@ export class MemorySink extends Writable {
         done();
     }
 
-    /**
-     * Всё записанное одной строкой.
-     *
-     * Перед чтением уступает очередь событий три раза. В режиме development
-     * логгер пишет через Transform-поток pino-pretty, и строка доходит до
-     * этого стока на следующих тиках, а не в тике вызова logger.info().
-     */
     async text(): Promise<string> {
         for (let i = 0; i < 3; i += 1) {
             await new Promise((resolve) => setImmediate(resolve));

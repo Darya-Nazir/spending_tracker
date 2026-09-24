@@ -1,16 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Чтение и проверка переменных окружения. Больше нигде в коде process.env
- * не читается.
- *
- * Проверка выполняется один раз при старте: если переменных не хватает или
- * значения некорректны, Config.load() бросает ошибку со списком всех проблем,
- * и процесс не поднимается.
- *
- * В схеме находятся только те переменные, которые используются приложением.
- */
-
 const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'] as const;
 
 const POSTGRES_URL_PATTERN = /^postgres(ql)?:\/\/.+/;
@@ -51,9 +40,6 @@ const envSchema = z.object({
         .enum(LOG_LEVELS, `LOG_LEVEL must be one of: ${LOG_LEVELS.join(', ')}`)
         .default('info'),
 
-    // Адрес базы, с которой работает приложение. Второй переменной под
-    // тестовую базу в схеме нет: прогон тестов и db:migrate:test передают
-    // адрес spending_test в этой же переменной (этапы 6–7).
     DATABASE_URL: z
         .string()
         .regex(
@@ -66,8 +52,6 @@ const envSchema = z.object({
         .regex(HTTP_URL_PATTERN, 'CORS_ORIGIN must be an http(s) origin')
         .default('http://localhost:9000'),
 
-    // Старый сервер вызывал bcrypt.genSalt(Number('example')), то есть genSalt(NaN).
-    // Проверка на целое число не меньше 10 не даёт передать сюда NaN.
     BCRYPT_COST: z.coerce
         .number()
         .int('BCRYPT_COST must be a whole number')
@@ -130,11 +114,6 @@ export class Config {
 
     readonly appTz: string;
 
-    /**
-     * @param env по умолчанию process.env. Тесты передают окружение
-     *   аргументом, поэтому им не нужно менять process.env.
-     * @throws Error со списком всех недостающих и некорректных переменных.
-     */
     static load(env: RawEnv = process.env): Config {
         const result = envSchema.safeParse(env);
 

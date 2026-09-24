@@ -3,10 +3,6 @@ import assert from 'node:assert/strict';
 
 import { Config, type RawEnv } from '../../src/config/config.ts';
 
-/**
- * Config.load() принимает окружение аргументом, поэтому тесты передают его
- * явно и не меняют process.env.
- */
 const validEnv: Readonly<RawEnv> = Object.freeze({
     NODE_ENV: 'test',
     PORT: '3000',

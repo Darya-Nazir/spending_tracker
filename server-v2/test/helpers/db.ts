@@ -23,10 +23,6 @@ export type TestDatabaseContext = {
     sink: MemorySink;
 };
 
-/**
- * Собирает зависимости для тестовой базы
- * Нужен тестам, которые намеренно создают отдельный pool.
- */
 export const createTestDatabase = (
     databaseUrl: string = TEST_DATABASE_URL,
 ): TestDatabaseContext => {
@@ -54,11 +50,6 @@ export const assertTestDatabaseName = (databaseName: string): void => {
     }
 };
 
-/**
- * Очищает все прикладные таблицы и сбрасывает identity-последовательности.
- * Список читается из information_schema, поэтому новые миграции не требуют
- * поддерживать этот helper вручную. Таблица истории миграций сохраняется.
- */
 export const resetDb = async (database: Database): Promise<void> => {
     const { rows: databaseNameRows } = await database.query<DatabaseNameRow>(
         'select current_database() as database_name',
@@ -88,10 +79,6 @@ export const resetDb = async (database: Database): Promise<void> => {
     await database.query(`truncate table ${tableNames} restart identity cascade`);
 };
 
-/**
- * Один вызов на верхнем уровне тестового файла: до каждого теста база чистая,
- * после файла pool закрыт и node:test может завершить процесс.
- */
 export const useTestDatabase = (): TestDatabaseContext => {
     const context = createTestDatabase();
 

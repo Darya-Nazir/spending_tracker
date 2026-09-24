@@ -19,16 +19,10 @@ const loadConfig = (): Config => {
 const config = loadConfig();
 const logger = Logger.create(config);
 
-// Пул создаётся до listen(), но соединение не открывает: при выключенной
-// базе процесс всё равно поднимается и отвечает 503 на /ready. Закрытие
-// пула по SIGTERM — этап 23.
 const database = new Database(config, logger);
 
 const app = new AppFactory(config, logger, database).build();
 
-// Колбэк в app.listen() не передаётся намеренно: express 5 вешает его не только
-// на событие listening, но и на error (lib/application.js), поэтому на занятом
-// порту он вызвался бы тоже и записал бы в лог успешный старт.
 const server = app.listen(config.port);
 
 server.on('listening', () => {

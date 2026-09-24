@@ -23,12 +23,6 @@ describe('pg type coercion', () => {
     });
 
     test('the same values added up in JS are not exact', async () => {
-        // те же значения, сложенные в JS, точными не являются
-        //
-        // Проверка самой проверки для теста выше: показывает, что sum() в SQL
-        // выбран не из удобства. Утверждение о семантике float64, а не о нашем
-        // коде, поэтому оно и не должно чиниться приведением типов — от него
-        // защищает только то, что складывание остаётся в базе.
         const { rows } = await database.query<{ amount: number }>(
             `select amount
                from (values (0.10::numeric(14,2)), (0.20)) source(amount)`,
@@ -44,12 +38,6 @@ describe('pg type coercion', () => {
     });
 
     test('the largest value numeric(14,2) allows survives the coercion', async () => {
-        // наибольшее значение numeric(14,2) переживает приведение без потерь
-        //
-        // Предел схемы: 14 значащих цифр, 2 после точки. В тиынах это
-        // 99999999999999 — меньше Number.MAX_SAFE_INTEGER (9007199254740991),
-        // поэтому одно значение любой допустимой величины Number передаёт
-        // точно. Терять есть что только на сложении.
         const { rows } = await database.query<{ amount: number }>(
             'select 999999999999.99::numeric(14,2) as amount',
         );

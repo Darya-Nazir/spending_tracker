@@ -27,10 +27,6 @@ type RunningServer = {
     stderr: () => string;
     /** Процесс уже завершился? Проверяется, чтобы не ждать строку лога до таймаута. */
     hasExited: () => boolean;
-    /**
-     * Ждёт в stdout строку NDJSON, подходящую под условие. Строка ищется
-     * опросом, а не по событию 'data': запись может прийти несколькими кусками.
-     */
     waitForRecord: (matches: (record: LogRecord) => boolean, timeoutMs?: number) => Promise<LogRecord>;
 };
 
@@ -134,11 +130,6 @@ describe('server startup', () => {
     });
 
     test('does not report a successful start when the port is taken', { timeout: 20_000 }, async () => {
-        // не сообщает об успешном старте, когда порт занят
-        //
-        // express 5 вешает колбэк, переданный в app.listen(), не только на
-        // событие listening, но и на error. Колбэк, который игнорирует свой
-        // аргумент, поэтому пишет «server listening» на занятом порту.
         const blocker = createServer();
         await new Promise<void>((resolve) => { blocker.listen(BUSY_PORT, resolve); });
 
