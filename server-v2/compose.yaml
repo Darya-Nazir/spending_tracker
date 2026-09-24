@@ -47,7 +47,7 @@ services:
         max-file: "3"
 
   server:
-    build: 
+    build: .
     container_name: spending-tracker-server
     restart: unless-stopped
     env_file:
@@ -60,7 +60,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-        
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/ready').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
 volumes:
   postgres_data:
     name: spending_tracker_postgres_data
