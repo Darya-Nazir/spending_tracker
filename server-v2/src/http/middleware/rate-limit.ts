@@ -23,6 +23,7 @@ export class RateLimiter {
     readonly #message: string;
     readonly #countOn: (statusCode: number) => boolean;
     readonly #hits = new Map<string, WindowEntry>();
+    #nextCleanupAt: number;
 
     constructor(options: RateLimitOptions) {
         this.#windowMs = options.windowMs;
@@ -30,11 +31,13 @@ export class RateLimiter {
         this.#keyFor = options.keyFor;
         this.#message = options.message;
         this.#countOn = options.countOn ?? (() => true);
+        this.#nextCleanupAt = Date.now() + this.#windowMs;
     }
 
     readonly check = (req: Request, res: Response, next: NextFunction): void => {
         const key = this.#keyFor(req);
         const now = Date.now();
+        this.#deleteExpired(now);
         const entry = this.#hits.get(key);
         const active = entry !== undefined && now < entry.resetAt ? entry : undefined;
 
@@ -56,6 +59,15 @@ export class RateLimiter {
 
         next();
     };
+
+    #deleteExpired(now: number): void {
+        if (now < this.#nextCleanupAt) return;
+
+        for (const [key, entry] of this.#hits) {
+            if (now >= entry.resetAt) this.#hits.delete(key);
+        }
+        this.#nextCleanupAt = now + this.#windowMs;
+    }
 }
 // Термин «key» здесь — из пары key-value
 export const loginRateLimitKey = (req: Request): string => {
