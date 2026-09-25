@@ -23,14 +23,12 @@ services:
       - "log_line_prefix=%m [%p] %q%u@%d "
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-spending_dev}
-      POSTGRES_TEST_DB: ${POSTGRES_TEST_DB:-spending_test}
       POSTGRES_USER: ${POSTGRES_USER:-spending}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spending}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:
         - CMD-SHELL
