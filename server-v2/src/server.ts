@@ -3,9 +3,9 @@ import { Database } from './db/database.ts';
 import { AppFactory } from './http/app.ts';
 import { Logger } from './logging/logger.ts';
 
-/**
- * Единственный файл, который вызывает listen() и process.exit().
- */
+// Точка входа
+
+const SHUTDOWN_TIMEOUT_MS = 10_000;
 
 const loadConfig = (): Config => {
     try {
@@ -37,5 +37,44 @@ server.on('error', (error: NodeJS.ErrnoException) => {
         logger.error({ err: { name: error.name, message: error.message } }, 'server failed to start');
     }
 
-    process.exit(1);
+    process.exitCode = 1;
 });
+
+let shuttingDown = false;
+
+// SIGTERM шлёт docker stop/docker compose down и Kubernetes, SIGINT — Ctrl+C в терминале.
+const shutdown = (signal: NodeJS.Signals): void => {
+    if (shuttingDown) {
+        return;
+    }
+    shuttingDown = true;
+
+    logger.info({ signal }, 'shutdown started');
+
+    const forceExit = setTimeout(() => {
+        logger.error({ signal, timeoutMs: SHUTDOWN_TIMEOUT_MS }, 'shutdown timed out, forcing exit');
+        process.exit(1);
+    }, SHUTDOWN_TIMEOUT_MS);
+
+    // Новые соединения не принимаются, коллбэк срабатывает после завершения текущих запросов.
+    server.close((closeError) => {
+        if (closeError) {
+            logger.error({ err: { name: closeError.name, message: closeError.message } }, 'server close failed');
+            process.exitCode = 1;
+        }
+
+        database.close()
+            .catch((dbError) => {
+                const err = dbError as Error;
+                logger.error({ err: { name: err.name, message: err.message } }, 'database close failed');
+                process.exitCode = 1;
+            })
+            .finally(() => {
+                clearTimeout(forceExit);
+                logger.info({ signal }, 'shutdown finished');
+            });
+    });
+};
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
