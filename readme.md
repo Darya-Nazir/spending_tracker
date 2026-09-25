@@ -21,7 +21,8 @@
 - валидацию запросов, CORS, rate limiting и структурированные логи;
 - миграции PostgreSQL, health checks, unit-, integration- и contract-тесты.
 
-API доступен по адресу `http://localhost:3000/api`. Эндпоинты состояния: `GET /health` и `GET /ready`.
+Локально запущенный API доступен по адресу `http://localhost:3000/api`, контейнерный — по адресу
+`http://localhost:3001/api`. Эндпоинты состояния: `GET /health` и `GET /ready`.
 
 ## Локальный запуск
 
@@ -51,7 +52,7 @@ npm ci
 npm run dev
 ```
 
-Клиент откроется на `http://localhost:9000` и будет обращаться к API на порту `3000`.
+Клиент откроется на `http://localhost:9000` и будет обращаться к локальному API на порту `3000`.
 
 ## Проверки
 
