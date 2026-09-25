@@ -11,16 +11,16 @@ export type LogFields = Record<string, unknown>;
 type LevelName = 'error' | 'warn' | 'info' | 'debug';
 
 export class Logger {
-    readonly #pino: PinoLogger;
+    private readonly pino: PinoLogger;
 
     static create(config: Config, destination: Writable = process.stdout): Logger {
         return new Logger(pino(
-            Logger.#options(config),
-            config.isDevelopment ? Logger.#prettyStream(destination) : destination,
+            Logger.options(config),
+            config.isDevelopment ? Logger.prettyStream(destination) : destination,
         ));
     }
 
-    static #options(config: Config): LoggerOptions {
+    private static options(config: Config): LoggerOptions {
         const options: LoggerOptions = { level: config.logLevel };
 
         if (!config.isDevelopment) {
@@ -30,7 +30,7 @@ export class Logger {
         return options;
     }
 
-    static #prettyStream(destination: Writable): Writable {
+    private static prettyStream(destination: Writable): Writable {
         return pretty({
             destination,
             translateTime: 'HH:MM:ss.l',
@@ -41,43 +41,43 @@ export class Logger {
     }
 
     constructor(instance: PinoLogger) {
-        this.#pino = instance;
+        this.pino = instance;
     }
 
     child(fields: LogFields): Logger {
-        return new Logger(this.#pino.child(fields));
+        return new Logger(this.pino.child(fields));
     }
 
     error(fields: LogFields, message: string): void;
     error(message: string): void;
     error(first: LogFields | string, second?: string): void {
-        this.#write('error', first, second);
+        this.write('error', first, second);
     }
 
     warn(fields: LogFields, message: string): void;
     warn(message: string): void;
     warn(first: LogFields | string, second?: string): void {
-        this.#write('warn', first, second);
+        this.write('warn', first, second);
     }
 
     info(fields: LogFields, message: string): void;
     info(message: string): void;
     info(first: LogFields | string, second?: string): void {
-        this.#write('info', first, second);
+        this.write('info', first, second);
     }
 
     debug(fields: LogFields, message: string): void;
     debug(message: string): void;
     debug(first: LogFields | string, second?: string): void {
-        this.#write('debug', first, second);
+        this.write('debug', first, second);
     }
 
-    #write(level: LevelName, first: LogFields | string, second?: string): void {
+    private write(level: LevelName, first: LogFields | string, second?: string): void {
         if (typeof first === 'string') {
-            this.#pino[level](first);
+            this.pino[level](first);
             return;
         }
 
-        this.#pino[level](first, second);
+        this.pino[level](first, second);
     }
 }

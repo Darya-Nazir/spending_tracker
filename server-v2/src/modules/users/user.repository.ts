@@ -34,15 +34,15 @@ const isUniqueViolation = (error: unknown): boolean => {
 };
 
 export class UserRepository {
-    readonly #database: QueryExecutor;
+    private readonly database: QueryExecutor;
 
     constructor(database: QueryExecutor) {
-        this.#database = database;
+        this.database = database;
     }
 
     async create(input: CreateUserInput): Promise<User> {
         try {
-            const { rows } = await this.#database.query<UserRow>(
+            const { rows } = await this.database.query<UserRow>(
                 `insert into users (email, name, password_hash)
                  values ($1, $2, $3)
                  returning id, email, name, password_hash, initial_balance, created_at`,
@@ -54,7 +54,7 @@ export class UserRepository {
                 throw new Error('PostgreSQL did not return the created user');
             }
 
-            return UserRepository.#map(row);
+            return UserRepository.map(row);
         } catch (error) {
             if (isUniqueViolation(error)) {
                 throw new ConflictError('Profile with given email already exists');
@@ -65,7 +65,7 @@ export class UserRepository {
     }
 
     async findByEmail(email: NormalizedEmail): Promise<User | null> {
-        const { rows } = await this.#database.query<UserRow>(
+        const { rows } = await this.database.query<UserRow>(
             `select id, email, name, password_hash, initial_balance, created_at
                from users
               where email = $1`,
@@ -77,10 +77,10 @@ export class UserRepository {
             return null;
         }
 
-        return UserRepository.#map(row);
+        return UserRepository.map(row);
     }
 
-    static #map(row: UserRow): User {
+    private static map(row: UserRow): User {
         return {
             id: row.id,
             email: row.email,

@@ -5,29 +5,29 @@ import type { CategoryWriteInput, MoveOperationsInput } from './category.schemas
 import type { CategoryService } from './category.service.ts';
 
 export class CategoryController {
-    readonly #service: CategoryService;
-    readonly #type: CategoryType;
+    private readonly service: CategoryService;
+    private readonly type: CategoryType;
 
     constructor(service: CategoryService, type: CategoryType) {
-        this.#service = service;
-        this.#type = type;
+        this.service = service;
+        this.type = type;
     }
 
     readonly list = async (req: Request, res: Response): Promise<void> => {
-        res.json(await this.#service.list(req.auth!.userId, this.#type));
+        res.json(await this.service.list(req.auth!.userId, this.type));
     };
 
     readonly getById = async (req: Request, res: Response): Promise<void> => {
-        res.json(await this.#service.getById(req.auth!.userId, this.#type, Number(req.params.id)));
+        res.json(await this.service.getById(req.auth!.userId, this.type, Number(req.params.id)));
     };
 
     readonly delete = async (req: Request, res: Response): Promise<void> => {
-        await this.#service.delete(req.auth!.userId, this.#type, Number(req.params.id));
+        await this.service.delete(req.auth!.userId, this.type, Number(req.params.id));
         res.json({ error: false, message: 'Category deleted successfully' });
     };
 
     readonly deleteOperations = async (req: Request, res: Response): Promise<void> => {
-        await this.#service.deleteOperations(req.auth!.userId, this.#type, Number(req.params.id));
+        await this.service.deleteOperations(req.auth!.userId, this.type, Number(req.params.id));
         res.json({ error: false, message: 'Operations deleted successfully' });
     };
 
@@ -35,8 +35,8 @@ export class CategoryController {
         req: Request<{ id: string }, unknown, MoveOperationsInput>,
         res: Response,
     ): Promise<void> => {
-        await this.#service.moveOperations(
-            req.auth!.userId, this.#type, Number(req.params.id), req.body.targetCategoryId,
+        await this.service.moveOperations(
+            req.auth!.userId, this.type, Number(req.params.id), req.body.targetCategoryId,
         );
         res.json({ error: false, message: 'Operations moved successfully' });
     };
@@ -45,13 +45,13 @@ export class CategoryController {
         req: Request<Record<string, never>, Category, CategoryWriteInput>,
         res: Response<Category>,
     ): Promise<void> => {
-        res.status(201).json(await this.#service.create(req.auth!.userId, this.#type, req.body.title));
+        res.status(201).json(await this.service.create(req.auth!.userId, this.type, req.body.title));
     };
 
     readonly rename = async (
         req: Request<{ id: string }, Category, CategoryWriteInput>,
         res: Response<Category>,
     ): Promise<void> => {
-        res.json(await this.#service.rename(req.auth!.userId, this.#type, Number(req.params.id), req.body.title));
+        res.json(await this.service.rename(req.auth!.userId, this.type, Number(req.params.id), req.body.title));
     };
 }

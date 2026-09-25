@@ -118,13 +118,13 @@ export class Config {
         const result = envSchema.safeParse(env);
 
         if (!result.success) {
-            throw new Error(Config.#describe(result.error));
+            throw new Error(Config.describe(result.error));
         }
 
         return new Config(result.data);
     }
 
-    static #describe(error: z.ZodError): string {
+    private static describe(error: z.ZodError): string {
         const lines = error.issues.map((issue) => {
             const name = issue.path.join('.') || '(environment)';
             return `  - ${name}: ${issue.message}`;

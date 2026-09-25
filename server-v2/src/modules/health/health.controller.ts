@@ -7,14 +7,14 @@ import type { HealthService } from './health.service.ts';
  * Правил здесь нет — они в сервисе.
  */
 export class HealthController {
-    readonly #service: HealthService;
+    private readonly service: HealthService;
 
     constructor(service: HealthService) {
-        this.#service = service;
+        this.service = service;
     }
 
     readonly health = (_req: Request, res: Response): void => {
-        res.status(200).json(this.#service.check());
+        res.status(200).json(this.service.check());
     };
 
     /**
@@ -22,7 +22,7 @@ export class HealthController {
      * процесс работает, но обслужить запрос сейчас не может.
      */
     readonly ready = async (_req: Request, res: Response): Promise<void> => {
-        const readiness = await this.#service.readiness();
+        const readiness = await this.service.readiness();
 
         res.status(readiness.db === 'up' ? 200 : 503).json(readiness);
     };

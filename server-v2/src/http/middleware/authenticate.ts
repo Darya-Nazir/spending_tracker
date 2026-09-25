@@ -12,10 +12,10 @@ declare global {
 }
 
 export class Authenticate {
-    readonly #tokens: TokenService;
+    private readonly tokens: TokenService;
 
     constructor(tokens: TokenService) {
-        this.#tokens = tokens;
+        this.tokens = tokens;
     }
 
     readonly requireAuth = (req: Request, _res: Response, next: NextFunction): void => {
@@ -26,7 +26,7 @@ export class Authenticate {
             if (token === undefined) {
                 throw new UnauthorizedError('Authorization must contain a Bearer token');
             }
-            req.auth = this.#tokens.verifyAccess(token);
+            req.auth = this.tokens.verifyAccess(token);
             if (req.log) {
                 req.log = req.log.child({ userId: req.auth.userId });
             }

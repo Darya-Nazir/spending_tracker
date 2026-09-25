@@ -11,14 +11,14 @@ type SessionRow = {
 };
 
 export class SessionRepository {
-    readonly #database: QueryExecutor;
+    private readonly database: QueryExecutor;
 
     constructor(database: QueryExecutor) {
-        this.#database = database;
+        this.database = database;
     }
 
     async create(userId: number, tokenHash: string, expiresAt: Date, device: string): Promise<number> {
-        const { rows } = await this.#database.query<{ id: number }>(
+        const { rows } = await this.database.query<{ id: number }>(
             `insert into sessions (user_id, token_hash, expires_at, device)
              values ($1, $2, $3, $4) returning id`,
             [userId, tokenHash, expiresAt, device],
@@ -33,11 +33,11 @@ export class SessionRepository {
 // блокирует строку пользователя до завершения транзакции, 
 // чтобы изменения происходилипо очереди
     async lockUser(userId: number): Promise<void> {
-        await this.#database.query('select id from users where id = $1 for update', [userId]);
+        await this.database.query('select id from users where id = $1 for update', [userId]);
     }
 
     async findByTokenHash(tokenHash: string): Promise<SessionRow | null> {
-        const { rows } = await this.#database.query<SessionRow>(
+        const { rows } = await this.database.query<SessionRow>(
             'select id, user_id, expires_at, device, revoked_at from sessions where token_hash = $1',
             [tokenHash],
         );
@@ -47,7 +47,7 @@ export class SessionRepository {
 // отмечает предыдущую запись отозванной через revoked_at и 
 // сохраняет ссылку на новую в replaced_by. там -  id новой строки
     async replace(id: number, replacementId: number): Promise<void> {
-        await this.#database.query(
+        await this.database.query(
             'update sessions set revoked_at = now(), replaced_by = $2 where id = $1',
             [id, replacementId],
         );
@@ -58,7 +58,7 @@ export class SessionRepository {
 // Одна цепочка id-ков, связанных через replaced_by, соответствует одному устройству.
 // Сессии других устройств того же пользователя не затрагиваются.
     async revokeChain(id: number): Promise<void> {
-        await this.#database.query(
+        await this.database.query(
             `with recursive chain as (
                 select id, replaced_by from sessions where id = $1
                 union all

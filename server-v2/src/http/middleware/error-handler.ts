@@ -17,10 +17,10 @@ type ErrorResponse = {
 };
 
 export class ErrorHandler {
-    readonly #logger: Logger;
+    private readonly logger: Logger;
 
     constructor(logger: Logger) {
-        this.#logger = logger;
+        this.logger = logger;
     }
 
     /**
@@ -30,14 +30,14 @@ export class ErrorHandler {
     readonly respond = (error: unknown, req: Request, res: Response, next: NextFunction): void => {
         // req.log ставит RequestContext. Запасной вариант нужен на случай,
         // если ошибка возникла до него.
-        const log = req.log ?? this.#logger;
+        const log = req.log ?? this.logger;
 
-        const { status, message, level } = ErrorHandler.#describe(error);
+        const { status, message, level } = ErrorHandler.describe(error);
         const where = { status, method: req.method, url: req.originalUrl };
 
         if (level === 'error') {
             // pino разложит Error на type, message и stack сам.
-            log.error({ ...where, err: ErrorHandler.#serialize(error) }, 'request failed');
+            log.error({ ...where, err: ErrorHandler.serialize(error) }, 'request failed');
         } else {
             // Отказ по правилам приложения — ожидаемое событие. Стек не пишем:
             // он указывает на наш же middleware и ничего не объясняет.
@@ -54,12 +54,12 @@ export class ErrorHandler {
         res.status(status).json({ error: true, message });
     };
 
-    static #describe(error: unknown): ErrorResponse {
+    private static describe(error: unknown): ErrorResponse {
         if (error instanceof AppError) {
             return { status: error.status, message: error.message, level: 'warn' };
         }
 
-        const exposed = ErrorHandler.#exposedHttpError(error);
+        const exposed = ErrorHandler.exposedHttpError(error);
         if (exposed) {
             return { ...exposed, level: 'warn' };
         }
@@ -67,7 +67,7 @@ export class ErrorHandler {
         return { status: 500, message: INTERNAL_MESSAGE, level: 'error' };
     }
 
-    static #exposedHttpError(error: unknown): { status: number; message: string } | undefined {
+    private static exposedHttpError(error: unknown): { status: number; message: string } | undefined {
         if (typeof error !== 'object' || error === null) {
             return undefined;
         }
@@ -90,7 +90,7 @@ export class ErrorHandler {
         return { status, message };
     }
 
-    static #serialize(error: unknown): unknown {
+    private static serialize(error: unknown): unknown {
         if (error instanceof Error) {
             return error;
         }

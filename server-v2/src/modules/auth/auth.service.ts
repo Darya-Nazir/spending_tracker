@@ -24,11 +24,11 @@ export type PublicUser = {
 };
 
 export class AuthService {
-    readonly #users: UserRepository;
-    readonly #passwords: PasswordService;
-    readonly #emails: EmailService;
-    readonly #tokens: TokenService;
-    readonly #database: Database;
+    private readonly users: UserRepository;
+    private readonly passwords: PasswordService;
+    private readonly emails: EmailService;
+    private readonly tokens: TokenService;
+    private readonly database: Database;
 
     constructor(
         users: UserRepository,
@@ -37,17 +37,17 @@ export class AuthService {
         tokens: TokenService,
         database: Database,
     ) {
-        this.#users = users;
-        this.#passwords = passwords;
-        this.#emails = emails;
-        this.#tokens = tokens;
-        this.#database = database;
+        this.users = users;
+        this.passwords = passwords;
+        this.emails = emails;
+        this.tokens = tokens;
+        this.database = database;
     }
 
     async signup(input: SignupInput): Promise<PublicUser> {
-        const email = this.#emails.normalize(input.email);
-        const passwordHash = await this.#passwords.hash(input.password);
-        const user = await this.#database.transaction(async (executor) => {
+        const email = this.emails.normalize(input.email);
+        const passwordHash = await this.passwords.hash(input.password);
+        const user = await this.database.transaction(async (executor) => {
             const created = await new UserRepository(executor).create({
                 email,
                 name: input.name,
@@ -65,14 +65,14 @@ export class AuthService {
     }
 
     async login(input: LoginInput, device = 'unknown'): Promise<LoginResult> {
-        const user = await this.#users.findByEmail(this.#emails.normalize(input.email));
-        if (user === null || !await this.#passwords.verify(input.password, user.passwordHash)) {
+        const user = await this.users.findByEmail(this.emails.normalize(input.email));
+        if (user === null || !await this.passwords.verify(input.password, user.passwordHash)) {
             throw new UnauthorizedError('Invalid email or password');
         }
 
-        const expiresAt = this.#tokens.sessionExpiresAt(input.rememberMe ?? false);
-        const tokens = this.#tokens.issueTokenPair(user.id, expiresAt);
-        await new SessionRepository(this.#database).create(
+        const expiresAt = this.tokens.sessionExpiresAt(input.rememberMe ?? false);
+        const tokens = this.tokens.issueTokenPair(user.id, expiresAt);
+        await new SessionRepository(this.database).create(
             user.id, hashToken(tokens.refreshToken), expiresAt, device.slice(0, 512),
         );
         return {
@@ -82,8 +82,8 @@ export class AuthService {
     }
 
     async refresh(input: RefreshInput): Promise<TokenPair> {
-        const { userId } = this.#tokens.verifyRefresh(input.refreshToken);
-        const tokens = await this.#database.transaction(async (executor) => {
+        const { userId } = this.tokens.verifyRefresh(input.refreshToken);
+        const tokens = await this.database.transaction(async (executor) => {
             const sessions = new SessionRepository(executor);
             await sessions.lockUser(userId);
             const session = await sessions.findByTokenHash(hashToken(input.refreshToken));
@@ -94,7 +94,7 @@ export class AuthService {
             }
             if (session.expires_at.getTime() <= Date.now()) return null;
 
-            const pair = this.#tokens.issueTokenPair(userId, session.expires_at);
+            const pair = this.tokens.issueTokenPair(userId, session.expires_at);
             const replacementId = await sessions.create(
                 userId, hashToken(pair.refreshToken), session.expires_at, session.device,
             );
@@ -107,7 +107,7 @@ export class AuthService {
     }
 
     async logout(input: RefreshInput): Promise<void> {
-        await this.#database.transaction(async (executor) => {
+        await this.database.transaction(async (executor) => {
             const sessions = new SessionRepository(executor);
             const session = await sessions.findByTokenHash(hashToken(input.refreshToken));
             if (session === null) return;

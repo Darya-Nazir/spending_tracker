@@ -41,14 +41,14 @@ import { RequestContext } from './middleware/request-context.ts';
 const BODY_LIMIT = '100kb';
 
 export class AppFactory {
-    readonly #config: Config;
-    readonly #logger: Logger;
-    readonly #database: Database;
+    private readonly config: Config;
+    private readonly logger: Logger;
+    private readonly database: Database;
 
     constructor(config: Config, logger: Logger, database: Database) {
-        this.#config = config;
-        this.#logger = logger;
-        this.#database = database;
+        this.config = config;
+        this.logger = logger;
+        this.database = database;
     }
 
     build(): Express {
@@ -57,58 +57,58 @@ export class AppFactory {
         //Дефолтный X-Powered-By: Express
         app.disable('x-powered-by');
 
-        app.use(new RequestContext(this.#logger).attach); // помечает все записи одного запроса requestId
+        app.use(new RequestContext(this.logger).attach); // помечает все записи одного запроса requestId
         app.use(cors({
-            origin: (origin, callback) => callback(null, origin === this.#config.corsOrigin),
+            origin: (origin, callback) => callback(null, origin === this.config.corsOrigin),
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
             allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
         }));
         app.use(json({ limit: BODY_LIMIT }));
 
-        app.use(this.#healthRouter());
-        app.use('/api', this.#authRouter());
-        app.use('/api/categories', this.#categoryRouter());
-        app.use('/api/balance', this.#balanceRouter());
-        app.use('/api/operations', this.#operationRouter());
+        app.use(this.healthRouter());
+        app.use('/api', this.authRouter());
+        app.use('/api/categories', this.categoryRouter());
+        app.use('/api/balance', this.balanceRouter());
+        app.use('/api/operations', this.operationRouter());
 
         app.use(new NotFoundHandler().reject);
-        app.use(new ErrorHandler(this.#logger).respond);
+        app.use(new ErrorHandler(this.logger).respond);
 
         return app;
     }
 
-    #healthRouter(): Router {
-        return HealthRouter.create(new HealthController(new HealthService(this.#database)));
+    private healthRouter(): Router {
+        return HealthRouter.create(new HealthController(new HealthService(this.database)));
     }
 
-    #authRouter(): Router {
-        const users = new UserRepository(this.#database);
-        const passwords = new PasswordService(this.#config);
+    private authRouter(): Router {
+        const users = new UserRepository(this.database);
+        const passwords = new PasswordService(this.config);
         const emails = new EmailService();
-        const tokens = new TokenService(this.#config);
-        const service = new AuthService(users, passwords, emails, tokens, this.#database);
+        const tokens = new TokenService(this.config);
+        const service = new AuthService(users, passwords, emails, tokens, this.database);
 
         return AuthRouter.create(new AuthController(service), AuthRateLimiterFactory.create());
     }
 
-    #categoryRouter(): Router {
-        const service = new CategoryService(new CategoryRepository(this.#database));
-        const authenticate = new Authenticate(new TokenService(this.#config));
+    private categoryRouter(): Router {
+        const service = new CategoryService(new CategoryRepository(this.database));
+        const authenticate = new Authenticate(new TokenService(this.config));
         return CategoryRouter.create(service, authenticate);
     }
 
-    #balanceRouter(): Router {
-        const service = new BalanceService(new BalanceRepository(this.#database));
-        const authenticate = new Authenticate(new TokenService(this.#config));
+    private balanceRouter(): Router {
+        const service = new BalanceService(new BalanceRepository(this.database));
+        const authenticate = new Authenticate(new TokenService(this.config));
         return BalanceRouter.create(new BalanceController(service), authenticate);
     }
 
-    #operationRouter(): Router {
+    private operationRouter(): Router {
         const service = new OperationService(
-            new OperationRepository(this.#database), new CategoryRepository(this.#database),
-            this.#config.appTz,
+            new OperationRepository(this.database), new CategoryRepository(this.database),
+            this.config.appTz,
         );
-        const authenticate = new Authenticate(new TokenService(this.#config));
+        const authenticate = new Authenticate(new TokenService(this.config));
         return OperationRouter.create(new OperationController(service), authenticate);
     }
 }

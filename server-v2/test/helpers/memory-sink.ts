@@ -1,14 +1,14 @@
 import { Writable } from 'node:stream';
 
 export class MemorySink extends Writable {
-    #chunks: Buffer[] = [];
+    private chunks: Buffer[] = [];
 
     override _write(
         chunk: Buffer | string,
         _encoding: BufferEncoding,
         done: (error?: Error | null) => void,
     ): void {
-        this.#chunks.push(Buffer.from(chunk));
+        this.chunks.push(Buffer.from(chunk));
         done();
     }
 
@@ -16,7 +16,7 @@ export class MemorySink extends Writable {
         for (let i = 0; i < 3; i += 1) {
             await new Promise((resolve) => setImmediate(resolve));
         }
-        return Buffer.concat(this.#chunks).toString('utf8');
+        return Buffer.concat(this.chunks).toString('utf8');
     }
 
     /** Записанное, разбитое по переводам строки; пустые строки отброшены. */

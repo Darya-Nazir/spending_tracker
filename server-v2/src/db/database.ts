@@ -19,23 +19,23 @@ pgTypes.setTypeParser(1700, (value) => Number(value));
 pgTypes.setTypeParser(1082, (value) => value);
 
 export class Database {
-    readonly #pool: Pool;
-    readonly #logger: Logger;
+    private readonly pool: Pool;
+    private readonly logger: Logger;
 
     constructor(config: Config, logger: Logger) {
-        this.#logger = logger;
+        this.logger = logger;
 
         // Соединение открывается при первом query()
-        this.#pool = new Pool({ connectionString: config.databaseUrl });
+        this.pool = new Pool({ connectionString: config.databaseUrl });
 
         // Событие означает, что первое физическое
         // соединение с PostgreSQL действительно установлено.
-        this.#pool.once('connect', () => {
-            this.#logger.info('database connected');
+        this.pool.once('connect', () => {
+            this.logger.info('database connected');
         });
 
-        this.#pool.on('error', (error) => {
-            this.#logger.error({ err: error }, 'idle database client failed');
+        this.pool.on('error', (error) => {
+            this.logger.error({ err: error }, 'idle database client failed');
         });
     }
 
@@ -44,12 +44,12 @@ export class Database {
         sql: string, //обычная строка с SQL-запросом
         params: readonly unknown[] = [], //значения, которые PostgreSQL подставляет вместо $1, $2 и тд
     ): Promise<QueryResult<T>> {
-        return this.#pool.query<T>(sql, [...params]);
+        return this.pool.query<T>(sql, [...params]);
     }
     
 // общая обёртка для выполнения разных действий внутри транзакции
     async transaction<T>(callback: (executor: QueryExecutor) => Promise<T>): Promise<T> {
-        const client = await this.#pool.connect();
+        const client = await this.pool.connect();
         let discard = false;
         try {
             await client.query('BEGIN');
@@ -63,7 +63,7 @@ export class Database {
                 await client.query('ROLLBACK');
             } catch (rollbackError) {
                 discard = true;
-                this.#logger.error({ err: rollbackError }, 'database rollback failed');
+                this.logger.error({ err: rollbackError }, 'database rollback failed');
             }
             throw error;
         } finally {
@@ -81,7 +81,7 @@ export class Database {
             return true;
         } catch (error) {
             // warn, а не error: недоступная база — предусмотренный ответ 503
-            this.#logger.warn({ err: error }, 'database is not reachable');
+            this.logger.warn({ err: error }, 'database is not reachable');
 
             return false;
         }
@@ -91,6 +91,6 @@ export class Database {
      * Закрывает все соединения пула
      */
     async close(): Promise<void> {
-        await this.#pool.end();
+        await this.pool.end();
     }
 }

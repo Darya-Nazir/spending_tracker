@@ -5,10 +5,10 @@ export type Health = { status: 'ok' };
 export type Readiness = { db: 'up' | 'down' };
 
 export class HealthService {
-    readonly #database: Database;
+    private readonly database: Database;
 
     constructor(database: Database) {
-        this.#database = database;
+        this.database = database;
     }
 
     check(): Health {
@@ -16,6 +16,6 @@ export class HealthService {
     }
 
     async readiness(): Promise<Readiness> {
-        return { db: (await this.#database.isReachable()) ? 'up' : 'down' };
+        return { db: (await this.database.isReachable()) ? 'up' : 'down' };
     }
 }

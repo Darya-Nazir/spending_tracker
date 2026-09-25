@@ -22,29 +22,29 @@ declare global {
 }
 
 export class RequestContext {
-    readonly #logger: Logger;
+    private readonly logger: Logger;
 
     constructor(logger: Logger) {
-        this.#logger = logger;
+        this.logger = logger;
     }
 
     /** Поле со стрелочной функцией, а не метод: express вызывает обработчик без this. */
     readonly attach = (req: Request, res: Response, next: NextFunction): void => {
-        const requestId = RequestContext.#resolveId(req.headers[REQUEST_ID_HEADER]);
+        const requestId = RequestContext.resolveId(req.headers[REQUEST_ID_HEADER]);
 
         req.requestId = requestId;
-        req.log = this.#logger.child({ requestId });
+        req.log = this.logger.child({ requestId });
 
         // Тот же идентификатор в ответе: по нему клиент или тестировщик может
         // указать конкретный запрос, а мы найдём его строки в логе.
         res.setHeader(REQUEST_ID_HEADER, requestId);
 
-        RequestContext.#logWhenFinished(req, res);
+        RequestContext.logWhenFinished(req, res);
 
         next();
     };
 
-    static #logWhenFinished(req: Request, res: Response): void {
+    private static logWhenFinished(req: Request, res: Response): void {
         const startedAt = process.hrtime.bigint();
 
         res.on('finish', () => {
@@ -54,7 +54,7 @@ export class RequestContext {
                 status: res.statusCode,
                 method: req.method,
                 url: req.originalUrl,
-                durationMs: RequestContext.#elapsedMs(startedAt),
+                durationMs: RequestContext.elapsedMs(startedAt),
             }, 'request completed');
         });
     }
@@ -63,13 +63,13 @@ export class RequestContext {
      * Монотонные часы, а не Date.now(): системное время может перескочить
      * назад при синхронизации и дать отрицательную длительность.
      */
-    static #elapsedMs(startedAt: bigint): number {
+    private static elapsedMs(startedAt: bigint): number {
         const elapsedNs = process.hrtime.bigint() - startedAt;
 
         return Number(elapsedNs / 1000n) / 1000;
     }
 
-    static #resolveId(header: string | string[] | undefined): string {
+    private static resolveId(header: string | string[] | undefined): string {
         const incoming = Array.isArray(header) ? header[0] : header;
 
         if (typeof incoming === 'string') {

@@ -1,14 +1,14 @@
 import type { QueryExecutor } from '../../db/database.ts';
 
 export class BalanceRepository {
-    readonly #database: QueryExecutor;
+    private readonly database: QueryExecutor;
 
     constructor(database: QueryExecutor) {
-        this.#database = database;
+        this.database = database;
     }
 
     async get(userId: number): Promise<number | null> {
-        const { rows } = await this.#database.query<{ balance: number }>(
+        const { rows } = await this.database.query<{ balance: number }>(
             `select initial_balance + coalesce(
                 (select sum(case when type = 'income' then amount else -amount end)
                    from public.operations where user_id = $1), 0
@@ -20,7 +20,7 @@ export class BalanceRepository {
     }
 
     async update(userId: number, balance: number): Promise<number | null> {
-        const { rows } = await this.#database.query<{ balance: number }>(
+        const { rows } = await this.database.query<{ balance: number }>(
             `with updated as (
                 update public.users set initial_balance = $2 where id = $1
                 returning id, initial_balance

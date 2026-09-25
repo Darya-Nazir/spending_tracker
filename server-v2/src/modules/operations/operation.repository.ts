@@ -15,14 +15,14 @@ export type Operation = {
 export type InsertedOperation = Omit<Operation, 'category'>;
 
 export class OperationRepository {
-    readonly #database: QueryExecutor;
+    private readonly database: QueryExecutor;
 
     constructor(database: QueryExecutor) {
-        this.#database = database;
+        this.database = database;
     }
 
     async findOwnedById(userId: number, id: number): Promise<Operation | null> {
-        const { rows } = await this.#database.query<Operation>(
+        const { rows } = await this.database.query<Operation>(
             `select o.id, o.type, o.amount, o.date, o.comment, c.title as category
                from public.operations o
                join public.categories c
@@ -34,7 +34,7 @@ export class OperationRepository {
     }
 
     async list(userId: number, range: DateRange | null): Promise<Operation[]> {
-        const { rows } = await this.#database.query<Operation>(
+        const { rows } = await this.database.query<Operation>(
             `select o.id, o.type, o.amount, o.date, o.comment, c.title as category
                from public.operations o
                join public.categories c
@@ -52,7 +52,7 @@ export class OperationRepository {
         userId: number, categoryId: number, type: CategoryType, amount: number, date: string, comment: string,
     ): Promise<InsertedOperation> {
         try {
-            const { rows } = await this.#database.query<InsertedOperation>(
+            const { rows } = await this.database.query<InsertedOperation>(
                 `insert into public.operations (user_id, category_id, type, amount, date, comment)
                  values ($1, $2, $3, $4, $5, $6)
                  returning id, type, amount, date, comment`,
@@ -63,7 +63,7 @@ export class OperationRepository {
             }
             return rows[0];
         } catch (error) {
-            throw OperationRepository.#asCategoryNotFound(error);
+            throw OperationRepository.asCategoryNotFound(error);
         }
     }
 
@@ -72,7 +72,7 @@ export class OperationRepository {
         comment: string,
     ): Promise<InsertedOperation | null> {
         try {
-            const { rows } = await this.#database.query<InsertedOperation>(
+            const { rows } = await this.database.query<InsertedOperation>(
                 `update public.operations
                     set category_id = $3, type = $4, amount = $5, date = $6, comment = $7
                   where user_id = $1 and id = $2
@@ -81,20 +81,20 @@ export class OperationRepository {
             );
             return rows[0] ?? null;
         } catch (error) {
-            throw OperationRepository.#asCategoryNotFound(error);
+            throw OperationRepository.asCategoryNotFound(error);
         }
     }
 
     /** true — строка была и удалена, false — такой операции у пользователя нет. */
     async delete(userId: number, id: number): Promise<boolean> {
-        const { rows } = await this.#database.query(
+        const { rows } = await this.database.query(
             'delete from public.operations where user_id = $1 and id = $2 returning id',
             [userId, id],
         );
         return rows.length > 0;
     }
 
-    static #asCategoryNotFound(error: unknown): unknown {
+    private static asCategoryNotFound(error: unknown): unknown {
         if (typeof error === 'object' && error !== null
             && 'code' in error && error.code === '23503'
             && 'constraint' in error && error.constraint === 'operations_category_fkey') {
