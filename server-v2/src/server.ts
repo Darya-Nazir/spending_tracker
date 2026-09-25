@@ -26,12 +26,7 @@ const app = new AppFactory(config, logger, database).build();
 const server = app.listen(config.port);
 
 server.on('listening', () => {
-    // Порт берётся у самого сокета, а не из конфига: в логе должно быть то,
-    // что сервер занял на самом деле.
-    const address = server.address();
-    const port = typeof address === 'object' && address !== null ? address.port : config.port;
-
-    logger.info({ port, nodeEnv: config.nodeEnv }, 'server listening');
+    logger.info({ port: config.port, nodeEnv: config.nodeEnv }, 'server listening');
 });
 
 // Порт занят другим процессом — частый случай, пока рядом работает старый server/.
