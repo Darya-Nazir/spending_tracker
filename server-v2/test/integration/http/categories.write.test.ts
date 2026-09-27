@@ -29,7 +29,7 @@ describe('POST and PUT /api/categories', () => {
                 assert.equal(typeof id, 'number');
                 assert.deepEqual(created.body, { id, title: 'Кофе Café İ' });
                 const { rows: inserted } = await database.query(
-                    'select user_id, type, title, title_normalized from categories where id = $1', [id],
+                    'SELECT user_id, type, title, title_normalized FROM categories WHERE id = $1', [id],
                 );
                 assert.deepEqual(inserted, [{
                     user_id: user.id, type, title: 'Кофе Café İ', title_normalized: 'кофе café i\u0307',
@@ -39,7 +39,7 @@ describe('POST and PUT /api/categories', () => {
 
                 assert.deepEqual(renamed.body, { id, title: 'Чай Tea İ' });
                 const { rows: updated } = await database.query(
-                    'select user_id, type, title, title_normalized from categories where id = $1', [id],
+                    'SELECT user_id, type, title, title_normalized FROM categories WHERE id = $1', [id],
                 );
                 assert.deepEqual(updated, [{
                     user_id: user.id, type, title: 'Чай Tea İ', title_normalized: 'чай tea i\u0307',
@@ -86,7 +86,7 @@ describe('POST and PUT /api/categories', () => {
         assert.equal(conflicts.length, 1);
         assert.match(conflicts[0]!.body.message, /already exist/i);
         const { rows } = await database.query(
-            'select id, title, title_normalized from categories where user_id = $1', [user.id],
+            'SELECT id, title, title_normalized FROM categories WHERE user_id = $1', [user.id],
         );
         assert.deepEqual(rows, [{ ...successes[0]!.body, title_normalized: 'кофе café' }]);
     });
@@ -105,7 +105,7 @@ describe('POST and PUT /api/categories', () => {
         assert.match(response.body.message, /already exist/i);
         assert.deepEqual(await categories.list(user.id, 'expense'), before);
         const { rows } = await database.query(
-            'select title_normalized from categories where id = $1', [category.id],
+            'SELECT title_normalized FROM categories WHERE id = $1', [category.id],
         );
         assert.deepEqual(rows, [{ title_normalized: 'спорт' }]);
     });

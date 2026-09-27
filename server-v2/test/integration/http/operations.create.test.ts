@@ -57,7 +57,7 @@ describe('POST /api/operations', () => {
 
         assert.equal(response.status, 404);
         assert.equal(response.body.error, true);
-        const { rows } = await database.query('select id from operations where user_id = $1', [attacker.id]);
+        const { rows } = await database.query('SELECT id FROM operations WHERE user_id = $1', [attacker.id]);
         assert.deepEqual(rows, []);
     });
 

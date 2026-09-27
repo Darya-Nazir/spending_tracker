@@ -12,8 +12,8 @@ describe('pg type coercion', () => {
     test('numeric values are summed by Postgres and arrive as an exact number', async () => {
         // сумма нескольких numeric считается в SQL и приходит точным числом
         const { rows } = await database.query<{ total: number }>(
-            `select sum(amount) as total
-               from (values (0.10::numeric(14,2)), (0.20)) source(amount)`,
+            `SELECT sum(amount) AS total
+               FROM (VALUES (0.10::numeric(14,2)), (0.20)) source(amount)`,
         );
         const [row] = rows;
         assert.ok(row, 'запрос должен вернуть одну строку');
@@ -24,8 +24,8 @@ describe('pg type coercion', () => {
 
     test('the same values added up in JS are not exact', async () => {
         const { rows } = await database.query<{ amount: number }>(
-            `select amount
-               from (values (0.10::numeric(14,2)), (0.20)) source(amount)`,
+            `SELECT amount
+               FROM (VALUES (0.10::numeric(14,2)), (0.20)) source(amount)`,
         );
         assert.equal(rows.length, 2);
 
@@ -39,7 +39,7 @@ describe('pg type coercion', () => {
 
     test('the largest value numeric(14,2) allows survives the coercion', async () => {
         const { rows } = await database.query<{ amount: number }>(
-            'select 999999999999.99::numeric(14,2) as amount',
+            'SELECT 999999999999.99::numeric(14,2) AS amount',
         );
         const [row] = rows;
         assert.ok(row, 'запрос должен вернуть одну строку');
@@ -59,7 +59,7 @@ describe('pg type coercion', () => {
         );
 
         const { rows } = await database.query<{ day: string }>(
-            "select '2026-08-24'::date as day",
+            "SELECT '2026-08-24'::date AS day",
         );
         const [row] = rows;
         assert.ok(row, 'запрос должен вернуть одну строку');

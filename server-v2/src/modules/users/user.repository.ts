@@ -43,9 +43,9 @@ export class UserRepository {
     async create(input: CreateUserInput): Promise<User> {
         try {
             const { rows } = await this.database.query<UserRow>(
-                `insert into users (email, name, password_hash)
-                 values ($1, $2, $3)
-                 returning id, email, name, password_hash, initial_balance, created_at`,
+                `INSERT INTO users (email, name, password_hash)
+                 VALUES ($1, $2, $3)
+                 RETURNING id, email, name, password_hash, initial_balance, created_at`,
                 [input.email, input.name, input.passwordHash],
             );
             const row = rows[0];
@@ -66,9 +66,9 @@ export class UserRepository {
 
     async findByEmail(email: NormalizedEmail): Promise<User | null> {
         const { rows } = await this.database.query<UserRow>(
-            `select id, email, name, password_hash, initial_balance, created_at
-               from users
-              where email = $1`,
+            `SELECT id, email, name, password_hash, initial_balance, created_at
+               FROM users
+              WHERE email = $1`,
             [email],
         );
         const row = rows[0];

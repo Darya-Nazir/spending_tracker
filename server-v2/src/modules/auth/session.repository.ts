@@ -19,8 +19,8 @@ export class SessionRepository {
 
     async create(userId: number, tokenHash: string, expiresAt: Date, device: string): Promise<number> {
         const { rows } = await this.database.query<{ id: number }>(
-            `insert into sessions (user_id, token_hash, expires_at, device)
-             values ($1, $2, $3, $4) returning id`,
+            `INSERT INTO sessions (user_id, token_hash, expires_at, device)
+             VALUES ($1, $2, $3, $4) RETURNING id`,
             [userId, tokenHash, expiresAt, device],
         );
         const session = rows[0];
@@ -33,12 +33,12 @@ export class SessionRepository {
 // блокирует строку пользователя до завершения транзакции, 
 // чтобы изменения происходилипо очереди
     async lockUser(userId: number): Promise<void> {
-        await this.database.query('select id from users where id = $1 for update', [userId]);
+        await this.database.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId]);
     }
 
     async findByTokenHash(tokenHash: string): Promise<SessionRow | null> {
         const { rows } = await this.database.query<SessionRow>(
-            'select id, user_id, expires_at, device, revoked_at from sessions where token_hash = $1',
+            'SELECT id, user_id, expires_at, device, revoked_at FROM sessions WHERE token_hash = $1',
             [tokenHash],
         );
         return rows[0] ?? null;
@@ -48,7 +48,7 @@ export class SessionRepository {
 // сохраняет ссылку на новую в replaced_by. там -  id новой строки
     async replace(id: number, replacementId: number): Promise<void> {
         await this.database.query(
-            'update sessions set revoked_at = now(), replaced_by = $2 where id = $1',
+            'UPDATE sessions SET revoked_at = now(), replaced_by = $2 WHERE id = $1',
             [id, replacementId],
         );
     }
@@ -59,14 +59,14 @@ export class SessionRepository {
 // Сессии других устройств того же пользователя не затрагиваются.
     async revokeChain(id: number): Promise<void> {
         await this.database.query(
-            `with recursive chain as (
-                select id, replaced_by from sessions where id = $1
-                union all
-                select s.id, s.replaced_by from sessions s
-                join chain c on s.id = c.replaced_by
+            `WITH RECURSIVE chain AS (
+                SELECT id, replaced_by FROM sessions WHERE id = $1
+                UNION ALL
+                SELECT s.id, s.replaced_by FROM sessions s
+                JOIN chain c ON s.id = c.replaced_by
              )
-             update sessions set revoked_at = now()
-             where id in (select id from chain) and revoked_at is null`,
+             UPDATE sessions SET revoked_at = now()
+             WHERE id IN (SELECT id FROM chain) AND revoked_at IS NULL`,
             [id],
         );
     }

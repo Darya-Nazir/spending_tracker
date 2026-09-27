@@ -9,11 +9,11 @@ export class BalanceRepository {
 
     async get(userId: number): Promise<number | null> {
         const { rows } = await this.database.query<{ balance: number }>(
-            `select initial_balance + coalesce(
-                (select sum(case when type = 'income' then amount else -amount end)
-                   from public.operations where user_id = $1), 0
-             ) as balance
-               from public.users where id = $1`,
+            `SELECT initial_balance + coalesce(
+                (SELECT sum(CASE WHEN type = 'income' THEN amount ELSE -amount END)
+                   FROM public.operations WHERE user_id = $1), 0
+             ) AS balance
+               FROM public.users WHERE id = $1`,
             [userId],
         );
         return rows[0]?.balance ?? null;
@@ -21,15 +21,15 @@ export class BalanceRepository {
 
     async update(userId: number, balance: number): Promise<number | null> {
         const { rows } = await this.database.query<{ balance: number }>(
-            `with updated as (
-                update public.users set initial_balance = $2 where id = $1
-                returning id, initial_balance
+            `WITH updated AS (
+                UPDATE public.users SET initial_balance = $2 WHERE id = $1
+                RETURNING id, initial_balance
              )
-             select updated.initial_balance + coalesce(
-                 (select sum(case when type = 'income' then amount else -amount end)
-                    from public.operations where user_id = updated.id), 0
-             ) as balance
-               from updated`,
+             SELECT updated.initial_balance + coalesce(
+                 (SELECT sum(CASE WHEN type = 'income' THEN amount ELSE -amount END)
+                    FROM public.operations WHERE user_id = updated.id), 0
+             ) AS balance
+               FROM updated`,
             [userId, balance],
         );
         return rows[0]?.balance ?? null;

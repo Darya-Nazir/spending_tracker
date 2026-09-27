@@ -13,9 +13,9 @@ const insertCategory = async (
     title: string,
 ): Promise<number> => {
     const { rows } = await database.query<{ id: number }>(
-        `insert into categories (user_id, type, title, title_normalized)
-         values ($1, $2, $3, $4)
-         returning id`,
+        `INSERT INTO categories (user_id, type, title, title_normalized)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
         [userId, type, title, new CategoryTitleService().normalize(title)],
     );
     const category = rows[0];
@@ -31,21 +31,21 @@ describe('categories schema', () => {
         // требует нормализованное название при создании и обновлении
         const user = await createUser(database);
         await assert.rejects(database.query(
-            `insert into categories (user_id, type, title) values ($1, 'expense', 'Еда')`,
+            `INSERT INTO categories (user_id, type, title) VALUES ($1, 'expense', 'Еда')`,
             [user.id],
         ), { code: '23502', column: 'title_normalized' });
         const id = await insertCategory(user.id, 'expense', 'Еда');
         await assert.rejects(database.query(
-            'update categories set title_normalized = null where id = $1', [id],
+            'UPDATE categories SET title_normalized = NULL WHERE id = $1', [id],
         ), { code: '23502', column: 'title_normalized' });
     });
 
     test('uses one full unique index for category titles', async () => {
         // использует один полный уникальный индекс для названий категорий
         const { rows } = await database.query(`
-            select indexname, indexdef from pg_indexes
-            where schemaname = 'public' and tablename = 'categories'
-              and indexname in ('categories_user_type_title_lower_unique',
+            SELECT indexname, indexdef FROM pg_indexes
+            WHERE schemaname = 'public' AND tablename = 'categories'
+              AND indexname IN ('categories_user_type_title_lower_unique',
                                 'categories_user_type_title_normalized_unique')
         `);
         assert.equal(rows.length, 1);

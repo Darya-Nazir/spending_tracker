@@ -28,11 +28,11 @@ const periodApp = new AppFactory(Config.load({
 const addDatedOperations = async (userId: number, dates: string[]) => {
     await new CategoryRepository(database).seedDefaults(userId);
     const { rows } = await database.query<{ id: number; date: string }>(
-        `insert into operations (user_id, category_id, type, amount, date)
-         select c.user_id, c.id, c.type, 10, d.date
-           from categories c cross join unnest($2::date[]) as d(date)
-          where c.user_id = $1 and c.type = 'expense' and c.is_default
-         returning id, date`,
+        `INSERT INTO operations (user_id, category_id, type, amount, date)
+         SELECT c.user_id, c.id, c.type, 10, d.date
+           FROM categories c CROSS JOIN unnest($2::date[]) AS d(date)
+          WHERE c.user_id = $1 AND c.type = 'expense' AND c.is_default
+         RETURNING id, date`,
         [userId, dates],
     );
     assert.equal(rows.length, dates.length);
@@ -61,10 +61,10 @@ describe('GET /api/operations', () => {
         const saved = [];
         for (const operation of operations) {
             const { rows } = await database.query<{ id: number }>(
-                `insert into operations (user_id, category_id, type, amount, date, comment)
-                 select user_id, id, type, $3, $4, $5 from categories
-                  where user_id = $1 and type = $2 and title = $6
-                 returning id`,
+                `INSERT INTO operations (user_id, category_id, type, amount, date, comment)
+                 SELECT user_id, id, type, $3, $4, $5 FROM categories
+                  WHERE user_id = $1 AND type = $2 AND title = $6
+                 RETURNING id`,
                 [user.id, operation.type, operation.amount, operation.date, operation.comment, operation.category],
             );
             assert.equal(rows.length, 1);

@@ -52,7 +52,7 @@ describe('GET/PUT/DELETE /api/operations/:id', () => {
             id: created.id, type: 'income', amount: 100.5, date: '2026-03-01', comment: 'Оклад', category: 'Зарплата',
         });
         const { rows } = await database.query(
-            'select type, category_id, amount, date, comment from operations where id = $1', [created.id],
+            'SELECT type, category_id, amount, date, comment FROM operations WHERE id = $1', [created.id],
         );
         assert.deepEqual(rows, [{
             type: 'income', category_id: salary.id, amount: 100.5, date: '2026-03-01', comment: 'Оклад',
@@ -105,7 +105,7 @@ describe('GET/PUT/DELETE /api/operations/:id', () => {
         assert.equal(response.body.error, false);
         assert.equal(typeof response.body.message, 'string');
         assert.ok(response.body.message.trim());
-        const { rows } = await database.query('select id from operations where id = $1', [created.id]);
+        const { rows } = await database.query('SELECT id FROM operations WHERE id = $1', [created.id]);
         assert.deepEqual(rows, []);
         const balanceAfterDelete = await request(app).get('/api/balance').set(authFor(user.id));
         assert.deepEqual(balanceAfterDelete.body, { balance: 100 });

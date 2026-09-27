@@ -11,7 +11,7 @@ test('reuses the connection after commit and rollback', async () => {
         let pid: number | undefined;
         const failure = new Error('Transaction callback failed');
         const transaction = database.transaction(async (executor) => {
-            const { rows } = await executor.query<{ pid: number }>('select pg_backend_pid() as pid');
+            const { rows } = await executor.query<{ pid: number }>('SELECT pg_backend_pid() AS pid');
             pid = rows[0]?.pid;
             if (fail) throw failure;
             return 'committed';
@@ -21,7 +21,7 @@ test('reuses the connection after commit and rollback', async () => {
         else assert.equal(await transaction, 'committed');
 
         assert.ok(pid);
-        const { rows } = await database.query('select pg_backend_pid() as pid');
+        const { rows } = await database.query('SELECT pg_backend_pid() AS pid');
         assert.equal(rows[0]?.pid, pid);
     }
 });

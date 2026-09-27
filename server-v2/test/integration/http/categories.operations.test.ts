@@ -17,8 +17,8 @@ const insertOperation = async (
     userId: number, categoryId: number, type: 'expense' | 'income', amount: number,
 ): Promise<void> => {
     await database.query(
-        `insert into operations (user_id, category_id, type, amount, date)
-         values ($1, $2, $3, $4, '2026-09-01')`,
+        `INSERT INTO operations (user_id, category_id, type, amount, date)
+         VALUES ($1, $2, $3, $4, '2026-09-01')`,
         [userId, categoryId, type, amount],
     );
 };
@@ -39,7 +39,7 @@ describe('DELETE /api/categories/:type/:id/operations', () => {
             .delete(`/api/categories/expense/${category.id}/operations`).set(authFor(user.id));
 
         assert.equal(response.status, 200);
-        const { rows } = await database.query('select id from operations where user_id = $1', [user.id]);
+        const { rows } = await database.query('SELECT id FROM operations WHERE user_id = $1', [user.id]);
         assert.deepEqual(rows, []);
     });
 });
@@ -58,7 +58,7 @@ describe('PUT /api/categories/:type/:id/operations', () => {
             .set(authFor(user.id)).send({ targetCategoryId: target.id });
 
         assert.equal(response.status, 200);
-        const { rows } = await database.query('select category_id from operations where user_id = $1', [user.id]);
+        const { rows } = await database.query('SELECT category_id FROM operations WHERE user_id = $1', [user.id]);
         assert.deepEqual(rows, [{ category_id: target.id }]);
 
         const listed = await request(app).get('/api/operations?period=all').set(authFor(user.id));

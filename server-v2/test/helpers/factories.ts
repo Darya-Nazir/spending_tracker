@@ -41,9 +41,9 @@ export const createUser = async (
         password_hash: string;
         initial_balance: number;
     }>(
-        `insert into users (email, name, password_hash, initial_balance)
-         values ($1, $2, $3, $4)
-         returning id, email, name, password_hash, initial_balance`,
+        `INSERT INTO users (email, name, password_hash, initial_balance)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, email, name, password_hash, initial_balance`,
         [user.email, user.name, user.passwordHash, user.initialBalance],
     );
     const persisted = rows[0];

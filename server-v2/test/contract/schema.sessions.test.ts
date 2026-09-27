@@ -8,9 +8,9 @@ const { database } = useTestDatabase();
 
 const insertSession = async (userId: number, tokenHash: string): Promise<number> => {
     const { rows } = await database.query<{ id: number }>(
-        `insert into sessions (user_id, token_hash, expires_at, device)
-         values ($1, $2, $3, $4)
-         returning id`,
+        `INSERT INTO sessions (user_id, token_hash, expires_at, device)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
         [userId, tokenHash, '2027-01-01T00:00:00Z', 'test device'],
     );
     const session = rows[0];
@@ -42,12 +42,12 @@ describe('sessions schema', () => {
         const user = await createUser(database);
         const sessionId = await insertSession(user.id, 'b'.repeat(64));
 
-        await database.query('delete from users where id = $1', [user.id]);
+        await database.query('DELETE FROM users WHERE id = $1', [user.id]);
 
         const { rows } = await database.query<{ count: number }>(
-            `select count(*)::integer as count
-               from sessions
-              where id = $1`,
+            `SELECT count(*)::integer AS count
+               FROM sessions
+              WHERE id = $1`,
             [sessionId],
         );
 

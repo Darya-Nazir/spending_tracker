@@ -61,7 +61,7 @@ describe('POST /api/login', () => {
         assert.deepEqual(tokens.verifyRefresh(response.body.tokens.refreshToken), { userId });
         const tokenHash = createHash('sha256').update(response.body.tokens.refreshToken).digest('hex');
         const { rows } = await database.query(
-            'select user_id, token_hash, revoked_at from sessions',
+            'SELECT user_id, token_hash, revoked_at FROM sessions',
         );
         assert.deepEqual(rows, [{ user_id: userId, token_hash: tokenHash, revoked_at: null }]);
     });
@@ -75,7 +75,7 @@ describe('POST /api/login', () => {
             assert.equal(response.status, 200);
         }
         const { rows } = await database.query<{ expires_at: Date }>(
-            'select expires_at from sessions where user_id = $1 order by id',
+            'SELECT expires_at FROM sessions WHERE user_id = $1 ORDER BY id',
             [userId],
         );
         assert.equal(rows.length, 2, 'Each login must create a session');

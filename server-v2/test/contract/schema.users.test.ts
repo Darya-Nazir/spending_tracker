@@ -22,12 +22,12 @@ describe('users schema', () => {
     test('users has the required columns and initial_balance contract', async () => {
         // в users есть обязательные колонки и соблюдается контракт initial_balance
         const { rows: usersColumnMetadataRows } = await database.query<ColumnMetadata>(
-            `select column_name, data_type, is_nullable,
+            `SELECT column_name, data_type, is_nullable,
                     numeric_precision, numeric_scale
-               from information_schema.columns
-              where table_schema = 'public'
-                and table_name = 'users'
-              order by ordinal_position`,
+               FROM information_schema.columns
+              WHERE table_schema = 'public'
+                AND table_name = 'users'
+              ORDER BY ordinal_position`,
         );
 
         const usersColumnsByName = new Map(
@@ -61,9 +61,9 @@ describe('users schema', () => {
         const email = 'stage-6-default-balance@example.test';
 
         const { rows: insertedUserRows } = await database.query<{ initial_balance: number }>(
-            `insert into users (email, name, password_hash)
-             values ($1, $2, $3)
-             returning initial_balance`,
+            `INSERT INTO users (email, name, password_hash)
+             VALUES ($1, $2, $3)
+             RETURNING initial_balance`,
             [email, 'Stage Six', 'not-a-real-password-hash'],
         );
 
@@ -76,15 +76,15 @@ describe('users schema', () => {
         const sameEmailInAnotherCase = 'stage-6-case@example.TEST';
 
         await database.query(
-            `insert into users (email, name, password_hash)
-             values ($1, $2, $3)`,
+            `INSERT INTO users (email, name, password_hash)
+             VALUES ($1, $2, $3)`,
             [firstEmail, 'First User', 'not-a-real-password-hash'],
         );
 
         await assert.rejects(
             database.query(
-                `insert into users (email, name, password_hash)
-                 values ($1, $2, $3)`,
+                `INSERT INTO users (email, name, password_hash)
+                 VALUES ($1, $2, $3)`,
                 [sameEmailInAnotherCase, 'Second User', 'not-a-real-password-hash'],
             ),
             (error: unknown) => {
@@ -102,11 +102,11 @@ describe('users schema', () => {
     test('canonical email has a plain unique index and keeps the compatibility index', async () => {
         // у канонического email есть обычный уникальный индекс и сохранён индекс совместимости
         const { rows: indexRows } = await database.query<IndexMetadata>(
-            `select indexname, indexdef
-               from pg_indexes
-              where schemaname = 'public'
-                and tablename = 'users'
-                and indexname in ('users_email_unique', 'users_email_lower_unique')`,
+            `SELECT indexname, indexdef
+               FROM pg_indexes
+              WHERE schemaname = 'public'
+                AND tablename = 'users'
+                AND indexname IN ('users_email_unique', 'users_email_lower_unique')`,
         );
         const indexesByName = new Map(
             indexRows.map((indexMetadata) => [indexMetadata.indexname, indexMetadata.indexdef]),

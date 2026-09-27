@@ -18,7 +18,7 @@ const register = async (email: string) => {
     const userId: number = response.body.user.id;
     const { rows: categories } = await database.query<{
         id: number; title: string; type: string;
-    }>('select id, title, type from categories where user_id = $1 order by id', [userId]);
+    }>('SELECT id, title, type FROM categories WHERE user_id = $1 ORDER BY id', [userId]);
 
     return { categories, auth: bearerAuth(tokens.issueTokenPair(userId).accessToken) };
 };

@@ -30,8 +30,8 @@ export class CategoryRepository {
 
     async list(userId: number, type: CategoryType): Promise<Category[]> {
         const { rows } = await this.database.query<Category>(
-            `select id, title from public.categories
-              where user_id = $1 and type = $2 order by id`,
+            `SELECT id, title FROM public.categories
+              WHERE user_id = $1 AND type = $2 ORDER BY id`,
             [userId, type],
         );
         return rows;
@@ -39,8 +39,8 @@ export class CategoryRepository {
 
     async findById(userId: number, type: CategoryType, id: number): Promise<Category | null> {
         const { rows } = await this.database.query<Category>(
-            `select id, title from public.categories
-              where user_id = $1 and type = $2 and id = $3`,
+            `SELECT id, title FROM public.categories
+              WHERE user_id = $1 AND type = $2 AND id = $3`,
             [userId, type, id],
         );
         return rows[0] ?? null;
@@ -48,7 +48,7 @@ export class CategoryRepository {
 
     async findOwnedById(userId: number, id: number): Promise<(Category & { type: CategoryType }) | null> {
         const { rows } = await this.database.query<Category & { type: CategoryType }>(
-            `select id, title, type from public.categories where user_id = $1 and id = $2`,
+            `SELECT id, title, type FROM public.categories WHERE user_id = $1 AND id = $2`,
             [userId, id],
         );
         return rows[0] ?? null;
@@ -57,8 +57,8 @@ export class CategoryRepository {
     async create(userId: number, type: CategoryType, title: string): Promise<Category> {
         try {
             const { rows } = await this.database.query<Category>(
-                `insert into public.categories (user_id, type, title, title_normalized)
-                 values ($1, $2, $3, $4) returning id, title`,
+                `INSERT INTO public.categories (user_id, type, title, title_normalized)
+                 VALUES ($1, $2, $3, $4) RETURNING id, title`,
                 [userId, type, title, this.titles.normalize(title)],
             );
             if (rows[0] === undefined) {
@@ -73,9 +73,9 @@ export class CategoryRepository {
     async rename(userId: number, type: CategoryType, id: number, title: string): Promise<Category | null> {
         try {
             const { rows } = await this.database.query<Category>(
-                `update public.categories set title = $4, title_normalized = $5
-                  where user_id = $1 and type = $2 and id = $3
-                  returning id, title`,
+                `UPDATE public.categories SET title = $4, title_normalized = $5
+                  WHERE user_id = $1 AND type = $2 AND id = $3
+                  RETURNING id, title`,
                 [userId, type, id, title, this.titles.normalize(title)],
             );
             return rows[0] ?? null;
@@ -87,7 +87,7 @@ export class CategoryRepository {
     async delete(userId: number, type: CategoryType, id: number): Promise<boolean> {
         try {
             const { rowCount } = await this.database.query(
-                `delete from public.categories where user_id = $1 and type = $2 and id = $3`,
+                `DELETE FROM public.categories WHERE user_id = $1 AND type = $2 AND id = $3`,
                 [userId, type, id],
             );
             return rowCount === 1;
@@ -103,7 +103,7 @@ export class CategoryRepository {
 
     async deleteOperations(userId: number, type: CategoryType, categoryId: number): Promise<void> {
         await this.database.query(
-            `delete from public.operations where user_id = $1 and type = $2 and category_id = $3`,
+            `DELETE FROM public.operations WHERE user_id = $1 AND type = $2 AND category_id = $3`,
             [userId, type, categoryId],
         );
     }
@@ -113,8 +113,8 @@ export class CategoryRepository {
     ): Promise<void> {
         try {
             await this.database.query(
-                `update public.operations set category_id = $4
-                  where user_id = $1 and type = $2 and category_id = $3`,
+                `UPDATE public.operations SET category_id = $4
+                  WHERE user_id = $1 AND type = $2 AND category_id = $3`,
                 [userId, type, categoryId, targetCategoryId],
             );
         } catch (error) {
@@ -130,9 +130,9 @@ export class CategoryRepository {
     async seedDefaults(userId: number): Promise<void> {
         for (const [type, titles] of Object.entries(STANDARD_CATEGORIES)) {
             await this.database.query(
-                `insert into public.categories (user_id, type, title, title_normalized, is_default)
-                 select $1, $2::public.category_type, title, title_normalized, title = 'Общее'
-                   from unnest($3::text[], $4::text[]) as seed(title, title_normalized)`,
+                `INSERT INTO public.categories (user_id, type, title, title_normalized, is_default)
+                 SELECT $1, $2::public.category_type, title, title_normalized, title = 'Общее'
+                   FROM unnest($3::text[], $4::text[]) AS seed(title, title_normalized)`,
                 [userId, type, titles, titles.map((title) => this.titles.normalize(title))],
             );
         }

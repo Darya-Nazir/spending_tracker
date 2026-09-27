@@ -8,7 +8,7 @@ import type { Logger } from '../logging/logger.ts';
  * Репозитории получают этот объект и вызывают query()
  */
 
-const PING = 'select 1';
+const PING = 'SELECT 1';
 
 export type QueryExecutor = Pick<Database, 'query'>;
 

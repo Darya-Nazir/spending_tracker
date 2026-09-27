@@ -29,13 +29,13 @@ const createDatabase = async (t: TestContext, count: number): Promise<Client> =>
     t.after(async () => {
         try {
             await client.end();
-            if (created) await admin.query(`drop database "${name}"`);
+            if (created) await admin.query(`DROP DATABASE "${name}"`);
         } finally {
             await admin.end();
         }
     });
     await admin.connect();
-    await admin.query(`create database "${name}"`);
+    await admin.query(`CREATE DATABASE "${name}"`);
     created = true;
     await client.connect();
     await migrate(client, count);
@@ -45,40 +45,40 @@ const createDatabase = async (t: TestContext, count: number): Promise<Client> =>
 /** Сравниваем контракт схемы по именам; физический порядок колонок допускает различия. */
 const schema = async (client: Client) => {
     const queries = {
-        schemas: `select nspname from pg_namespace
-            where nspname in ('public', 'identity', 'finance') order by nspname`,
-        tables: `select table_schema, table_name, table_type from information_schema.tables
-            where table_schema in ('public', 'identity', 'finance') and table_name <> 'pgmigrations'
-            order by table_schema, table_name`,
-        columns: `select table_schema, table_name, column_name, data_type, udt_schema, udt_name,
+        schemas: `SELECT nspname FROM pg_namespace
+            WHERE nspname IN ('public', 'identity', 'finance') ORDER BY nspname`,
+        tables: `SELECT table_schema, table_name, table_type FROM information_schema.tables
+            WHERE table_schema IN ('public', 'identity', 'finance') AND table_name <> 'pgmigrations'
+            ORDER BY table_schema, table_name`,
+        columns: `SELECT table_schema, table_name, column_name, data_type, udt_schema, udt_name,
                 is_nullable, column_default, numeric_precision, numeric_scale, character_maximum_length,
                 is_identity, identity_generation
-            from information_schema.columns
-            where table_schema in ('public', 'identity', 'finance') and table_name <> 'pgmigrations'
-            order by table_schema, table_name, column_name`,
-        constraints: `select n.nspname, t.relname, c.conname, c.contype, pg_get_constraintdef(c.oid) as definition
-            from pg_constraint c join pg_class t on t.oid = c.conrelid
-            join pg_namespace n on n.oid = t.relnamespace
-            where n.nspname in ('public', 'identity', 'finance') and t.relname <> 'pgmigrations'
-            order by n.nspname, t.relname, c.conname`,
-        indexes: `select schemaname, tablename, indexname, indexdef from pg_indexes
-            where schemaname in ('public', 'identity', 'finance') and tablename <> 'pgmigrations'
-            order by schemaname, tablename, indexname`,
-        enums: `select n.nspname, t.typname, e.enumlabel, e.enumsortorder from pg_enum e
-            join pg_type t on t.oid = e.enumtypid join pg_namespace n on n.oid = t.typnamespace
-            where n.nspname in ('public', 'identity', 'finance') order by n.nspname, t.typname, e.enumsortorder`,
-        sequences: `select schemaname, sequencename, data_type::text, start_value, min_value,
-                max_value, increment_by, cycle, cache_size from pg_sequences
-            where schemaname in ('public', 'identity', 'finance') and sequencename <> 'pgmigrations_id_seq'
-            order by schemaname, sequencename`,
-        functions: `select n.nspname, p.proname, pg_get_functiondef(p.oid) as definition
-            from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-            where n.nspname in ('public', 'identity', 'finance') order by n.nspname, p.proname`,
-        triggers: `select n.nspname, c.relname, t.tgname, pg_get_triggerdef(t.oid) as definition
-            from pg_trigger t join pg_class c on c.oid = t.tgrelid
-            join pg_namespace n on n.oid = c.relnamespace
-            where n.nspname in ('public', 'identity', 'finance') and not t.tgisinternal
-            order by n.nspname, c.relname, t.tgname`,
+            FROM information_schema.columns
+            WHERE table_schema IN ('public', 'identity', 'finance') AND table_name <> 'pgmigrations'
+            ORDER BY table_schema, table_name, column_name`,
+        constraints: `SELECT n.nspname, t.relname, c.conname, c.contype, pg_get_constraintdef(c.oid) AS definition
+            FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid
+            JOIN pg_namespace n ON n.oid = t.relnamespace
+            WHERE n.nspname IN ('public', 'identity', 'finance') AND t.relname <> 'pgmigrations'
+            ORDER BY n.nspname, t.relname, c.conname`,
+        indexes: `SELECT schemaname, tablename, indexname, indexdef FROM pg_indexes
+            WHERE schemaname IN ('public', 'identity', 'finance') AND tablename <> 'pgmigrations'
+            ORDER BY schemaname, tablename, indexname`,
+        enums: `SELECT n.nspname, t.typname, e.enumlabel, e.enumsortorder FROM pg_enum e
+            JOIN pg_type t ON t.oid = e.enumtypid JOIN pg_namespace n ON n.oid = t.typnamespace
+            WHERE n.nspname IN ('public', 'identity', 'finance') ORDER BY n.nspname, t.typname, e.enumsortorder`,
+        sequences: `SELECT schemaname, sequencename, data_type::text, start_value, min_value,
+                max_value, increment_by, cycle, cache_size FROM pg_sequences
+            WHERE schemaname IN ('public', 'identity', 'finance') AND sequencename <> 'pgmigrations_id_seq'
+            ORDER BY schemaname, sequencename`,
+        functions: `SELECT n.nspname, p.proname, pg_get_functiondef(p.oid) AS definition
+            FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+            WHERE n.nspname IN ('public', 'identity', 'finance') ORDER BY n.nspname, p.proname`,
+        triggers: `SELECT n.nspname, c.relname, t.tgname, pg_get_triggerdef(t.oid) AS definition
+            FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname IN ('public', 'identity', 'finance') AND NOT t.tgisinternal
+            ORDER BY n.nspname, c.relname, t.tgname`,
     };
     const result: Record<string, unknown> = {};
     for (const [name, sql] of Object.entries(queries)) result[name] = (await client.query(sql)).rows;
@@ -86,19 +86,19 @@ const schema = async (client: Client) => {
 };
 
 const history = async (client: Client) => (await client.query(
-    'select id, name, run_on from public.pgmigrations order by id',
+    'SELECT id, name, run_on FROM public.pgmigrations ORDER BY id',
 )).rows;
 
 const data = async (client: Client, historical: boolean) => {
     const result: Record<string, unknown> = {};
     const users = historical
-        ? `select to_jsonb(u) || jsonb_build_object('initial_balance', coalesce(a.initial_balance, 0)) as row
-            from identity.users u left join finance.accounts a on a.user_id = u.id order by u.id`
-        : 'select to_jsonb(u) as row from public.users u order by u.id';
+        ? `SELECT to_jsonb(u) || jsonb_build_object('initial_balance', coalesce(a.initial_balance, 0)) AS row
+            FROM identity.users u LEFT JOIN finance.accounts a ON a.user_id = u.id ORDER BY u.id`
+        : 'SELECT to_jsonb(u) AS row FROM public.users u ORDER BY u.id';
     result.users = (await client.query(users)).rows;
     for (const table of ['sessions', 'categories', 'operations']) {
         const namespace = historical ? (table === 'sessions' ? 'identity' : 'finance') : 'public';
-        result[table] = (await client.query(`select to_jsonb(t) as row from ${namespace}.${table} t order by id`)).rows;
+        result[table] = (await client.query(`SELECT to_jsonb(t) AS row FROM ${namespace}.${table} t ORDER BY id`)).rows;
     }
     return result;
 };
@@ -119,28 +119,28 @@ test('restoration preserves business data, balances, sequences and user deletion
     // восстановление сохраняет бизнес-данные, балансы, последовательности и каскадное удаление пользователя
     const client = await createDatabase(t, 6);
     await client.query(`
-        insert into users (email, name, password_hash, initial_balance) values
+        INSERT INTO users (email, name, password_hash, initial_balance) VALUES
             ('ready@example.test', 'Ready', 'hash-ready', 123.45),
             ('failed@example.test', 'Failed', 'hash-failed', -42.10),
             ('pending@example.test', 'Pending', 'hash-pending', 0);
-        insert into sessions (user_id, token_hash, expires_at, device, revoked_at) values
+        INSERT INTO sessions (user_id, token_hash, expires_at, device, revoked_at) VALUES
             (1, repeat('a', 64), '2027-01-01', 'phone', '2026-09-01'),
-            (1, repeat('b', 64), '2027-02-01', 'laptop', null);
-        update sessions set replaced_by = 2 where id = 1;
-        insert into categories (user_id, type, title, title_normalized, is_default) values
+            (1, repeat('b', 64), '2027-02-01', 'laptop', NULL);
+        UPDATE sessions SET replaced_by = 2 WHERE id = 1;
+        INSERT INTO categories (user_id, type, title, title_normalized, is_default) VALUES
             (1, 'expense', 'Food', 'food', true), (2, 'income', 'Salary', 'salary', false);
-        insert into operations (user_id, category_id, type, amount, date, comment) values
+        INSERT INTO operations (user_id, category_id, type, amount, date, comment) VALUES
             (1, 1, 'expense', 12.34, '2026-09-08', 'Lunch'),
             (2, 2, 'income', 987.65, '2026-09-09', 'Pay');
     `);
     await migrate(client, 13);
     await client.query(`
-        update finance.accounts set status = 'ready' where user_id = 1;
-        update finance.accounts set status = 'failed', status_reason = 'fixture failure' where user_id = 2;
-        update identity.outbox set failed_at = current_timestamp, last_error = 'fixture failure' where user_id = 2;
-        insert into identity.users (email, name, password_hash) values ('new@example.test', 'New', 'hash-new');
-        insert into finance.categories (user_id, type, title) values (1, 'income', 'Gift');
-        insert into finance.operations (user_id, category_id, type, amount, date) values
+        UPDATE finance.accounts SET status = 'ready' WHERE user_id = 1;
+        UPDATE finance.accounts SET status = 'failed', status_reason = 'fixture failure' WHERE user_id = 2;
+        UPDATE identity.outbox SET failed_at = current_timestamp, last_error = 'fixture failure' WHERE user_id = 2;
+        INSERT INTO identity.users (email, name, password_hash) VALUES ('new@example.test', 'New', 'hash-new');
+        INSERT INTO finance.categories (user_id, type, title) VALUES (1, 'income', 'Gift');
+        INSERT INTO finance.operations (user_id, category_id, type, amount, date) VALUES
             (1, 3, 'income', 50, '2026-09-14');
     `);
     const before = await data(client, true);
@@ -148,38 +148,38 @@ test('restoration preserves business data, balances, sequences and user deletion
     await migrate(client);
     assert.deepEqual(await data(client, false), before);
     assert.deepEqual((await history(client)).slice(0, 13), previousHistory);
-    assert.equal((await client.query('select initial_balance from users where id = 4')).rows[0].initial_balance, 0);
-    assert.equal((await client.query(`insert into users (email, name, password_hash)
-        values ('next@example.test', 'Next', 'hash-next') returning id`)).rows[0].id, 5);
-    assert.equal((await client.query(`insert into categories (user_id, type, title)
-        values (5, 'expense', 'Next') returning id`)).rows[0].id, 4);
-    assert.equal((await client.query(`insert into operations (user_id, category_id, type, amount, date)
-        values (5, 4, 'expense', 1, '2026-09-14') returning id`)).rows[0].id, 4);
-    assert.equal((await client.query(`insert into sessions (user_id, token_hash, expires_at, device)
-        values (5, repeat('c', 64), '2027-01-01', 'next') returning id`)).rows[0].id, 3);
-    await client.query('delete from users where id = 1');
+    assert.equal((await client.query('SELECT initial_balance FROM users WHERE id = 4')).rows[0].initial_balance, 0);
+    assert.equal((await client.query(`INSERT INTO users (email, name, password_hash)
+        VALUES ('next@example.test', 'Next', 'hash-next') RETURNING id`)).rows[0].id, 5);
+    assert.equal((await client.query(`INSERT INTO categories (user_id, type, title)
+        VALUES (5, 'expense', 'Next') RETURNING id`)).rows[0].id, 4);
+    assert.equal((await client.query(`INSERT INTO operations (user_id, category_id, type, amount, date)
+        VALUES (5, 4, 'expense', 1, '2026-09-14') RETURNING id`)).rows[0].id, 4);
+    assert.equal((await client.query(`INSERT INTO sessions (user_id, token_hash, expires_at, device)
+        VALUES (5, repeat('c', 64), '2027-01-01', 'next') RETURNING id`)).rows[0].id, 3);
+    await client.query('DELETE FROM users WHERE id = 1');
     for (const table of ['sessions', 'categories', 'operations']) {
-        assert.equal((await client.query(`select * from ${table} where user_id = 1`)).rowCount, 0);
+        assert.equal((await client.query(`SELECT * FROM ${table} WHERE user_id = 1`)).rowCount, 0);
     }
-    assert.equal((await client.query('select * from operations where user_id = 2')).rowCount, 1);
+    assert.equal((await client.query('SELECT * FROM operations WHERE user_id = 2')).rowCount, 1);
 });
 
 test('orphan accounts abort restoration with their user IDs and preserve the database', async t => {
     // аккаунты без пользователей прерывают восстановление с указанием ID и сохраняют базу
     const client = await createDatabase(t, 13);
-    await client.query('insert into finance.accounts (user_id, initial_balance) values (999, 12.34)');
+    await client.query('INSERT INTO finance.accounts (user_id, initial_balance) VALUES (999, 12.34)');
     const before = await schema(client);
     const applied = await history(client);
     await assert.rejects(migrate(client), /Restore identity users.*999/);
     assert.deepEqual(await schema(client), before);
     assert.deepEqual(await history(client), applied);
-    assert.equal((await client.query('select initial_balance from finance.accounts where user_id = 999')).rows[0].initial_balance, 12.34);
+    assert.equal((await client.query('SELECT initial_balance FROM finance.accounts WHERE user_id = 999')).rows[0].initial_balance, 12.34);
 });
 
 test('a schema collision rolls back all preceding restoration changes', async t => {
     // конфликт схемы откатывает все предшествующие изменения восстановления
     const client = await createDatabase(t, 13);
-    await client.query('create table public.users (marker text)');
+    await client.query('CREATE TABLE public.users (marker text)');
     const before = await schema(client);
     const applied = await history(client);
     await assert.rejects(migrate(client), /already exists/);
@@ -201,13 +201,13 @@ test('migration 016 preserves service-normalized data and matches a fresh databa
     // миграция 016 сохраняет нормализованные сервисом данные и даёт схему как у новой базы
     const client = await createDatabase(t, 15);
     const fresh = await createDatabase(t, 16);
-    await client.query(`insert into users (email, name, password_hash)
-        values ('categories@example.test', 'Categories', 'hash')`);
+    await client.query(`INSERT INTO users (email, name, password_hash)
+        VALUES ('categories@example.test', 'Categories', 'hash')`);
     const categories = new CategoryRepository(client);
     await categories.seedDefaults(1);
     await categories.create(1, 'expense', 'Кофе Café İ');
-    await client.query(`insert into operations (user_id, category_id, type, amount, date)
-        values (1, 1, 'expense', 12.34, '2026-09-16')`);
+    await client.query(`INSERT INTO operations (user_id, category_id, type, amount, date)
+        VALUES (1, 1, 'expense', 12.34, '2026-09-16')`);
     const before = await data(client, false);
     const previousHistory = await history(client);
 

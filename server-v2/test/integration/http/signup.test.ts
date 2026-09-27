@@ -29,8 +29,8 @@ describe('POST /api/signup', () => {
                 title: string;
                 is_default: boolean;
             }>(
-                `select type, title, is_default
-                   from categories where user_id = $1`,
+                `SELECT type, title, is_default
+                   FROM categories WHERE user_id = $1`,
                 [response.body.user.id],
             );
 
@@ -52,7 +52,7 @@ describe('POST /api/signup', () => {
         assert.equal(response.status, 201);
 
         const { rows } = await database.query<{ title: string; title_normalized: string }>(
-            'select title, title_normalized from categories where user_id = $1',
+            'SELECT title, title_normalized FROM categories WHERE user_id = $1',
             [response.body.user.id],
         );
         assert.ok(rows.length > 0, 'Signup must create categories');
@@ -65,8 +65,8 @@ describe('POST /api/signup', () => {
     test('rolls back failed signup and allows retry', async () => {
         // откатывает регистрацию при сбое и позволяет повторить попытку
         await database.query(
-            `alter table categories add constraint test_reject_signup_categories
-             check (type = 'expense') not valid`,
+            `ALTER TABLE categories ADD CONSTRAINT test_reject_signup_categories
+             CHECK (type = 'expense') NOT VALID`,
         );
         try {
             const response = await request(app)
@@ -74,14 +74,14 @@ describe('POST /api/signup', () => {
                 .send(validSignup);
 
             const { rows } = await database.query(
-                `select (select count(*)::integer from users) as users,
-                        (select count(*)::integer from categories) as categories`,
+                `SELECT (SELECT count(*)::integer FROM users) AS users,
+                        (SELECT count(*)::integer FROM categories) AS categories`,
             );
             assert.deepEqual(rows, [{ users: 0, categories: 0 }]);
             assert.equal(response.status, 500);
             assert.equal(response.body.error, true);
         } finally {
-            await database.query('alter table categories drop constraint test_reject_signup_categories');
+            await database.query('ALTER TABLE categories DROP CONSTRAINT test_reject_signup_categories');
         }
 
         const retry = await request(app).post('/api/signup').send(validSignup);
@@ -109,7 +109,7 @@ describe('POST /api/signup', () => {
             email: string;
             password_hash: string;
         }>(
-            'select email, password_hash from users where id = $1',
+            'SELECT email, password_hash FROM users WHERE id = $1',
             [response.body.user.id],
         );
         const persisted = rows[0];
@@ -148,7 +148,7 @@ describe('POST /api/signup', () => {
         }
 
         const { rows } = await database.query<{ count: number }>(
-            'select count(*)::integer as count from users',
+            'SELECT count(*)::integer AS count FROM users',
         );
         assert.equal(rows[0]?.count, 0);
     });

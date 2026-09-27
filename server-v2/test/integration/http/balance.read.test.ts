@@ -15,11 +15,11 @@ const auth = (userId: number) => bearerAuth(tokens.issueTokenPair(userId).access
 const addOperations = async (userId: number, income: number, expense: number) => {
     await new CategoryRepository(database).seedDefaults(userId);
     await database.query(
-        `insert into operations (user_id, category_id, type, amount, date)
-         select user_id, id, type,
-                case when type = 'income' then $2::numeric else $3::numeric end,
+        `INSERT INTO operations (user_id, category_id, type, amount, date)
+         SELECT user_id, id, type,
+                CASE WHEN type = 'income' THEN $2::numeric ELSE $3::numeric END,
                 '2026-09-01'::date
-           from categories where user_id = $1 and is_default`,
+           FROM categories WHERE user_id = $1 AND is_default`,
         [userId, income, expense],
     );
 };

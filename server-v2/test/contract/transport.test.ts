@@ -37,8 +37,8 @@ const assertSafeJson = (response: request.Response, name: string): void => {
 
 const insertOperation = async (userId: number, categoryId: number, type: CategoryType): Promise<number> => {
     const { rows } = await database.query<{ id: number }>(
-        `insert into operations (user_id, category_id, type, amount, date, comment)
-         values ($1, $2, $3, 10, '2026-09-01', 'transport contract') returning id`,
+        `INSERT INTO operations (user_id, category_id, type, amount, date, comment)
+         VALUES ($1, $2, $3, 10, '2026-09-01', 'transport contract') RETURNING id`,
         [userId, categoryId, type],
     );
     const id = rows[0]?.id;

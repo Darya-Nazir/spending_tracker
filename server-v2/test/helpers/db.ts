@@ -52,7 +52,7 @@ export const assertTestDatabaseName = (databaseName: string): void => {
 
 export const resetDb = async (database: Database): Promise<void> => {
     const { rows: databaseNameRows } = await database.query<DatabaseNameRow>(
-        'select current_database() as database_name',
+        'SELECT current_database() AS database_name',
     );
     const databaseName = databaseNameRows[0]?.database_name;
 
@@ -63,12 +63,12 @@ export const resetDb = async (database: Database): Promise<void> => {
     assertTestDatabaseName(databaseName);
 
     const { rows: tableNameRows } = await database.query<TableNameRow>(
-        `select format('%I.%I', table_schema, table_name) as qualified_name
-           from information_schema.tables
-          where table_schema = 'public'
-            and table_type = 'BASE TABLE'
-            and table_name <> 'pgmigrations'
-          order by table_name`,
+        `SELECT format('%I.%I', table_schema, table_name) AS qualified_name
+           FROM information_schema.tables
+          WHERE table_schema = 'public'
+            AND table_type = 'BASE TABLE'
+            AND table_name <> 'pgmigrations'
+          ORDER BY table_name`,
     );
 
     if (tableNameRows.length === 0) {
@@ -76,7 +76,7 @@ export const resetDb = async (database: Database): Promise<void> => {
     }
 
     const tableNames = tableNameRows.map(({ qualified_name }) => qualified_name).join(', ');
-    await database.query(`truncate table ${tableNames} restart identity cascade`);
+    await database.query(`TRUNCATE TABLE ${tableNames} RESTART IDENTITY CASCADE`);
 };
 
 export const useTestDatabase = (): TestDatabaseContext => {

@@ -23,11 +23,11 @@ export class OperationRepository {
 
     async findOwnedById(userId: number, id: number): Promise<Operation | null> {
         const { rows } = await this.database.query<Operation>(
-            `select o.id, o.type, o.amount, o.date, o.comment, c.title as category
-               from public.operations o
-               join public.categories c
-                 on c.id = o.category_id and c.user_id = o.user_id and c.type = o.type
-              where o.user_id = $1 and o.id = $2`,
+            `SELECT o.id, o.type, o.amount, o.date, o.comment, c.title AS category
+               FROM public.operations o
+               JOIN public.categories c
+                 ON c.id = o.category_id AND c.user_id = o.user_id AND c.type = o.type
+              WHERE o.user_id = $1 AND o.id = $2`,
             [userId, id],
         );
         return rows[0] ?? null;
@@ -35,14 +35,14 @@ export class OperationRepository {
 
     async list(userId: number, range: DateRange | null): Promise<Operation[]> {
         const { rows } = await this.database.query<Operation>(
-            `select o.id, o.type, o.amount, o.date, o.comment, c.title as category
-               from public.operations o
-               join public.categories c
-                 on c.id = o.category_id and c.user_id = o.user_id and c.type = o.type
-              where o.user_id = $1
-                and ($2::date is null or o.date >= $2::date)
-                and ($3::date is null or o.date <= $3::date)
-              order by o.date desc, o.id desc`,
+            `SELECT o.id, o.type, o.amount, o.date, o.comment, c.title AS category
+               FROM public.operations o
+               JOIN public.categories c
+                 ON c.id = o.category_id AND c.user_id = o.user_id AND c.type = o.type
+              WHERE o.user_id = $1
+                AND ($2::date IS NULL OR o.date >= $2::date)
+                AND ($3::date IS NULL OR o.date <= $3::date)
+              ORDER BY o.date DESC, o.id DESC`,
             [userId, range?.dateFrom ?? null, range?.dateTo ?? null],
         );
         return rows;
@@ -53,9 +53,9 @@ export class OperationRepository {
     ): Promise<InsertedOperation> {
         try {
             const { rows } = await this.database.query<InsertedOperation>(
-                `insert into public.operations (user_id, category_id, type, amount, date, comment)
-                 values ($1, $2, $3, $4, $5, $6)
-                 returning id, type, amount, date, comment`,
+                `INSERT INTO public.operations (user_id, category_id, type, amount, date, comment)
+                 VALUES ($1, $2, $3, $4, $5, $6)
+                 RETURNING id, type, amount, date, comment`,
                 [userId, categoryId, type, amount, date, comment],
             );
             if (rows[0] === undefined) {
@@ -73,10 +73,10 @@ export class OperationRepository {
     ): Promise<InsertedOperation | null> {
         try {
             const { rows } = await this.database.query<InsertedOperation>(
-                `update public.operations
-                    set category_id = $3, type = $4, amount = $5, date = $6, comment = $7
-                  where user_id = $1 and id = $2
-                 returning id, type, amount, date, comment`,
+                `UPDATE public.operations
+                    SET category_id = $3, type = $4, amount = $5, date = $6, comment = $7
+                  WHERE user_id = $1 AND id = $2
+                 RETURNING id, type, amount, date, comment`,
                 [userId, id, categoryId, type, amount, date, comment],
             );
             return rows[0] ?? null;
@@ -88,7 +88,7 @@ export class OperationRepository {
     /** true — строка была и удалена, false — такой операции у пользователя нет. */
     async delete(userId: number, id: number): Promise<boolean> {
         const { rows } = await this.database.query(
-            'delete from public.operations where user_id = $1 and id = $2 returning id',
+            'DELETE FROM public.operations WHERE user_id = $1 AND id = $2 RETURNING id',
             [userId, id],
         );
         return rows.length > 0;

@@ -18,13 +18,13 @@ export const globalSetup = async (): Promise<void> => {
     try {
         await admin.connect();
         const exists = await admin.query(
-            'select 1 from pg_database where datname = $1',
+            'SELECT 1 FROM pg_database WHERE datname = $1',
             [databaseName],
         );
 
         if (exists.rowCount === 0) {
             const identifier = `"${databaseName.replaceAll('"', '""')}"`;
-            await admin.query(`create database ${identifier}`);
+            await admin.query(`CREATE DATABASE ${identifier}`);
         }
     } finally {
         await admin.end();

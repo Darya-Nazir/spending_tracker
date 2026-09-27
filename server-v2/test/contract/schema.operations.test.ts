@@ -14,18 +14,18 @@ type ReferencedOperation = {
 const createReferencedOperation = async (): Promise<ReferencedOperation> => {
     const user = await createUser(database);
     const { rows: categoryRows } = await database.query<{ id: number }>(
-        `insert into categories (user_id, type, title, title_normalized)
-         values ($1, $2, $3, $4)
-         returning id`,
+        `INSERT INTO categories (user_id, type, title, title_normalized)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
         [user.id, 'expense', 'Еда', 'еда'],
     );
     const category = categoryRows[0];
     assert.ok(category);
 
     const { rows: operationRows } = await database.query<{ id: number }>(
-        `insert into operations (user_id, category_id, type, amount, date, comment)
-         values ($1, $2, $3, $4, $5, $6)
-         returning id`,
+        `INSERT INTO operations (user_id, category_id, type, amount, date, comment)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
         [user.id, category.id, 'expense', 100, '2026-09-01', 'Обед'],
     );
     const operation = operationRows[0];
@@ -43,9 +43,9 @@ describe('operations schema', () => {
 
             await assert.rejects(
                 database.query(
-                    `insert into operations (user_id, category_id, type, amount, date)
-                     select coalesce($2::integer, user_id), category_id, $3, amount, date
-                       from operations where id = $1`,
+                    `INSERT INTO operations (user_id, category_id, type, amount, date)
+                     SELECT coalesce($2::integer, user_id), category_id, $3, amount, date
+                       FROM operations WHERE id = $1`,
                     [
                         fixture.operationId,
                         mismatch === 'owner' ? otherUser.id : null,
@@ -62,7 +62,7 @@ describe('operations schema', () => {
         const fixture = await createReferencedOperation();
 
         await assert.rejects(
-            database.query('delete from categories where id = $1', [fixture.categoryId]),
+            database.query('DELETE FROM categories WHERE id = $1', [fixture.categoryId]),
             (error: unknown) => {
                 assert.equal((error as { code?: string }).code, '23503');
                 return true;
@@ -75,11 +75,11 @@ describe('operations schema', () => {
         const fixture = await createReferencedOperation();
 
         await database.query(
-            'delete from operations where id = $1',
+            'DELETE FROM operations WHERE id = $1',
             [fixture.operationId],
         );
         const deletion = await database.query(
-            'delete from categories where id = $1',
+            'DELETE FROM categories WHERE id = $1',
             [fixture.categoryId],
         );
 

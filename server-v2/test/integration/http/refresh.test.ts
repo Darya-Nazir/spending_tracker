@@ -92,15 +92,15 @@ describe('POST /api/refresh', () => {
         assert.equal(temporary.status, 200);
         // Приближаем окончание сессии, чтобы обнаружить продление срока при refresh.
         const { rows: [session] } = await database.query<{ expires_at: Date }>(
-            `update sessions set expires_at = date_trunc('second', now()) + interval '5 minutes'
-             where id = (select max(id) from sessions) returning expires_at`,
+            `UPDATE sessions SET expires_at = date_trunc('second', now()) + interval '5 minutes'
+             WHERE id = (SELECT max(id) FROM sessions) RETURNING expires_at`,
         );
         assert.ok(session);
         const refreshed = await request(app).post('/api/refresh')
             .send({ refreshToken: temporary.body.tokens.refreshToken });
         assert.equal(refreshed.status, 200);
         const { rows: [successor] } = await database.query<{ expires_at: Date }>(
-            'select expires_at from sessions order by id desc limit 1',
+            'SELECT expires_at FROM sessions ORDER BY id DESC LIMIT 1',
         );
         assert.deepEqual(successor?.expires_at, session.expires_at);
         const payload = jwt.decode(refreshed.body.tokens.refreshToken);
@@ -111,7 +111,7 @@ describe('POST /api/refresh', () => {
     test('rejects refresh when the database session has expired while the JWT is valid', async () => {
         // отклоняет обновление при истёкшей сессии в БД и действительном JWT
         const { refreshToken } = await login();
-        const expired = await database.query("update sessions set expires_at = now() - interval '1 second'");
+        const expired = await database.query("UPDATE sessions SET expires_at = now() - interval '1 second'");
         assert.equal(expired.rowCount, 1, 'Login must create a session to expire');
         assert.deepEqual(new TokenService(config).verifyRefresh(refreshToken), { userId: 1 });
 
