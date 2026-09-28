@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-    mode: 'development',
     entry: './src/app.ts',
     output: {
         filename: 'app.js',
@@ -20,6 +19,12 @@ export default {
         compress: true,
         port: 9000,
         historyApiFallback: true,
+        proxy: [
+            {
+                context: ['/api'],
+                target: 'http://localhost:3000',
+            },
+        ],
     },
     module: {
         rules: [
