@@ -1,0 +1,25 @@
+node_modules
+dist
+
+# Результаты тестов
+coverage
+test-results
+playwright-report
+__tests__/**/__snapshots__
+.last-run.json
+
+# IDE-файлы
+.idea
+.vscode
+*.swp
+
+# Локальные артефакты
+.DS_Store
+npm-debug.log*
+.env
+.env.local
+
+.git
+.gitignore
+Dockerfile
+.dockerignore
